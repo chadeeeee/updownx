@@ -1,0 +1,1 @@
+export { SupportFooterSection } from "./SupportFooterSection";
