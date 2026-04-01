@@ -1,1 +1,0 @@
-export { GlobalHeaderNavigationSection } from "./GlobalHeaderNavigationSection";

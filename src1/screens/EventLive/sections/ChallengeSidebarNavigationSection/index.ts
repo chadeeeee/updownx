@@ -1,1 +1,0 @@
-export { ChallengeSidebarNavigationSection } from "./ChallengeSidebarNavigationSection";

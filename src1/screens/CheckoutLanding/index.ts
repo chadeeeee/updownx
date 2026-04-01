@@ -1,1 +1,0 @@
-export { CheckoutLanding } from "./CheckoutLanding";
