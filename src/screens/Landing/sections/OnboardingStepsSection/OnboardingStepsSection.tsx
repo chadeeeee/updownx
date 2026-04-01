@@ -59,11 +59,11 @@ const onboardingSteps = [
 
 export const OnboardingStepsSection = (): JSX.Element => {
   return (
-    <section className="flex flex-col w-full items-start px-[111px] py-24 bg-[#05070a]">
-      <div className="flex flex-col max-w-screen-xl items-start gap-16 w-full">
+    <section className="flex w-full flex-col items-center bg-[#05070a] py-24 px-8">
+      <div className="flex w-full max-w-screen-xl flex-col items-center gap-16">
         {/* Section heading */}
         <div className="flex items-center justify-center w-full">
-          <h2 className="[font-family:'Inter',Helvetica] font-normal text-white text-4xl text-center tracking-[0] leading-10 whitespace-nowrap">
+          <h2 className="[font-family:'Inter',Helvetica] font-extrabold text-white text-4xl text-center tracking-[0] leading-10 whitespace-nowrap">
             How to get Started
           </h2>
         </div>

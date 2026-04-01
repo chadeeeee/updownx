@@ -31,7 +31,7 @@ export const SupportFooterSection = (): JSX.Element => {
               <img
                 className="w-[205px] h-[40.29px] object-contain"
                 alt="Logo"
-                src="/logo-1.png"
+                src="/images/logo.png"
               />
             </div>
 
@@ -39,17 +39,29 @@ export const SupportFooterSection = (): JSX.Element => {
             <div className="flex flex-col items-start">
               <p className="[font-family:'Inter',Helvetica] font-normal text-gray-500 text-sm tracking-[0] leading-5">
                 The world&#39;s leading crypto prop trading
-                <br />
                 firm. Empowering traders with the
-                <br />
                 capital they need to succeed in the
-                <br />
                 digital asset market.
               </p>
             </div>
 
             {/* Social icons */}
-            <img className="w-full" alt="Container" src="/container-1.svg" />
+            <div className="flex items-center gap-3">
+              {[
+                { icon: "/svg/icon-1.svg", name: "Twitter/X" },
+                { icon: "/svg/icon-2.svg", name: "Discord" },
+                { icon: "/svg/icon-3.svg", name: "Other" },
+              ].map((social, i) => (
+                <a
+                  key={i}
+                  href="#"
+                  className="flex h-12 w-12 items-center justify-center rounded-full border border-solid border-[#1e262f] bg-[#0b0f14] transition-all hover:border-[#00ffa3]/50"
+                  aria-label={social.name}
+                >
+                  <img src={social.icon} alt="" className="h-5 w-5" />
+                </a>
+              ))}
+            </div>
           </div>
 
           {/* Column 2: Quick Links */}

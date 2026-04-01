@@ -21,7 +21,8 @@ const steps = [
 
 export const ReferralPromotionSection = (): JSX.Element => {
   return (
-    <section className="relative flex flex-col w-full items-start p-16 rounded-[40px] overflow-hidden border border-solid border-[#00ffa333] bg-[linear-gradient(171deg,rgba(11,15,20,1)_0%,rgba(5,7,10,1)_100%)]">
+    <section className="flex w-full flex-col items-center py-24 px-5">
+      <div className="relative flex w-full max-w-[1216px] flex-col items-start p-16 rounded-[40px] overflow-hidden border border-solid border-[#00ffa333] bg-[linear-gradient(171deg,rgba(11,15,20,1)_0%,rgba(5,7,10,1)_100%)]">
       {/* Right-side green glow overlay */}
       <div className="absolute w-[33.28%] h-full top-0 left-[66.64%] bg-[#00ffa30d] blur-[50px] pointer-events-none" />
 
@@ -84,6 +85,7 @@ export const ReferralPromotionSection = (): JSX.Element => {
               </CardContent>
             </Card>
           ))}
+        </div>
         </div>
       </div>
     </section>

@@ -49,7 +49,7 @@ export const InstitutionalOverviewSection = (): JSX.Element => {
           </span>
 
           {/* Heading */}
-          <h2 className="self-stretch [font-family:'Inter',Helvetica] font-normal text-white text-4xl tracking-[0] leading-[45px]">
+          <h2 className="self-stretch [font-family:'Inter',Helvetica] font-extrabold text-white text-4xl tracking-[0] leading-[45px]">
             Empowering Global Traders
             <br />
             with Institutional Power

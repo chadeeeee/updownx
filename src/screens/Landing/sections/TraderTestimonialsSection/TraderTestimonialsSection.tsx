@@ -4,21 +4,21 @@ const testimonials = [
   {
     name: "Alex Rivera",
     role: "Professional Scalper",
-    avatar: "/user.png",
+    avatar: "/images/user-1.png",
     quote:
       '"The latency on UPDOWNX is incredible. Execution is instant even during high volatility. My first payout was processed in less than 4 hours!"',
   },
   {
     name: "Sarah Jenkins",
     role: "Day Trader",
-    avatar: "/user-1.png",
+    avatar: "/images/user-2.png",
     quote:
       '"I\'ve tried 4 different prop firms, and none compare to the crypto asset selection here. 160+ tokens to trade with great leverage."',
   },
   {
     name: "Michael Chen",
     role: "Swing Trader",
-    avatar: "/user-2.png",
+    avatar: "/images/user-3.png",
     quote:
       '"Fair rules, clear dashboard, and a very supportive community. The 80% profit share is a game changer for my financial freedom."',
   },
@@ -30,12 +30,13 @@ export const TraderTestimonialsSection = (): JSX.Element => {
       <div className="flex-1 mx-20 flex flex-col gap-16">
         {/* Header */}
         <div className="flex flex-col gap-4 items-center">
-          <h2 className="[font-family:'Inter',Helvetica] font-normal text-white text-4xl text-center tracking-[0] leading-10 whitespace-nowrap">
+          <h2 className="flex items-center justify-center gap-3 [font-family:'Inter',Helvetica] font-extrabold text-white text-4xl tracking-[0] leading-10 whitespace-nowrap">
+            
             Loved by Professional Traders
           </h2>
 
           <div className="flex items-center justify-center gap-1 h-6">
-            <img className="w-5 h-5" alt="Rating star" src="/svg.svg" />
+            <img className="w-5 h-5" alt="Rating star" src="/svg/star.svg" />
             <span className="[font-family:'Inter',Helvetica] font-bold text-[#00ffa3] text-base text-center tracking-[0] leading-6 whitespace-nowrap">
               Excellent 4.9 out of 5
             </span>

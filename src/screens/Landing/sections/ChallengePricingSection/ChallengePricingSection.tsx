@@ -58,7 +58,7 @@ export const ChallengePricingSection = (): JSX.Element => {
       {/* Header */}
       <div className="flex flex-col items-center gap-4 w-full">
         <div className="flex flex-col items-center w-full">
-          <h2 className="[font-family:'Inter',Helvetica] font-normal text-white text-4xl leading-10 text-center tracking-[0] whitespace-nowrap">
+          <h2 className="[font-family:'Inter',Helvetica] font-extrabold text-white text-4xl leading-10 text-center tracking-[0] whitespace-nowrap">
             Choose Your Challenge
           </h2>
         </div>

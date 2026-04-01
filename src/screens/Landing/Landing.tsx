@@ -17,15 +17,16 @@ export const Landing = (): JSX.Element => {
       {/* Hero section with background images layered behind content */}
       <div className="relative w-full">
         <img
-          className="absolute top-0 left-[calc(50%_-_720px)] w-[1440px] h-[944px] bg-blend-screen pointer-events-none"
-          alt="Chatgpt image"
-          src="/chatgpt-image-13------2026-----00-51-40-1.png"
+          src="/images/bg-lines.png"
+          alt=""
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40"
         />
         <img
-          className="absolute top-[2px] left-[calc(50%_-_720px)] w-[1439px] h-[943px] pointer-events-none"
-          alt="Chatgpt image"
-          src="/chatgpt-image-13------2026-----00-54-43-1.png"
+          src="/images/bg-lines1.png"
+          alt=""
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-11 mix-blend-screen"
         />
+
         <div className="relative z-10">
           <HeroCallToActionSection />
         </div>

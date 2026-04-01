@@ -1,4 +1,6 @@
 import { Button } from "../../../../components/ui/button";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../../../lib/auth";
 
 const navLinks = [
   { label: "Challenges" },
@@ -8,6 +10,9 @@ const navLinks = [
 ];
 
 export const TopNavigationSection = (): JSX.Element => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
   return (
     <nav className="w-full h-16 bg-[#0b0f14] border-b border-[#2cf6c3] flex items-center px-[30px]">
       {/* Logo */}
@@ -15,7 +20,7 @@ export const TopNavigationSection = (): JSX.Element => {
         <img
           className="w-full h-[40.29px] object-contain"
           alt="Logo"
-          src="/logo.png"
+          src="/images/logo.png"
         />
       </div>
 
@@ -38,20 +43,35 @@ export const TopNavigationSection = (): JSX.Element => {
           <span className="[font-family:'Inter',Helvetica] font-bold text-gray-400 text-xs text-center tracking-[0] leading-4 whitespace-nowrap">
             EN
           </span>
-          <img className="w-4 h-4" alt="Svg" src="/svg-1.svg" />
+          <img className="w-4 h-4" alt="Svg" src="/svg/arrow.svg" />
         </div>
 
         {/* Login button */}
-        <Button
-          variant="outline"
-          className="h-auto px-5 py-2 rounded-full border border-solid border-[#1e262f] bg-transparent text-white [font-family:'Inter',Helvetica] font-normal text-sm tracking-[0] leading-5 whitespace-nowrap hover:bg-[#1e262f] hover:text-white"
-        >
-          Login
-        </Button>
+        {user ? (
+          <button
+            className="h-auto rounded-full border border-solid border-[#1e262f] bg-transparent px-5 py-2 text-sm text-[#00ffa3] hover:bg-[#1e262f]"
+            onClick={() => navigate("/accounts")}
+          >
+            {user.name}
+          </button>
+        ) : (
+          <>
+            <Button
+              asChild
+              variant="outline"
+              className="h-auto rounded-full border border-solid border-[#1e262f] bg-transparent px-5 py-2 text-sm font-normal leading-5 whitespace-nowrap text-white hover:bg-[#1e262f] hover:text-white"
+            >
+              <Link to="/login">Login</Link>
+            </Button>
+          </>
+        )}
 
         {/* Start Challenge button */}
-        <Button className="h-auto px-5 py-2 bg-[#00ffa3] rounded-full text-[#05070a] [font-family:'Inter',Helvetica] font-bold text-sm tracking-[0] leading-5 whitespace-nowrap hover:bg-[#00e691] border-none">
-          Start Challenge
+        <Button
+          asChild
+          className="h-auto rounded-full border-none bg-[#00ffa3] px-5 py-2 text-sm font-bold leading-5 whitespace-nowrap text-[#05070a] hover:bg-[#00e691]"
+        >
+          <Link to={user ? "/challenge" : "/login"}>Start Challenge</Link>
         </Button>
       </div>
     </nav>
