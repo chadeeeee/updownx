@@ -3,10 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../lib/auth";
 
 const navLinks = [
-  { label: "Challenges" },
-  { label: "Affiliate" },
-  { label: "FAQ" },
-  { label: "Blog" },
+  { label: "Challenges", href: "#challenges" },
+  { label: "Affiliate", href: "#affiliate" },
+  { label: "FAQ", href: "#faq" },
+  { label: "Blog", href: "#blog" },
 ];
 
 export const TopNavigationSection = (): JSX.Element => {
@@ -27,12 +27,13 @@ export const TopNavigationSection = (): JSX.Element => {
       {/* Nav Links - centered */}
       <div className="flex items-center gap-8 flex-1 justify-center">
         {navLinks.map((link) => (
-          <button
+          <a
             key={link.label}
-            className="[font-family:'Inter',Helvetica] font-medium text-gray-400 text-sm tracking-[0] leading-5 whitespace-nowrap hover:text-white transition-colors bg-transparent border-none cursor-pointer"
+            href={link.href}
+            className="[font-family:'Inter',Helvetica] font-medium text-gray-400 text-sm tracking-[0] leading-5 whitespace-nowrap hover:text-[#00ffa3] transition-colors cursor-pointer"
           >
             {link.label}
-          </button>
+          </a>
         ))}
       </div>
 

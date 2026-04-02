@@ -33,12 +33,12 @@ export const Landing = (): JSX.Element => {
       </div>
 
       <InstitutionalOverviewSection />
-      <ChallengePricingSection />
+      <div id="challenges"><ChallengePricingSection /></div>
       <OnboardingStepsSection />
       <TraderTestimonialsSection />
-      <ReferralPromotionSection />
-      <FAQSection />
-      <SupportFooterSection />
+      <div id="affiliate"><ReferralPromotionSection /></div>
+      <div id="faq"><FAQSection /></div>
+      <div id="blog"><SupportFooterSection /></div>
     </div>
   );
 };
