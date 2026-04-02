@@ -49,6 +49,30 @@ createRoot(document.getElementById("app") as HTMLElement).render(
               </PrivateRoute>
             }
           />
+          <Route
+            path="/new-challenge"
+            element={
+              <PrivateRoute>
+                <Accounts />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/withdrawals"
+            element={
+              <PrivateRoute>
+                <Accounts />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/help"
+            element={
+              <PrivateRoute>
+                <Accounts />
+              </PrivateRoute>
+            }
+          />
           <Route path="/event-live" element={<EventLive />} />
           <Route
             path="/checkout"
