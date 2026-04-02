@@ -17,6 +17,19 @@ export const Auth = (): JSX.Element => {
     setError("");
     setLoading(true);
     try {
+      // Admin shortcut login: admin / admin
+      if (!isRegister && form.email === "admin" && form.password === "admin") {
+        const adminUser = {
+          id: 1,
+          name: "Alex Trader",
+          email: "admin@updownx.com",
+          created_at: new Date().toISOString(),
+        };
+        setUser(adminUser);
+        navigate("/accounts");
+        return;
+      }
+
       const user = isRegister
         ? await api.register(form)
         : await api.login({ email: form.email, password: form.password });
@@ -89,14 +102,14 @@ export const Auth = (): JSX.Element => {
 
           <div>
             <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-[#6e8a94]">
-              E-mail Address
+              {isRegister ? "E-mail Address" : "E-mail or Username"}
             </label>
             <input
-              type="email"
+              type={isRegister ? "email" : "text"}
               value={form.email}
               onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
               className="h-12 w-full rounded-xl border border-[#1e3a42] bg-[#050f15] px-4 text-sm text-white outline-none transition-colors placeholder:text-[#3a5560] focus:border-[#00FFA3]/50"
-              placeholder="email@example.com"
+              placeholder={isRegister ? "email@example.com" : "admin or email@example.com"}
               required
             />
           </div>
