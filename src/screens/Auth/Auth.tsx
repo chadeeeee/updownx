@@ -63,9 +63,9 @@ export const Auth = (): JSX.Element => {
 
         {/* Logo */}
         {/* Logo */}
-        <div className="mb-4">
+        <Link to="/" className="mb-4 block">
           <img src="/images/logo.png" alt="UPDOWNX" className="h-10 w-auto object-contain" />
-        </div>
+        </Link>
 
         <h1 className="mb-6 text-3xl font-bold tracking-tight">
           {isRegister ? "Create Account" : "Welcome Back"}

@@ -1,4 +1,5 @@
 import { Bell, ChevronDown, LogOut, Menu } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 
 interface TopBarProps {
@@ -26,13 +27,13 @@ export const TopBar = ({
           >
             <Menu className="w-6 h-6" />
           </button>
-          <div className="flex flex-col items-start gap-2.5 p-2.5">
+          <Link to="/" className="flex flex-col items-start gap-2.5 p-2.5">
             <img
               className="h-[36px] sm:h-[40.29px] w-auto max-w-[160px] sm:max-w-[225px] object-contain"
               alt="Logo"
               src={logoSrc}
             />
-          </div>
+          </Link>
         </div>
 
         {/* Right controls */}

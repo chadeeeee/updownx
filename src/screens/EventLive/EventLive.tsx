@@ -25,7 +25,7 @@ export const EventLive = (): JSX.Element => {
 
         <img className="w-px self-stretch" alt="Divider" src="/vector-6.svg" />
 
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-col flex-1 animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
           <EventPromotionHeroSection />
           <AccountPlanTierGridSection />
         </div>

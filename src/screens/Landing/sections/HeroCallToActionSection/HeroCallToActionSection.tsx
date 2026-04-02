@@ -124,7 +124,7 @@ export const HeroCallToActionSection = (): JSX.Element => {
           {statCards.map((card, index) => (
             <Card
               key={index}
-              className="flex h-[140px] flex-col items-center justify-center gap-1 rounded-[16px] 
+              className="relative flex h-[140px] flex-col items-center justify-center gap-1 rounded-[16px] 
                        border border-white/5 
                        bg-white/[0.02] 
                        backdrop-blur-xl 
@@ -132,15 +132,17 @@ export const HeroCallToActionSection = (): JSX.Element => {
                        transition-all duration-300 
                        hover:bg-white/[0.05] hover:border-[#00ffa3]/20"
             >
-              <CardContent className="flex flex-col items-center gap-1 p-0 w-full">
+              <CardContent className="flex flex-col items-center justify-center p-0 w-full h-full">
                 {/* Іконка */}
-                <img className="h-7 w-7 mb-2 opacity-70" alt="Icon" src={card.icon} />
+                <div className="absolute top-[22px] left-[24px]">
+                  <img className="h-6 w-6" alt="Icon" src={card.icon} />
+                </div>
 
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center mt-2">
                   <span className="text-center font-sans text-xl font-bold leading-7 text-white tracking-tight">
                     {card.title}
                   </span>
-                  <span className="text-center font-sans text-sm font-normal leading-5 text-gray-500">
+                  <span className="text-cente r font-sans text-sm font-normal leading-5 text-gray-500 mt-1">
                     {card.subtitle}
                   </span>
                 </div>

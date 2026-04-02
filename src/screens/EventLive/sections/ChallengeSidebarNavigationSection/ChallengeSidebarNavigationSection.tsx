@@ -1,78 +1,75 @@
-import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "../../../../components/ui/button";
 
 const navItems = [
   {
+    icon: "/svg/rocket.svg",
+    alt: "Icon rocket",
+    label: "New Challenge",
+    route: "/challenge",
+  },
+  {
     icon: "/svg/wallet.svg",
     alt: "Icon wallet",
     label: "Accounts",
+    route: "/accounts",
   },
   {
     icon: "/svg/money.svg",
     alt: "Icon cash",
     label: "Payments",
+    route: "/payments",
   },
   {
     icon: "/svg/withdrawal.svg",
     alt: "Icon withdrawals",
     label: "Withdrawals",
+    route: "/withdrawals",
   },
   {
     icon: "/svg/faq.svg",
     alt: "Icon faq",
     label: "Help",
+    route: "/help",
   },
 ];
 
 export const ChallengeSidebarNavigationSection = (): JSX.Element => {
-  const [activeItem, setActiveItem] = useState<string>("New Challenge");
+  const location = useLocation();
+  const navigate = useNavigate();
 
   return (
     <nav className="flex flex-col w-[269px] min-h-full items-center justify-between px-0 py-[43px] bg-[#05070a]">
       <div className="flex flex-col w-[210px] items-start gap-[5px]">
-        <button
-          onClick={() => setActiveItem("New Challenge")}
-          className="w-[210px] gap-1.5 pl-[30px] pr-4 py-2 flex-[0_0_auto] rounded-xl flex items-center cursor-pointer border-none outline-none bg-[#01ffa3]"
-        >
-          <img
-            className="w-[20px] h-[20px] flex-shrink-0"
-            alt="Icon rocket"
-            src="/svg/rocket.svg"
-          />
-          <span className="[font-family:'Inter',Helvetica] font-semibold text-[13.2px] tracking-[0] leading-5 whitespace-nowrap text-[#05070a]">
-            New Challenge
-          </span>
-        </button>
-
         {navItems.map((item) => {
-          const isActive = activeItem === item.label;
+          const isActive = location.pathname.startsWith(item.route) || (item.route === "/challenge" && location.pathname === "/event-live");
           const isHelp = item.label === "Help";
           return (
             <button
               key={item.label}
-              onClick={() => setActiveItem(item.label)}
-              className={`flex w-[210px] items-center gap-1.5 px-4 py-2 flex-[0_0_auto] rounded-xl border-none outline-none cursor-pointer transition-colors ${
-                isActive ? "bg-white/10" : "bg-transparent hover:bg-white/5"
+              onClick={() => navigate(item.route)}
+              className={`flex w-[210px] items-center gap-1.5 py-2 flex-[0_0_auto] rounded-xl border-none outline-none cursor-pointer transition-all duration-200 ${
+                isActive ? "bg-[#01ffa3] pl-[30px] pr-4" : "bg-transparent hover:bg-white/5 px-4"
               }`}
             >
               {isHelp ? (
-                <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                <div className="w-[20px] h-[20px] flex items-center justify-center flex-shrink-0 relative">
                   <img
-                    className="w-[30px] h-[30px] max-w-none ml-[-3px]"
+                    className={`w-[26px] h-[26px] max-w-none absolute ${isActive ? "brightness-0" : ""}`}
                     alt={item.alt}
                     src={item.icon}
                   />
                 </div>
               ) : (
                 <img
-                  className="w-[20px] h-[20px] flex-shrink-0"
+                  className={`w-[20px] h-[20px] flex-shrink-0 ${isActive ? "brightness-0" : ""}`}
                   alt={item.alt}
                   src={item.icon}
                 />
               )}
               <span
-                className={`[font-family:'Inter',Helvetica] text-[13.2px] tracking-[0] leading-5 whitespace-nowrap ${
-                  isActive ? "font-semibold text-white" : "font-normal text-gray-300"
+                className={`[font-family:'Inter',Helvetica] text-[13.2px] tracking-[0] leading-5 whitespace-nowrap transition-colors ${
+                  isActive ? "font-semibold text-[#05070a]" : "font-normal text-gray-300"
                 }`}
               >
                 {item.label}

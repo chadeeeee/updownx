@@ -16,13 +16,13 @@ export const TopNavigationSection = (): JSX.Element => {
   return (
     <nav className="w-full h-16 bg-[#0b0f14] border-b border-[#2cf6c3] flex items-center px-[30px]">
       {/* Logo */}
-      <div className="flex items-center w-[225px] shrink-0 p-2.5">
+      <Link to="/" className="flex items-center w-[225px] shrink-0 p-2.5">
         <img
           className="w-full h-[40.29px] object-contain"
           alt="Logo"
           src="/images/logo.png"
         />
-      </div>
+      </Link>
 
       {/* Nav Links - centered */}
       <div className="flex items-center gap-8 flex-1 justify-center">

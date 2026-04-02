@@ -1,17 +1,15 @@
 import {
   Bell,
   ChevronDown,
-  CircleHelp,
-  CreditCard,
   Globe,
   LogOut,
-  Rocket,
   User,
   Wallet,
 } from "lucide-react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef, type PropsWithChildren } from "react";
 import { useAuth } from "../lib/auth";
+import { Sidebar } from "./Sidebar";
 
 export const DashboardLayout = ({ children }: PropsWithChildren): JSX.Element => {
   const { user, logout } = useAuth();
@@ -45,7 +43,7 @@ export const DashboardLayout = ({ children }: PropsWithChildren): JSX.Element =>
           {/* Language */}
           <button className="flex items-center gap-1 text-sm text-[#89a4ad] transition-colors hover:text-white">
             <Globe size={14} />
-            EN 
+            EN
             <ChevronDown size={12} />
           </button>
 
@@ -115,23 +113,7 @@ export const DashboardLayout = ({ children }: PropsWithChildren): JSX.Element =>
 
       <div className="mx-auto flex min-h-[calc(100vh-64px)] max-w-[1440px]">
         {/* ═══ Sidebar ═══ */}
-        <aside className="flex w-[230px] flex-col justify-between border-r border-[#113038]/50 bg-[#03070d] p-5 pt-6">
-          <nav className="space-y-1">
-            <SidebarLink to="/challenge" label="New Challenge" icon={<Rocket size={16} />} highlight />
-            <SidebarLink to="/accounts" label="Accounts" icon={<User size={16} />} />
-            <SidebarLink to="/payments" label="Payments" icon={<Wallet size={16} />} />
-            <SidebarLink to="#" label="Withdrawals" icon={<CreditCard size={16} />} />
-            <SidebarLink to="/help" label="Help" icon={<CircleHelp size={16} />} />
-          </nav>
-
-          {/* Bottom support widget */}
-          <div className="rounded-2xl border border-[#1a4540] bg-[#0a2420]/90 px-4 py-4">
-            <p className="mb-2 text-xs text-[#a0c2b8]">Need assistance?</p>
-            <button className="w-full rounded-xl border border-[#00FFA3] bg-[#00FFA3]/10 px-4 py-2 text-sm font-semibold text-[#00FFA3] transition-colors hover:bg-[#00FFA3]/20">
-              Contact Support
-            </button>
-          </div>
-        </aside>
+        <Sidebar mobileOpen={false} onClose={() => { }} />
 
         {/* ═══ Main content ═══ */}
         <section className="relative flex-1 overflow-auto">
@@ -154,33 +136,4 @@ export const DashboardLayout = ({ children }: PropsWithChildren): JSX.Element =>
   );
 };
 
-/* ── Sidebar nav link ── */
-const SidebarLink = ({
-  to,
-  label,
-  icon,
-  highlight,
-}: {
-  to: string;
-  label: string;
-  icon: JSX.Element;
-  highlight?: boolean;
-}): JSX.Element => (
-  <NavLink
-    to={to}
-    className={({ isActive }) => {
-      const base =
-        "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all";
-      if (isActive) {
-        return `${base} bg-[#00FFA3] text-[#021018] shadow-[0_0_16px_rgba(0,255,163,0.2)]`;
-      }
-      if (highlight) {
-        return `${base} bg-[#00FFA3] text-[#021018]`;
-      }
-      return `${base} text-[#afc0c9] hover:bg-[#0d1a24] hover:text-white`;
-    }}
-  >
-    {icon}
-    {label}
-  </NavLink>
-);
+

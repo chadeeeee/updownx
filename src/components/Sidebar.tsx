@@ -1,66 +1,108 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Button } from "./ui/button";
 
 const navItems = [
-  { label: "ACCOUNTS", path: "/accounts" },
-  { label: "PAYMENTS", path: "/payments" },
-  { label: "NEW CHALLENGE", path: "/new-challenge" },
-  { label: "WITHDRAWALS", path: "/withdrawals" },
-  { label: "HELP", path: "/help" },
+  {
+    icon: "/svg/rocket.svg",
+    alt: "Icon rocket",
+    label: "New Challenge",
+    route: "/challenge",
+  },
+  {
+    icon: "/svg/wallet.svg",
+    alt: "Icon wallet",
+    label: "Accounts",
+    route: "/accounts",
+  },
+  {
+    icon: "/svg/money.svg",
+    alt: "Icon cash",
+    label: "Payments",
+    route: "/payments",
+  },
+  {
+    icon: "/svg/withdrawal.svg",
+    alt: "Icon withdrawals",
+    label: "Withdrawals",
+    route: "/withdrawals",
+  },
+  {
+    icon: "/svg/faq.svg",
+    alt: "Icon faq",
+    label: "Help",
+    route: "/help",
+  },
 ];
 
 interface SidebarProps {
-  mobileOpen: boolean;
-  onClose: () => void;
+  mobileOpen?: boolean;
+  onClose?: () => void;
 }
 
-export const Sidebar = ({ mobileOpen, onClose }: SidebarProps) => {
+export const Sidebar = ({ mobileOpen, onClose }: SidebarProps): JSX.Element => {
+  const location = useLocation();
   const navigate = useNavigate();
 
   return (
     <>
       {/* Mobile Overlay */}
-      {mobileOpen && (
+      {mobileOpen && onClose && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 lg:hidden" onClick={onClose} />
       )}
 
-      <aside className={`fixed lg:static top-0 left-0 h-full w-[260px] bg-[#0b0f14] border-r border-white/5 transition-transform duration-300 z-40 ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
-        <div className="flex flex-col h-full py-6 gap-8">
-          {/* Navigation items */}
-          <nav className="flex flex-col px-4 gap-1.5">
-            {navItems.map((item) => (
-              <NavLink
+      <aside className={`flex flex-col w-[269px] min-h-full items-center justify-between px-0 py-[43px] bg-[#05070a] transition-transform duration-300 z-40 fixed lg:static top-0 left-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
+        <div className="flex flex-col w-[210px] items-start gap-[5px]">
+          {navItems.map((item) => {
+            const isActive = location.pathname.startsWith(item.route) || (item.route === "/challenge" && location.pathname === "/event-live");
+            const isHelp = item.label === "Help";
+            return (
+              <button
                 key={item.label}
-                to={item.path}
-                onClick={onClose}
-                className={({ isActive }) => `
-                  flex items-center w-full gap-1.5 py-2 px-4 rounded-xl transition-all duration-200
-                  ${isActive 
-                    ? "bg-[#01ffa3] text-[#05070a] font-semibold" 
-                    : "bg-transparent text-gray-300 hover:bg-white/5 font-normal"}
-                `}
+                onClick={() => {
+                  navigate(item.route);
+                  if (onClose) onClose();
+                }}
+                className={`flex w-[210px] items-center gap-1.5 py-2 flex-[0_0_auto] rounded-xl border-none outline-none cursor-pointer transition-all duration-200 ${
+                  isActive ? "bg-[#01ffa3] pl-[30px] pr-4" : "bg-transparent hover:bg-white/5 px-4"
+                }`}
               >
-                <span className="text-[13.2px] tracking-tight leading-5 whitespace-nowrap">
+                {isHelp ? (
+                  <div className="w-[20px] h-[20px] flex items-center justify-center flex-shrink-0 relative">
+                    <img
+                      className={`w-[26px] h-[26px] max-w-none absolute ${isActive ? "brightness-0" : ""}`}
+                      alt={item.alt}
+                      src={item.icon}
+                    />
+                  </div>
+                ) : (
+                  <img
+                    className={`w-[20px] h-[20px] flex-shrink-0 ${isActive ? "brightness-0" : ""}`}
+                    alt={item.alt}
+                    src={item.icon}
+                  />
+                )}
+                <span
+                  className={`[font-family:'Inter',Helvetica] text-[13.2px] tracking-[0] leading-5 whitespace-nowrap transition-colors ${
+                    isActive ? "font-semibold text-[#05070a]" : "font-normal text-gray-300"
+                  }`}
+                >
                   {item.label}
                 </span>
-              </NavLink>
-            ))}
-          </nav>
+              </button>
+            );
+          })}
+        </div>
 
-          {/* Contact Support Card */}
-          <div className="mt-auto px-5">
-            <div className="relative p-[1px] rounded-xl bg-gradient-to-br from-[#2cf6c34d] to-[#0132264d]">
-              <div className="bg-[#0b0f14]/80 rounded-[11px] p-4 flex flex-col items-center gap-3 shadow-xl">
-                <p className="text-white text-[11.3px] font-normal leading-4 self-start">
-                  Need assistance?
-                </p>
-                <button 
-                  onClick={() => { onClose(); navigate('/support'); }}
-                  className="w-full py-2 bg-[#00ffa3] hover:bg-[#00ffa3]/90 rounded-xl font-semibold text-[#0b0f14] text-[11.1px] transition-colors"
-                >
-                  Contact Support
-                </button>
-              </div>
+        <div className="self-stretch w-full px-[23px] mt-auto lg:mt-0 lg:pb-0">
+          <div className="relative w-full h-[90px] rounded-xl bg-[linear-gradient(211deg,rgba(44,246,195,0.3)_0%,rgba(1,50,38,0.3)_100%)] before:content-[''] before:absolute before:inset-0 before:p-px before:rounded-xl before:[background:linear-gradient(227deg,rgba(44,246,195,0.3)_0%,rgba(1,50,38,0.3)_100%)] before:[-webkit-mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] before:[-webkit-mask-composite:xor] before:[mask-composite:exclude] before:z-[1] before:pointer-events-none">
+            <div className="absolute top-[17px] left-[17px] flex items-center [font-family:'Inter',Helvetica] font-normal text-white text-[11.3px] tracking-[0] leading-4">
+              Need assistance?
             </div>
+            <Button 
+                onClick={() => navigate('/support')}
+                className="absolute top-[41px] left-1/2 -translate-x-1/2 w-[173px] h-[33px] bg-[#00ffa3] hover:bg-[#00ffa3]/90 rounded-xl [font-family:'Inter',Helvetica] font-semibold text-[#0b0f14] text-[11.1px] text-center tracking-[0] leading-4 whitespace-nowrap border-none">
+              Contact Support
+            </Button>
           </div>
         </div>
       </aside>

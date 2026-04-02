@@ -37,7 +37,7 @@ export const Payments = (): JSX.Element => {
         <Sidebar mobileOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         {/* Page content */}
-        <main className="flex-1 flex flex-col gap-5 p-4 sm:p-6 min-w-0 overflow-x-auto">
+        <main className="flex-1 flex flex-col gap-5 p-4 sm:p-6 min-w-0 overflow-x-auto animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
           {/* Page header */}
           <div className="flex flex-col gap-1">
             <h1 className="[font-family:'Inter',Helvetica] font-bold text-white text-xl sm:text-2xl tracking-[-0.5px]">

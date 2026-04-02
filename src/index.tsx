@@ -9,6 +9,8 @@ import { Payments } from "./screens/Payments";
 import { Checkout } from "./screens/Checkout";
 import { CheckoutLanding } from "./screens/CheckoutLanding";
 import { EventLive } from "./screens/EventLive";
+import { Trading } from "./screens/Trading";
+import { ControlPanel } from "./screens/ControlPanel";
 import { AuthProvider, useAuth } from "./lib/auth";
 
 const PrivateRoute = ({ children }: { children: JSX.Element }): JSX.Element => {
@@ -70,6 +72,22 @@ createRoot(document.getElementById("app") as HTMLElement).render(
             element={
               <PrivateRoute>
                 <Accounts />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/trading"
+            element={
+              <PrivateRoute>
+                <Trading />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/control-panel"
+            element={
+              <PrivateRoute>
+                <ControlPanel />
               </PrivateRoute>
             }
           />

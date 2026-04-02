@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "../../../../components/ui/button";
 import { Separator } from "../../../../components/ui/separator";
 
@@ -27,13 +28,13 @@ export const SupportFooterSection = (): JSX.Element => {
           {/* Column 1: Logo + Description + Social */}
           <div className="flex flex-col items-start gap-6 pt-[14px] min-w-[220px] max-w-[260px]">
             {/* Logo */}
-            <div className="flex flex-col items-start gap-2.5 -mt-[14px]">
+            <Link to="/" className="flex flex-col items-start gap-2.5 -mt-[14px]">
               <img
                 className="w-[205px] h-[40.29px] object-contain"
                 alt="Logo"
                 src="/images/logo.png"
               />
-            </div>
+            </Link>
 
             {/* Description */}
             <div className="flex flex-col items-start">

@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "../../../../components/ui/button";
 
 // Navigation menu items data
@@ -47,7 +46,7 @@ const navItems = [
 ];
 
 export const LandingSlidebarSubsection = (): JSX.Element => {
-  const [activeItem, setActiveItem] = useState("new-challenge");
+  const location = useLocation();
   const navigate = useNavigate();
 
   return (
@@ -55,46 +54,40 @@ export const LandingSlidebarSubsection = (): JSX.Element => {
       {/* Navigation menu items */}
       <div className="flex flex-col w-[210px] items-start gap-[5px]">
         {navItems.map((item) => {
-          const isActive = activeItem === item.id;
-          const isNewChallenge = item.id === "new-challenge";
+          const isActive = item.route === "#" ? false : location.pathname.startsWith(item.route) || (item.route === "/challenge" && location.pathname === "/event-live");
           const isHelp = item.id === "help";
           
           return (
             <button
               key={item.id}
               onClick={() => {
-                setActiveItem(item.id);
                 if (item.route && item.route !== "#") navigate(item.route);
               }}
-              className={`flex w-[210px] items-center gap-1.5 py-2 rounded-xl transition-colors ${
-                isNewChallenge
+              className={`flex w-[210px] items-center gap-1.5 py-2 rounded-xl transition-all duration-200 ${
+                isActive
                   ? "bg-[#01ffa3] pl-[30px] pr-4"
-                  : isActive
-                  ? "bg-white/10 px-4"
-                  : "px-4 bg-transparent hover:bg-white/5"
+                  : "bg-transparent hover:bg-white/5 px-4"
               }`}
             >
               {isHelp ? (
                 <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
                   <img
-                    className="w-[30px] h-[30px] max-w-none ml-[-3px]"
+                    className={`w-[30px] h-[30px] max-w-none ml-[-3px] ${isActive ? "brightness-0" : ""}`}
                     alt={item.alt}
                     src={item.icon}
                   />
                 </div>
               ) : (
                 <img
-                  className="w-[20px] h-[20px] flex-shrink-0"
+                  className={`w-[20px] h-[20px] flex-shrink-0 ${isActive ? "brightness-0" : ""}`}
                   alt={item.alt}
                   src={item.icon}
                 />
               )}
               <span
-                className={`[font-family:'Inter',Helvetica] text-[13.2px] tracking-[0] leading-5 whitespace-nowrap ${
-                  isNewChallenge
+                className={`[font-family:'Inter',Helvetica] text-[13.2px] tracking-[0] leading-5 whitespace-nowrap transition-colors ${
+                  isActive
                     ? "font-semibold text-[#05070a]"
-                    : isActive
-                    ? "font-semibold text-white"
                     : "font-normal text-gray-300"
                 }`}
               >
