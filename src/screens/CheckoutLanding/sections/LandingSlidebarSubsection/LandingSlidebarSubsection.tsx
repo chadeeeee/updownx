@@ -66,36 +66,32 @@ export const LandingSlidebarSubsection = (): JSX.Element => {
                 setActiveItem(item.id);
                 if (item.route && item.route !== "#") navigate(item.route);
               }}
-              className={`flex w-[210px] items-center gap-1.5 py-2 rounded-xl transition-colors ${
-                isNewChallenge
-                  ? "bg-[#01ffa3] pl-[30px] pr-4"
-                  : isActive
-                  ? "bg-white/10 px-4"
+              className={`flex w-[210px] items-center gap-3 py-3 rounded-xl transition-all ${
+                isNewChallenge || isActive
+                  ? "bg-[#00FFA3] pl-[16px] pr-4 shadow-[0_0_16px_rgba(0,255,163,0.25)]"
                   : "px-4 bg-transparent hover:bg-white/5"
               }`}
             >
               {isHelp ? (
                 <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
                   <img
-                    className="w-[30px] h-[30px] max-w-none ml-[-3px]"
+                    className={`w-[30px] h-[30px] max-w-none ml-[-3px] ${isActive ? "brightness-0" : ""}`}
                     alt={item.alt}
                     src={item.icon}
                   />
                 </div>
               ) : (
                 <img
-                  className="w-[20px] h-[20px] flex-shrink-0"
+                  className={`w-[20px] h-[20px] flex-shrink-0 ${isNewChallenge || isActive ? "brightness-0" : ""}`}
                   alt={item.alt}
                   src={item.icon}
                 />
               )}
               <span
-                className={`[font-family:'Inter',Helvetica] text-[13.2px] tracking-[0] leading-5 whitespace-nowrap ${
-                  isNewChallenge
-                    ? "font-semibold text-[#05070a]"
-                    : isActive
-                    ? "font-semibold text-white"
-                    : "font-normal text-gray-300"
+                className={`[font-family:'Inter',Helvetica] text-[14px] tracking-[0] leading-5 whitespace-nowrap ${
+                  isNewChallenge || isActive
+                    ? "font-semibold text-[#021018]"
+                    : "font-medium text-gray-300"
                 }`}
               >
                 {item.label}

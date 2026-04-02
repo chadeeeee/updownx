@@ -51,28 +51,28 @@ export const ChallengeSidebarNavigationSection = (): JSX.Element => {
             <button
               key={item.label}
               onClick={() => setActiveItem(item.label)}
-              className={`flex w-[210px] items-center gap-1.5 px-4 py-2 flex-[0_0_auto] rounded-xl border-none outline-none cursor-pointer transition-colors ${
-                isActive ? "bg-white/10" : "bg-transparent hover:bg-white/5"
+              className={`flex w-[210px] items-center gap-3 px-4 py-3 flex-[0_0_auto] rounded-xl border-none outline-none cursor-pointer transition-all ${
+                isActive ? "bg-[#00FFA3] shadow-[0_0_16px_rgba(0,255,163,0.25)]" : "bg-transparent hover:bg-white/5"
               }`}
             >
               {isHelp ? (
                 <div className="w-5 h-5 flex items-center justify-center flex-shrink-0">
                   <img
-                    className="w-[30px] h-[30px] max-w-none ml-[-3px]"
+                    className={`w-[30px] h-[30px] max-w-none ml-[-3px] ${isActive ? "brightness-0" : ""}`}
                     alt={item.alt}
                     src={item.icon}
                   />
                 </div>
               ) : (
                 <img
-                  className="w-[20px] h-[20px] flex-shrink-0"
+                  className={`w-[20px] h-[20px] flex-shrink-0 ${isActive ? "brightness-0" : ""}`}
                   alt={item.alt}
                   src={item.icon}
                 />
               )}
               <span
-                className={`[font-family:'Inter',Helvetica] text-[13.2px] tracking-[0] leading-5 whitespace-nowrap ${
-                  isActive ? "font-semibold text-white" : "font-normal text-gray-300"
+                className={`[font-family:'Inter',Helvetica] text-[14px] tracking-[0] leading-5 whitespace-nowrap ${
+                  isActive ? "font-semibold text-[#021018]" : "font-medium text-gray-300"
                 }`}
               >
                 {item.label}

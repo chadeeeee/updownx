@@ -170,12 +170,14 @@ const SidebarLink = ({
     to={to}
     className={({ isActive }) => {
       const base =
-        "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all";
-      if (isActive) {
-        return `${base} bg-[#00FFA3] text-[#021018] shadow-[0_0_16px_rgba(0,255,163,0.2)]`;
-      }
+        "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all";
       if (highlight) {
-        return `${base} bg-[#00FFA3] text-[#021018]`;
+        // New Challenge is always green
+        return `${base} bg-[#00FFA3] text-[#021018] shadow-[0_0_16px_rgba(0,255,163,0.25)]`;
+      }
+      if (isActive) {
+        // Active page gets green background
+        return `${base} bg-[#00FFA3] text-[#021018] shadow-[0_0_16px_rgba(0,255,163,0.25)]`;
       }
       return `${base} text-[#afc0c9] hover:bg-[#0d1a24] hover:text-white`;
     }}
