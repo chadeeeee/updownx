@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../../../../components/ui/button";
 
 // Navigation menu items data
@@ -9,6 +10,7 @@ const navItems = [
     icon: "/svg/rocket.svg",
     alt: "Icon rocket",
     active: true,
+    route: "/challenge",
   },
   {
     id: "accounts",
@@ -16,6 +18,7 @@ const navItems = [
     icon: "/svg/wallet.svg",
     alt: "Icon wallet",
     active: false,
+    route: "/accounts",
   },
   {
     id: "payments",
@@ -23,6 +26,7 @@ const navItems = [
     icon: "/svg/money.svg",
     alt: "Icon cash",
     active: false,
+    route: "/payments",
   },
   {
     id: "withdrawals",
@@ -30,6 +34,7 @@ const navItems = [
     icon: "/svg/withdrawal.svg",
     alt: "Icon withdrawals",
     active: false,
+    route: "#",
   },
   {
     id: "help",
@@ -37,11 +42,13 @@ const navItems = [
     icon: "/svg/faq.svg",
     alt: "Icon faq",
     active: false,
+    route: "#",
   },
 ];
 
 export const LandingSlidebarSubsection = (): JSX.Element => {
   const [activeItem, setActiveItem] = useState("new-challenge");
+  const navigate = useNavigate();
 
   return (
     <nav className="flex flex-col w-[269px] min-h-screen items-center justify-between px-0 py-[43px] bg-[#05070a]">
@@ -55,7 +62,10 @@ export const LandingSlidebarSubsection = (): JSX.Element => {
           return (
             <button
               key={item.id}
-              onClick={() => setActiveItem(item.id)}
+              onClick={() => {
+                setActiveItem(item.id);
+                if (item.route && item.route !== "#") navigate(item.route);
+              }}
               className={`flex w-[210px] items-center gap-1.5 py-2 rounded-xl transition-colors ${
                 isNewChallenge
                   ? "bg-[#01ffa3] pl-[30px] pr-4"
