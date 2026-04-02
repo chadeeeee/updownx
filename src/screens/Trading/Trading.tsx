@@ -30,67 +30,66 @@ const candleData = [
 const dateLabels = ["MAY 24", "MAY 26", "MAY 28", "MAY 30", "JUN 01"];
 
 const CandlestickChart = () => {
-  const chartWidth = 460;
-  const chartHeight = 140;
-  const candleWidth = 14;
-  const candleGap = 9;
-  const padding = 10;
-
   return (
-    <svg width={chartWidth} height={chartHeight} className="w-full max-w-[460px]">
+    <svg width="100%" height="100%" className="w-full h-full block">
       {/* Grid lines */}
       {[0, 1, 2, 3].map((i) => (
         <line
           key={i}
-          x1={0}
-          y1={padding + (i * (chartHeight - 2 * padding)) / 3}
-          x2={chartWidth}
-          y2={padding + (i * (chartHeight - 2 * padding)) / 3}
+          x1="0"
+          y1={`${10 + (i * 80) / 3}%`}
+          x2="100%"
+          y2={`${10 + (i * 80) / 3}%`}
           stroke="#1a2030"
           strokeWidth={0.5}
         />
       ))}
 
       {candleData.map((candle, i) => {
-        const x = i * (candleWidth + candleGap) + candleGap;
+        const xPercent = (i * 100) / candleData.length + 0.8;
+        const widthPercent = (100 / candleData.length) - 1.6;
+        const wickXPercent = xPercent + widthPercent / 2;
+
         const maxPrice = 75;
         const minPrice = 35;
-        const scale = (chartHeight - 2 * padding) / (maxPrice - minPrice);
+        const scale = 80 / (maxPrice - minPrice);
 
         const bodyTop = Math.min(candle.open, candle.close);
         const bodyBottom = Math.max(candle.open, candle.close);
-        const bodyY = padding + (maxPrice - bodyBottom) * scale;
-        const bodyH = (bodyBottom - bodyTop) * scale || 2;
+        const bodyY = 10 + (maxPrice - bodyBottom) * scale;
+        const bodyH = Math.max((bodyBottom - bodyTop) * scale, 0.5);
 
-        const wickY1 = padding + (maxPrice - candle.high) * scale;
-        const wickY2 = padding + (maxPrice - candle.low) * scale;
-        const wickX = x + candleWidth / 2;
+        const wickY1 = 10 + (maxPrice - candle.high) * scale;
+        const wickY2 = 10 + (maxPrice - candle.low) * scale;
 
         const fill = candle.color === "green" ? "#00ffa3" : "#ff4d4d";
         const stroke = candle.color === "green" ? "#00ffa3" : "#ff4d4d";
 
         return (
           <g key={i}>
-            <line x1={wickX} y1={wickY1} x2={wickX} y2={wickY2} stroke={stroke} strokeWidth={1.5} />
-            <rect x={x} y={bodyY} width={candleWidth} height={bodyH} fill={fill} rx={1} />
+            <line x1={`${wickXPercent}%`} y1={`${wickY1}%`} x2={`${wickXPercent}%`} y2={`${wickY2}%`} stroke={stroke} strokeWidth={1.5} />
+            <rect x={`${xPercent}%`} y={`${bodyY}%`} width={`${widthPercent}%`} height={`${bodyH}%`} fill={fill} rx={2} />
           </g>
         );
       })}
 
       {/* Date labels */}
-      {dateLabels.map((label, i) => (
-        <text
-          key={i}
-          x={padding + i * ((chartWidth - 2 * padding) / (dateLabels.length - 1))}
-          y={chartHeight - 2}
-          fill="#4a5568"
-          fontSize="8"
-          fontFamily="Inter, sans-serif"
-          textAnchor="middle"
-        >
-          {label}
-        </text>
-      ))}
+      {dateLabels.map((label, i) => {
+        const xPos = 5 + (i * 90) / (dateLabels.length - 1);
+        return (
+          <text
+            key={i}
+            x={`${xPos}%`}
+            y="98%"
+            fill="#4a5568"
+            fontSize="10"
+            fontFamily="Inter, sans-serif"
+            textAnchor="middle"
+          >
+            {label}
+          </text>
+        );
+      })}
     </svg>
   );
 };
@@ -245,8 +244,10 @@ export const Trading = (): JSX.Element => {
               </div>
 
               {/* Chart */}
-              <div className="bg-[#0b0f14] rounded-2xl p-5 border border-white/5">
-                <CandlestickChart />
+              <div className="bg-[#0b0f14] rounded-2xl border border-white/5 flex-1 relative min-h-[300px]">
+                <div className="absolute inset-5">
+                  <CandlestickChart />
+                </div>
               </div>
             </div>
 

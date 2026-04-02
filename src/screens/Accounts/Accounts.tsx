@@ -1,16 +1,12 @@
-import React, { useState } from "react";
-import { TopBar } from "../../components/TopBar";
-import { Sidebar } from "../../components/Sidebar";
+import React from "react";
 import { NavAccountsSubsection } from "./sections/NavAccountsSubsection";
 import { MainHedgeModuleSubsection } from "./sections/MainHedgeModuleSubsection";
 
 // --- Main screen component ---
 
 export const Accounts = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   return (
-    <div className="relative flex flex-col min-h-screen bg-[#05070a]">
+    <>
       {/* Background image - decorative */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <img
@@ -20,24 +16,9 @@ export const Accounts = () => {
         />
       </div>
 
-      {/* Top navigation bar */}
-      <div className="relative z-30">
-        <TopBar
-          onMenuToggle={() => setSidebarOpen(true)}
-          logoSrc="https://c.animaapp.com/mnh4g5xzo5XXIf/img/logo.png"
-          avatarSrc="https://c.animaapp.com/mnh4g5xzo5XXIf/img/avatar.png"
-        />
-      </div>
-
-      {/* Main content area: sidebar + page content */}
-      <div className="flex flex-1 relative z-10">
-        {/* Sidebar */}
-        <Sidebar mobileOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
-        {/* Page content */}
-        <main className="flex-1 flex flex-col gap-6 p-4 sm:p-8 min-w-0 overflow-x-hidden animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
+      <div className="flex-1 flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
           
-          {/* Account tab nav */}
+        {/* Account tab nav */}
           <NavAccountsSubsection />
 
           {/* Trading Identity block */}
@@ -84,8 +65,7 @@ export const Accounts = () => {
               </div>
             ))}
           </section>
-        </main>
       </div>
-    </div>
+    </>
   );
 };
