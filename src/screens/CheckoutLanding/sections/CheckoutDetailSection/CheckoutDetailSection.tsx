@@ -1,14 +1,9 @@
+import React, { useState } from "react";
 import { Button } from "../../../../components/ui/button";
 
 /* Reusable gradient-border card style applied via className */
 const gradientCardClass =
   "relative bg-[#05070a] rounded-xl border-none before:content-[''] before:absolute before:inset-0 before:p-px before:rounded-xl before:[background:linear-gradient(227deg,rgba(44,246,195,0.3)_0%,rgba(1,50,38,0.3)_100%)] before:[-webkit-mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] before:[-webkit-mask-composite:xor] before:[mask-composite:exclude] before:z-[1] before:pointer-events-none";
-
-/* Billing form field data */
-const billingRow1 = [
-  { label: "FULL NAME", value: "Alex Stormer" },
-  { label: "E-MAIL ADDRESS", value: "alex.stormer@example.com" },
-];
 
 /* Order summary line items */
 const orderLineItems = [
@@ -21,8 +16,22 @@ const orderLineItems = [
 ];
 
 export const CheckoutDetailSection = (): JSX.Element => {
+  const [billingInfo, setBillingInfo] = useState({
+    fullName: "",
+    email: "",
+    country: "",
+    city: "",
+  });
+
+  const [paymentMethod, setPaymentMethod] = useState<string | null>("crypto");
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setBillingInfo((prev) => ({ ...prev, [name]: value }));
+  };
+
   return (
-    <div className="flex flex-col w-full items-end justify-center gap-[34px]">
+    <div className="flex flex-col w-full items-end justify-center gap-[34px] pr-8">
       {/* Main two-column layout */}
       <div className="flex items-start gap-5 w-full">
         {/* Left column: Billing Details + Payment Method */}
@@ -47,18 +56,38 @@ export const CheckoutDetailSection = (): JSX.Element => {
             <div className="flex flex-col gap-6 w-full">
               {/* Row 1: Full Name + Email */}
               <div className="grid grid-cols-2 gap-6">
-                {billingRow1.map((field) => (
-                  <div key={field.label} className="flex flex-col gap-2">
-                    <label className="[font-family:'Public_Sans',Helvetica] font-bold text-gray-500 text-xs tracking-[1.20px] leading-4 whitespace-nowrap">
-                      {field.label}
-                    </label>
-                    <div className="flex items-center px-4 py-3 bg-[#0b0f14] rounded-lg border border-solid border-[#00ffa333] overflow-hidden">
-                      <span className="[font-family:'Public_Sans',Helvetica] font-normal text-white text-base tracking-[0] leading-6">
-                        {field.value}
-                      </span>
-                    </div>
+                {/* Full Name */}
+                <div className="flex flex-col gap-2">
+                  <label className="[font-family:'Public_Sans',Helvetica] font-bold text-gray-500 text-xs tracking-[1.20px] leading-4 whitespace-nowrap">
+                    FULL NAME
+                  </label>
+                  <div className="flex items-center px-4 py-3 bg-[#0b0f14] rounded-lg border border-solid border-[#00ffa333] overflow-hidden focus-within:border-[#00ffa3] transition-colors">
+                    <input
+                      name="fullName"
+                      value={billingInfo.fullName}
+                      onChange={handleInputChange}
+                      className="bg-transparent border-none outline-none w-full [font-family:'Public_Sans',Helvetica] font-normal text-white text-base tracking-[0] leading-6"
+                      placeholder="Enter Full Name"
+                    />
                   </div>
-                ))}
+                </div>
+
+                {/* E-mail Address */}
+                <div className="flex flex-col gap-2">
+                  <label className="[font-family:'Public_Sans',Helvetica] font-bold text-gray-500 text-xs tracking-[1.20px] leading-4 whitespace-nowrap">
+                    E-MAIL ADDRESS
+                  </label>
+                  <div className="flex items-center px-4 py-3 bg-[#0b0f14] rounded-lg border border-solid border-[#00ffa333] overflow-hidden focus-within:border-[#00ffa3] transition-colors">
+                    <input
+                      name="email"
+                      type="email"
+                      value={billingInfo.email}
+                      onChange={handleInputChange}
+                      className="bg-transparent border-none outline-none w-full [font-family:'Public_Sans',Helvetica] font-normal text-white text-base tracking-[0] leading-6"
+                      placeholder="Enter E-mail"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Row 2: Country/Region + City/Town */}
@@ -68,10 +97,14 @@ export const CheckoutDetailSection = (): JSX.Element => {
                   <label className="[font-family:'Public_Sans',Helvetica] font-bold text-gray-500 text-xs tracking-[1.20px] leading-4 whitespace-nowrap">
                     COUNTRY/REGION
                   </label>
-                  <div className="relative flex items-center h-[50px] bg-[#0b0f14] rounded-lg border border-solid border-[#00ffa333] px-4">
-                    <span className="[font-family:'Public_Sans',Helvetica] font-normal text-white text-base tracking-[0] leading-6 flex-1">
-                      United Kingdom
-                    </span>
+                  <div className="relative flex items-center h-[50px] bg-[#0b0f14] rounded-lg border border-solid border-[#00ffa333] px-4 cursor-pointer hover:border-[#00ffa366] transition-colors">
+                    <input
+                      name="country"
+                      value={billingInfo.country}
+                      onChange={handleInputChange}
+                      className="bg-transparent border-none outline-none w-full [font-family:'Public_Sans',Helvetica] font-normal text-white text-base tracking-[0] leading-6 cursor-pointer"
+                      placeholder="Select Country"
+                    />
                     <img
                       className="w-6 h-6 flex-shrink-0"
                       alt="Dropdown arrow"
@@ -85,10 +118,14 @@ export const CheckoutDetailSection = (): JSX.Element => {
                   <label className="[font-family:'Public_Sans',Helvetica] font-bold text-gray-500 text-xs tracking-[1.20px] leading-4 whitespace-nowrap">
                     CITY/TOWN
                   </label>
-                  <div className="flex items-center px-4 py-3 bg-[#0b0f14] rounded-lg border border-solid border-[#00ffa333] overflow-hidden">
-                    <span className="[font-family:'Public_Sans',Helvetica] font-normal text-white text-base tracking-[0] leading-6">
-                      London
-                    </span>
+                  <div className="flex items-center px-4 py-3 bg-[#0b0f14] rounded-lg border border-solid border-[#00ffa333] overflow-hidden focus-within:border-[#00ffa3] transition-colors">
+                    <input
+                      name="city"
+                      value={billingInfo.city}
+                      onChange={handleInputChange}
+                      className="bg-transparent border-none outline-none w-full [font-family:'Public_Sans',Helvetica] font-normal text-white text-base tracking-[0] leading-6"
+                      placeholder="Enter City"
+                    />
                   </div>
                 </div>
               </div>
@@ -113,16 +150,17 @@ export const CheckoutDetailSection = (): JSX.Element => {
 
             {/* Crypto Payment Option */}
             <div
-              className="relative w-full h-[92px] bg-[#2cf6c30d] rounded-xl border-none
+              onClick={() => setPaymentMethod(paymentMethod === "crypto" ? null : "crypto")}
+              className={`relative w-full h-[92px] bg-[#2cf6c30d] rounded-xl border-none cursor-pointer group
                 before:content-[''] before:absolute before:inset-0 before:p-0.5 before:rounded-xl
                 before:[background:linear-gradient(227deg,rgba(44,246,195,0.3)_0%,rgba(1,50,38,0.3)_100%)]
                 before:[-webkit-mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)]
                 before:[-webkit-mask-composite:xor] before:[mask-composite:exclude]
-                before:z-[1] before:pointer-events-none"
+                before:z-[1] before:pointer-events-none ${paymentMethod === "crypto" ? "bg-[#2cf6c31a]" : "hover:bg-[#2cf6c314]"} transition-all`}
             >
               {/* Payment info */}
               <div className="flex items-center gap-4 absolute top-1/2 -translate-y-1/2 left-[22px]">
-                <div className="w-12 h-12 flex items-center justify-center bg-[#05070a] rounded-lg border border-solid border-[#00ffa333] flex-shrink-0">
+                <div className="w-12 h-12 flex items-center justify-center bg-[#05070a] rounded-lg border border-solid border-[#00ffa333] flex-shrink-0 group-hover:border-[#00ffa366] transition-colors">
                   <img
                     className="w-[17px] h-[23px] flex-shrink-0"
                     alt="Crypto icon"
@@ -140,7 +178,11 @@ export const CheckoutDetailSection = (): JSX.Element => {
               </div>
 
               {/* Radio button indicator */}
-              <div className="absolute top-1/2 -translate-y-1/2 right-[22px] w-6 h-6 border-2 border-solid rounded-full border-[#00ffa3]" />
+              <div className={`absolute top-1/2 -translate-y-1/2 right-[22px] w-6 h-6 border-2 border-solid rounded-full border-[#00ffa3] flex items-center justify-center transition-all ${paymentMethod === "crypto" ? "bg-[#00ffa333]" : ""}`}>
+                {paymentMethod === "crypto" && (
+                  <img src="/svg/tick.svg" alt="selected" className="w-3.5 h-3.5" />
+                )}
+              </div>
             </div>
           </div>
         </div>

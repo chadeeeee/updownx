@@ -23,13 +23,13 @@ export const GlobalHeaderNavigationSection = (): JSX.Element => {
             <span className="[font-family:'Inter',Helvetica] font-bold text-gray-300 text-xs text-center tracking-[0] leading-4 whitespace-nowrap">
               EN
             </span>
-            <img className="w-4 h-4" alt="Dropdown" src="/svg.svg" />
+            <img className="w-4 h-4" alt="Dropdown" src="/svg/arrow.svg" />
           </div>
 
           <img
             className="flex-[0_0_auto] cursor-pointer"
             alt="Notification"
-            src="/nottification-button.svg"
+            src="/svg/bell.svg"
           />
 
           <div className="inline-flex items-center gap-3">
@@ -52,9 +52,9 @@ export const GlobalHeaderNavigationSection = (): JSX.Element => {
           </div>
 
           <img
-            className="w-6 h-6 cursor-pointer"
+            className="w-[18px] h-[16px] cursor-pointer"
             alt="Logout"
-            src="/button-log-out.svg"
+            src="/svg/button-log-out.svg"
           />
         </div>
       </div>

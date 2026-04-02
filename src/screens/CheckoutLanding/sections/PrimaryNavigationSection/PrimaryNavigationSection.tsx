@@ -25,14 +25,14 @@ export const PrimaryNavigationSection = (): JSX.Element => {
           <span className="[font-family:'Inter',Helvetica] font-bold text-gray-300 text-xs text-center tracking-[0] leading-4 whitespace-nowrap">
             EN
           </span>
-          <img className="w-4 h-4" alt="Svg" src="/svg.svg" />
+          <img className="w-4 h-4" alt="Svg" src="/svg/arrow.svg" />
         </div>
 
         {/* Notification button */}
         <img
           className="flex-shrink-0 cursor-pointer"
           alt="Nottification button"
-          src="/nottification-button.svg"
+          src="/svg/bell.svg"
         />
 
         {/* User info */}
@@ -58,9 +58,9 @@ export const PrimaryNavigationSection = (): JSX.Element => {
 
         {/* Logout button */}
         <img
-          className="w-6 h-6 cursor-pointer"
+          className="w-[18px] h-[16px] cursor-pointer"
           alt="Button log out"
-          src="/button-log-out.svg"
+          src="/svg/button-log-out.svg"
         />
       </div>
     </nav>
