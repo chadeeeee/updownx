@@ -4,8 +4,20 @@ import {
   AvatarImage,
 } from "../../../../components/ui/avatar";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../../../lib/auth";
+
+const getInitials = (name: string) =>
+  name
+    .split(/\s+/)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
 export const PrimaryNavigationSection = (): JSX.Element => {
+  const { user } = useAuth();
+  const displayName = user?.name || "Trader";
+  const initials = getInitials(displayName);
   return (
     <nav className="w-full h-16 flex flex-row items-center justify-between px-[30px] py-2.5 bg-[#0b0f14] border-b border-[#2cf6c3]">
       {/* Logo section */}
@@ -39,7 +51,7 @@ export const PrimaryNavigationSection = (): JSX.Element => {
         {/* User info */}
         <div className="inline-flex items-center gap-3">
           <span className="[font-family:'Inter',Helvetica] font-bold text-[#00ffa3] text-[11.4px] text-right tracking-[-0.40px] leading-4 whitespace-nowrap">
-            Alex Trader
+            {displayName}
           </span>
 
           {/* Avatar with green border */}
@@ -47,11 +59,11 @@ export const PrimaryNavigationSection = (): JSX.Element => {
             <Avatar className="w-[34px] h-[34px]">
               <AvatarImage
                 src="/avatar.png"
-                alt="Alex Trader"
+                alt={displayName}
                 className="object-cover"
               />
               <AvatarFallback className="bg-[#00ffa3] text-[#0b0f14] text-xs font-bold">
-                AT
+                {initials}
               </AvatarFallback>
             </Avatar>
           </div>

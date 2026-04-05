@@ -2,6 +2,14 @@ import { Bell, ChevronDown, LogOut, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 
+const getInitials = (name: string) =>
+  name
+    .split(/\s+/)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
 interface TopBarProps {
   onMenuToggle?: () => void;
   logoSrc?: string;
@@ -14,6 +22,8 @@ export const TopBar = ({
   avatarSrc = "https://c.animaapp.com/mnh4g5xzo5XXIf/img/avatar.png",
 }: TopBarProps): JSX.Element => {
   const { user, logout } = useAuth();
+  const displayName = user?.name || "Trader";
+  const initials = getInitials(displayName);
 
   return (
     <header className="w-full h-16 flex bg-[#0b0f14] border-b border-[#2cf6c3] shrink-0 z-30">
@@ -57,20 +67,20 @@ export const TopBar = ({
           {/* User info */}
           <div className="inline-flex items-center gap-2 sm:gap-3">
             <span className="hidden sm:flex [font-family:'Inter',Helvetica] font-bold text-[#00ffa3] text-[11.4px] text-right tracking-[-0.40px] leading-4 whitespace-nowrap">
-              {user?.name || "Alex Trader"}
+              {displayName}
             </span>
 
             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-solid border-[#00ffa3] overflow-hidden bg-[#0b0f14] flex items-center justify-center shrink-0">
               <img
                 src={avatarSrc}
-                alt={`${user?.name || "User"} avatar`}
+                alt={`${displayName} avatar`}
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).style.display = "none";
                 }}
               />
               <span className="text-[#00ffa3] text-xs font-bold [font-family:'Inter',Helvetica] absolute">
-                {user?.name ? user.name.substring(0, 2).toUpperCase() : "AT"}
+                {initials}
               </span>
             </div>
           </div>

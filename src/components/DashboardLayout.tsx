@@ -3,6 +3,7 @@ import {
   ChevronDown,
   Globe,
   LogOut,
+  Menu,
   User,
   Wallet,
 } from "lucide-react";
@@ -14,6 +15,7 @@ import { Sidebar } from "./Sidebar";
 export const DashboardLayout = ({ children }: PropsWithChildren): JSX.Element => {
   const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -29,14 +31,22 @@ export const DashboardLayout = ({ children }: PropsWithChildren): JSX.Element =>
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#05070A] font-['Inter',sans-serif] text-white">
+    <main className="min-h-screen bg-[#05070A] font-['Inter',sans-serif] text-white overflow-x-hidden">
       {/* ═══ Top header bar ═══ */}
-      <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-[#0f2f35]/60 bg-[#05070A]/95 px-6 backdrop-blur-md">
-        {/* Logo */}
-        {/* Logo */}
-        <Link to="/" className="flex items-center">
-          <img src="/images/logo.png" alt="UPDOWNX" className="h-8 w-auto object-contain" />
-        </Link>
+      <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-[#0f2f35]/60 bg-[#05070A]/95 px-4 sm:px-6 backdrop-blur-md">
+        {/* Left: hamburger + Logo */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="lg:hidden text-gray-300 hover:text-white p-1"
+            aria-label="Open menu"
+          >
+            <Menu size={24} />
+          </button>
+          <Link to="/" className="flex items-center">
+            <img src="/images/logo.png" alt="UPDOWNX" className="h-8 w-auto object-contain" />
+          </Link>
+        </div>
 
         {/* Right side controls */}
         <div className="flex items-center gap-4">
@@ -63,7 +73,7 @@ export const DashboardLayout = ({ children }: PropsWithChildren): JSX.Element =>
                 {user?.name ?? "Trader"}
               </span>
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#00FFA3] to-[#0ea5e9] text-xs font-bold text-black">
-                {(user?.name ?? "T").charAt(0).toUpperCase()}
+                {(user?.name ?? "T").split(/\s+/).map((w) => w[0]).join("").toUpperCase().slice(0, 2)}
               </div>
             </button>
 
@@ -113,7 +123,7 @@ export const DashboardLayout = ({ children }: PropsWithChildren): JSX.Element =>
 
       <div className="mx-auto flex min-h-[calc(100vh-64px)] max-w-[1440px]">
         {/* ═══ Sidebar ═══ */}
-        <Sidebar mobileOpen={false} onClose={() => { }} />
+        <Sidebar mobileOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         {/* ═══ Main content ═══ */}
         <section className="relative flex-1 overflow-auto">
@@ -129,7 +139,7 @@ export const DashboardLayout = ({ children }: PropsWithChildren): JSX.Element =>
             className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-11 mix-blend-screen"
           />
 
-          <div className="relative z-10 p-8">{children}</div>
+          <div className="relative z-10 p-4 sm:p-6 lg:p-8">{children}</div>
         </section>
       </div>
     </main>

@@ -31,7 +31,7 @@ export const CheckoutDetailSection = (): JSX.Element => {
   };
 
   return (
-    <div className="flex flex-col w-full items-end justify-center gap-[34px] pr-8">
+    <div className="flex flex-col w-full items-end justify-center gap-5 pr-8 pb-8">
       {/* Main two-column layout */}
       <div className="flex items-start gap-5 w-full">
         {/* Left column: Billing Details + Payment Method */}
