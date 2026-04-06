@@ -50,10 +50,10 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps): JSX.Element => {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 lg:hidden" onClick={onClose} />
       )}
 
-      <aside className={`flex flex-col w-[269px] min-h-full items-start justify-between px-0 py-[43px] bg-[#05070a] transition-transform duration-300 z-40 fixed lg:sticky top-0 left-0 lg:left-auto lg:h-screen lg:overflow-y-auto ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
+      <aside className={`flex flex-col w-[269px] min-h-full items-start justify-between pl-6 pr-0 py-[43px] bg-[#05070a] transition-transform duration-300 z-40 fixed lg:sticky top-0 left-0 lg:left-auto lg:h-screen lg:overflow-y-auto ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
         <div className="flex flex-col w-[210px] items-start gap-[5px]">
           {navItems.map((item) => {
-            const isActive = location.pathname.startsWith(item.route) || (item.route === "/challenge" && location.pathname === "/event-live");
+            const isActive = location.pathname.startsWith(item.route) || (item.route === "/challenge" && location.pathname === "/event-live") || (item.route === "/accounts" && location.pathname === "/control-panel");
             const isHelp = item.label === "Help";
             return (
               <button
