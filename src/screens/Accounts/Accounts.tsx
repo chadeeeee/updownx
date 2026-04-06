@@ -20,11 +20,11 @@ const accountTabs = [
 ];
 
 const NeedAssistance = () => (
-  <div className="mt-4 md:mt-6 rounded-xl border border-[#163e4a]/40 bg-[#08141c]/60 p-4 md:p-6">
-    <p className="mb-3 md:mb-4 text-xs md:text-sm text-gray-400">Need assistance?</p>
-    <div className="grid grid-cols-2 gap-3 md:gap-4">
-      <button className="h-10 md:h-14 rounded-xl bg-[#00FFA3] text-xs md:text-sm font-bold text-black">Contact Support</button>
-      <button className="h-10 md:h-14 rounded-xl border border-[#163e4a] bg-[#0b1820] text-xs md:text-sm font-bold text-white">Help</button>
+  <div className="mt-3 min-[375px]:mt-4 md:mt-5 lg:mt-6 rounded-xl border border-[#163e4a]/40 bg-[#08141c]/60 p-3 min-[375px]:p-4 md:p-6 lg:p-8">
+    <p className="mb-2 min-[375px]:mb-3 md:mb-4 lg:mb-5 text-[10px] min-[375px]:text-xs md:text-sm lg:text-base text-gray-400">Need assistance?</p>
+    <div className="grid grid-cols-2 gap-2 min-[375px]:gap-3 md:gap-4 lg:gap-5">
+      <button className="h-9 min-[375px]:h-10 md:h-14 lg:h-16 rounded-xl bg-[#00FFA3] text-[10px] min-[375px]:text-xs md:text-sm lg:text-base font-bold text-black">Contact Support</button>
+      <button className="h-9 min-[375px]:h-10 md:h-14 lg:h-16 rounded-xl border border-[#163e4a] bg-[#0b1820] text-[10px] min-[375px]:text-xs md:text-sm lg:text-base font-bold text-white">Help</button>
     </div>
   </div>
 );
@@ -60,10 +60,9 @@ export const Accounts = () => {
         </div>
       </header>
 
-      {/* Slide-over sidebar (hamburger) */}
-      {sidebarOpen && <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30" onClick={() => setSidebarOpen(false)} />}
-      <aside className={`fixed top-0 left-0 z-40 flex flex-col w-[269px] h-screen px-0 py-[43px] bg-[#05070a] transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
-        <div className="flex flex-col w-[210px] items-start gap-[5px] ml-4">
+      {/* Main nav tabs (hamburger-toggled, pill style) */}
+      {sidebarOpen && <nav className="flex justify-center overflow-x-auto scrollbar-hide border-b border-[#1a2a32]/60 bg-[#05070A] px-2 py-2 min-[375px]:px-3 min-[375px]:py-3 md:px-6 md:py-4">
+        <div className="flex w-full justify-evenly gap-0.5 rounded-[13px] border border-[#12313a] bg-[#081018]/80 px-1 py-1 min-[375px]:gap-0.5 min-[375px]:rounded-[16px] min-[375px]:px-1.5 min-[375px]:py-1.5 min-[400px]:gap-1 min-[400px]:rounded-[18px] min-[400px]:px-2 md:gap-2 md:rounded-[22px] md:px-3 md:py-2">
           {mobileNavTabs.map((tab) => {
             const isActive = isMobileTabActive(tab.route);
             return (
@@ -71,53 +70,31 @@ export const Accounts = () => {
                 key={tab.route}
                 to={tab.route}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex w-[210px] items-center py-2 px-4 rounded-xl transition-all duration-200 ${
-                  isActive ? "bg-[#01ffa3]" : "bg-transparent hover:bg-white/5"
-                }`}
-              >
-                <span className={`text-[13.2px] leading-5 whitespace-nowrap ${
-                  isActive ? "font-semibold text-[#05070a]" : "font-normal text-gray-300"
-                }`}>{tab.label}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </aside>
-
-      {/* Main nav — always visible, same underline style as sub-tabs */}
-      <nav className="overflow-x-auto scrollbar-hide border-b border-[#1a2a32]/60 bg-[#05070A] px-3 min-[375px]:px-4 md:px-8">
-        <div className="flex justify-evenly min-w-max w-full">
-          {mobileNavTabs.map((tab) => {
-            const isActive = isMobileTabActive(tab.route);
-            return (
-              <Link
-                key={tab.route}
-                to={tab.route}
-                className={`relative whitespace-nowrap py-3 px-2 text-[11px] font-medium transition-colors min-[375px]:text-[12px] md:text-sm md:px-3 md:py-4 ${
+                className={`relative whitespace-nowrap rounded-lg px-2 py-1.5 text-[9px] font-medium transition-colors min-[375px]:rounded-xl min-[375px]:px-2.5 min-[375px]:py-2 min-[375px]:text-[11px] min-[400px]:px-3 min-[400px]:text-[12px] md:rounded-2xl md:px-5 md:py-3 md:text-sm lg:px-6 lg:text-base ${
                   isActive ? "text-[#00FFA3]" : "text-gray-400 hover:text-gray-200"
                 }`}
               >
                 {tab.label}
-                <span className={`absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity ${isActive ? "bg-[#00FFA3] opacity-100" : "opacity-0"}`} />
+                <span className={`absolute bottom-1 left-2.5 right-2.5 h-px rounded-full transition-opacity min-[375px]:left-3 min-[375px]:right-3 ${isActive ? "bg-[#00FFA3] opacity-100" : "opacity-0"}`} />
               </Link>
             );
           })}
         </div>
-      </nav>
+      </nav>}
 
-      {/* Account sub-tabs — always visible, centered */}
-      <div className="overflow-x-auto scrollbar-hide border-b border-[#1a2a32]/60 bg-[#05070A] px-3 min-[375px]:px-4 md:px-8">
-        <div className="flex justify-evenly min-w-max w-full">
+      {/* Account sub-tabs — pill style matching main nav */}
+      <div className="flex justify-center overflow-x-auto scrollbar-hide border-b border-[#1a2a32]/60 bg-[#05070A] px-2 py-2 min-[375px]:px-3 min-[375px]:py-3 md:px-6 md:py-4">
+        <div className="flex w-full justify-evenly gap-0.5 rounded-[13px] border border-[#12313a] bg-[#081018]/80 px-1 py-1 min-[375px]:gap-0.5 min-[375px]:rounded-[16px] min-[375px]:px-1.5 min-[375px]:py-1.5 min-[400px]:gap-1 min-[400px]:rounded-[18px] min-[400px]:px-2 md:gap-2 md:rounded-[22px] md:px-3 md:py-2">
           {accountTabs.map((tab) => (
             <button
               key={tab.value}
               onClick={() => setActiveTab(tab.value)}
-              className={`relative whitespace-nowrap py-3 px-2 text-[11px] font-medium transition-colors min-[375px]:text-[12px] md:text-sm md:px-3 md:py-4 ${
+              className={`relative whitespace-nowrap rounded-lg px-2 py-1.5 text-[9px] font-medium transition-colors min-[375px]:rounded-xl min-[375px]:px-2.5 min-[375px]:py-2 min-[375px]:text-[11px] min-[400px]:px-3 min-[400px]:text-[12px] md:rounded-2xl md:px-5 md:py-3 md:text-sm lg:px-6 lg:text-base ${
                 activeTab === tab.value ? "text-[#00FFA3]" : "text-gray-400 hover:text-gray-200"
               }`}
             >
               {tab.label}
-              <span className={`absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity ${activeTab === tab.value ? "bg-[#00FFA3] opacity-100" : "opacity-0"}`} />
+              <span className={`absolute bottom-1 left-2.5 right-2.5 h-px rounded-full transition-opacity min-[375px]:left-3 min-[375px]:right-3 ${activeTab === tab.value ? "bg-[#00FFA3] opacity-100" : "opacity-0"}`} />
             </button>
           ))}
         </div>
@@ -127,7 +104,7 @@ export const Accounts = () => {
       <div className="flex-1 flex flex-col relative">
         <img src="/images/bg-lines.png" alt="" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40" />
         <img src="/images/bg-lines1.png" alt="" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-10 mix-blend-screen" />
-        <div className="relative z-10 px-3 py-4 min-[375px]:px-4 md:px-8 md:py-8 lg:px-12 flex-1 flex flex-col gap-4 md:gap-6 md:justify-between">
+        <div className="relative z-10 px-3 py-4 min-[375px]:px-4 md:px-8 md:py-6 lg:px-12 flex-1 flex flex-col gap-3 md:gap-4">
 
           {/* Trading Identity */}
           <div className="flex flex-col gap-1">
@@ -137,56 +114,56 @@ export const Accounts = () => {
           </div>
 
           {/* Account Card */}
-          <div className="relative rounded-2xl border border-white/5 bg-[linear-gradient(135deg,#0a2118_0%,#05110e_100%)] p-4 min-[375px]:p-5 md:p-8 overflow-hidden">
+          <div className="relative rounded-2xl border border-white/5 bg-[linear-gradient(135deg,#0a2118_0%,#05110e_100%)] p-4 min-[375px]:p-5 md:p-8 overflow-hidden md:flex-1 flex flex-col">
             <img src="https://c.animaapp.com/mnh4g5xzo5XXIf/img/chatgpt-image-13------2026-----00-54-43-1.png" alt="" className="pointer-events-none absolute inset-0 w-full h-full object-cover opacity-30" />
-            <div className="relative z-10 flex flex-col gap-4 md:gap-6">
+            <div className="relative z-10 flex flex-col gap-4 md:gap-5 md:flex-1">
 
               {/* PRO Card */}
-              <div className="w-full max-w-[240px] md:max-w-[280px] h-[120px] md:h-[150px] rounded-xl bg-[linear-gradient(135deg,#13161c_0%,#07080a_100%)] border border-white/10 p-4 md:p-5 flex flex-col justify-between shadow-2xl overflow-hidden">
-                <span className="font-black italic text-white text-xl md:text-2xl tracking-tighter">PRO</span>
+              <div className="w-full max-w-[300px] min-[375px]:max-w-[320px] md:max-w-[420px] lg:max-w-[500px] h-[170px] min-[375px]:h-[185px] md:h-[240px] lg:h-[290px] rounded-2xl bg-[linear-gradient(135deg,#13161c_0%,#07080a_100%)] border border-white/10 px-5 pt-5 pb-9 min-[375px]:px-6 md:px-8 md:pt-7 md:pb-14 lg:px-10 lg:pt-8 lg:pb-16 flex flex-col justify-between shadow-2xl overflow-hidden">
+                <span className="font-black italic text-white text-2xl min-[375px]:text-3xl md:text-4xl lg:text-5xl tracking-tighter">PRO</span>
                 <div className="flex flex-col">
-                  <span className="text-[7px] md:text-[8px] text-gray-500 font-bold tracking-[0.2em] uppercase">Master Equity</span>
-                  <span className="text-white text-xs tracking-[0.4em] mt-1 opacity-80">•••• •••• •••• ••••</span>
-                  <span className="text-white text-base md:text-lg font-medium tracking-widest mt-1">5316</span>
+                  <span className="text-[9px] min-[375px]:text-[10px] md:text-[12px] lg:text-[14px] text-gray-500 font-bold tracking-[0.2em] uppercase">Master Equity</span>
+                  <span className="text-white text-sm min-[375px]:text-base md:text-lg lg:text-xl tracking-[0.4em] mt-1.5 opacity-80">•••• •••• •••• ••••</span>
+                  <span className="text-white text-lg min-[375px]:text-xl md:text-2xl lg:text-3xl font-medium tracking-widest mt-1.5">5316</span>
                 </div>
               </div>
 
               {/* Stage + Info */}
               <div className="flex flex-col gap-3 md:gap-4">
                 <div>
-                  <h2 className="text-[22px] md:text-[26px] font-bold text-white tracking-tight">Stage 1</h2>
+                  <h2 className="text-[32px] min-[375px]:text-[36px] md:text-[44px] lg:text-[56px] font-bold text-white tracking-tight">Stage 1</h2>
                   <div className="flex items-center gap-2 mt-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#00FFA3] shadow-[0_0_6px_#00ffa3]" />
-                    <span className="text-[9px] md:text-[10px] font-bold text-[#00FFA3] uppercase tracking-[0.1em]">STATUS: CHALLENGE</span>
+                    <div className="w-2 h-2 rounded-full bg-[#00FFA3] shadow-[0_0_6px_#00ffa3]" />
+                    <span className="text-[11px] min-[375px]:text-[12px] md:text-[14px] lg:text-[16px] font-bold text-[#00FFA3] uppercase tracking-[0.1em]">STATUS: CHALLENGE</span>
                   </div>
                 </div>
                 <div className="flex flex-col gap-3 md:flex-row md:gap-8">
                   <div>
-                    <span className="text-[8px] md:text-[10px] font-medium text-gray-400 uppercase tracking-[0.08em] block mb-0.5">Start Balance</span>
-                    <span className="text-[15px] md:text-[19px] font-medium text-white tracking-tight">100,000.00 USDT</span>
+                    <span className="text-[11px] min-[375px]:text-[12px] md:text-[14px] lg:text-[16px] font-medium text-gray-400 uppercase tracking-[0.08em] block mb-0.5">Start Balance</span>
+                    <span className="text-[20px] min-[375px]:text-[22px] md:text-[28px] lg:text-[34px] font-medium text-white tracking-tight">100,000.00 USDT</span>
                   </div>
                   <div>
-                    <span className="text-[8px] md:text-[10px] font-medium text-gray-400 uppercase tracking-[0.08em] block mb-0.5">End of Period</span>
-                    <span className="text-[15px] md:text-[19px] font-medium text-white tracking-tight">Unlimited</span>
+                    <span className="text-[11px] min-[375px]:text-[12px] md:text-[14px] lg:text-[16px] font-medium text-gray-400 uppercase tracking-[0.08em] block mb-0.5">End of Period</span>
+                    <span className="text-[20px] min-[375px]:text-[22px] md:text-[28px] lg:text-[34px] font-medium text-white tracking-tight">Unlimited</span>
                   </div>
                   <div>
-                    <span className="text-[8px] md:text-[10px] font-medium text-gray-400 uppercase tracking-[0.08em] block mb-0.5">Risk Limit (24 Hours)</span>
-                    <span className="text-[15px] md:text-[19px] font-medium text-white tracking-tight">5,000.00 USDT</span>
+                    <span className="text-[11px] min-[375px]:text-[12px] md:text-[14px] lg:text-[16px] font-medium text-gray-400 uppercase tracking-[0.08em] block mb-0.5">Risk Limit (24 Hours)</span>
+                    <span className="text-[20px] min-[375px]:text-[22px] md:text-[28px] lg:text-[34px] font-medium text-white tracking-tight">5,000.00 USDT</span>
                   </div>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3">
+              <div className="flex gap-3 md:mt-auto">
                 <button
                   onClick={() => navigate("/trading")}
-                  className="flex-1 h-10 md:h-12 flex items-center justify-center rounded-xl bg-[#00FFA3] hover:bg-[#00e693] text-[13px] md:text-[15px] font-bold text-black transition-colors"
+                  className="flex-1 h-14 md:h-16 lg:h-20 flex items-center justify-center rounded-xl bg-[#00FFA3] hover:bg-[#00e693] text-[15px] md:text-[17px] lg:text-[19px] font-bold text-black transition-colors"
                 >
                   Trade
                 </button>
                 <button
                   onClick={() => navigate("/control-panel")}
-                  className="flex-1 h-10 md:h-12 flex items-center justify-center rounded-xl border border-white/10 bg-[#131f1c] hover:bg-[#1a2824] text-[13px] md:text-[15px] font-medium text-white transition-colors"
+                  className="flex-1 h-14 md:h-16 lg:h-20 flex items-center justify-center rounded-xl border border-white/10 bg-[#131f1c] hover:bg-[#1a2824] text-[15px] md:text-[17px] lg:text-[19px] font-medium text-white transition-colors"
                 >
                   Control Panel
                 </button>
