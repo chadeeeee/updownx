@@ -50,7 +50,7 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps): JSX.Element => {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 lg:hidden" onClick={onClose} />
       )}
 
-      <aside className={`flex flex-col w-[269px] min-h-full items-center justify-between px-0 py-[43px] bg-[#05070a] transition-transform duration-300 z-40 fixed lg:sticky top-0 left-0 lg:left-auto lg:h-screen lg:overflow-y-auto ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
+      <aside className={`flex flex-col w-[269px] min-h-full items-start justify-between px-0 py-[43px] bg-[#05070a] transition-transform duration-300 z-40 fixed lg:sticky top-0 left-0 lg:left-auto lg:h-screen lg:overflow-y-auto ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
         <div className="flex flex-col w-[210px] items-start gap-[5px]">
           {navItems.map((item) => {
             const isActive = location.pathname.startsWith(item.route) || (item.route === "/challenge" && location.pathname === "/event-live");
@@ -62,8 +62,8 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps): JSX.Element => {
                   navigate(item.route);
                   if (onClose) onClose();
                 }}
-                className={`flex w-[210px] items-center gap-1.5 py-2 flex-[0_0_auto] rounded-xl border-none outline-none cursor-pointer transition-all duration-200 ${
-                  isActive ? "bg-[#01ffa3] pl-[30px] pr-4" : "bg-transparent hover:bg-white/5 px-4"
+                className={`flex w-[210px] items-center gap-1.5 py-2 flex-[0_0_auto] rounded-xl border-none outline-none cursor-pointer transition-all duration-200 px-4 ${
+                  isActive ? "bg-[#01ffa3]" : "bg-transparent hover:bg-white/5"
                 }`}
               >
                 {isHelp ? (

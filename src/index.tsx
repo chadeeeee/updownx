@@ -28,57 +28,37 @@ createRoot(document.getElementById("app") as HTMLElement).render(
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Auth />} />
           <Route path="/register" element={<Auth />} />
+          <Route
+            path="/challenge"
+            element={
+              <PrivateRoute>
+                <EventLive />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/accounts"
+            element={<PrivateRoute><Accounts /></PrivateRoute>}
+          />
+          <Route
+            path="/new-challenge"
+            element={<PrivateRoute><Accounts /></PrivateRoute>}
+          />
+          <Route
+            path="/withdrawals"
+            element={<PrivateRoute><Accounts /></PrivateRoute>}
+          />
+          <Route
+            path="/help"
+            element={<PrivateRoute><Accounts /></PrivateRoute>}
+          />
           <Route element={<MainLayout />}>
             <Route
-              path="/challenge"
-              element={
-                <PrivateRoute>
-                  <EventLive />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/accounts"
-              element={
-                <PrivateRoute>
-                  <Accounts />
-                </PrivateRoute>
-              }
-            />
-            <Route
               path="/payments"
-              element={
-                <PrivateRoute>
-                  <Payments />
-                </PrivateRoute>
-              }
+              element={<PrivateRoute><Payments /></PrivateRoute>}
             />
-            <Route
-              path="/new-challenge"
-              element={
-                <PrivateRoute>
-                  <Accounts />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/withdrawals"
-              element={
-                <PrivateRoute>
-                  <Accounts />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/help"
-              element={
-                <PrivateRoute>
-                  <Accounts />
-                </PrivateRoute>
-              }
-            />
-            <Route path="/event-live" element={<EventLive />} />
           </Route>
+          <Route path="/event-live" element={<EventLive />} />
           <Route
             path="/trading"
             element={

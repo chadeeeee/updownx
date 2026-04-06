@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { DashboardLayout } from "../../components/DashboardLayout";
 import { api, type Challenge } from "../../lib/api";
-import { ArrowRight, CheckCircle2, ChevronDown, Menu } from "lucide-react";
+import { ArrowRight, CheckCircle2, ChevronDown, Menu, X } from "lucide-react";
 
 /* ── Shared constants ── */
 const mobileNavTabs = [
@@ -86,13 +86,10 @@ export const NewChallenge = (): JSX.Element => {
   const isMobileTabActive = (route: string) =>
     location.pathname.startsWith(route) || (route === "/challenge" && location.pathname === "/event-live");
 
-  /* ═══════════════════════════════════════════════
-     MOBILE LAYOUT (< xl) — fully standalone
-     ═══════════════════════════════════════════════ */
-  const MobileLayout = () => (
+  return (<>
     <div className="xl:hidden min-h-screen bg-[#05070A] font-['Inter',sans-serif] text-white overflow-x-hidden flex flex-col">
       {/* ── Mobile Header ── */}
-      <header className="sticky top-0 z-50 flex h-14 items-center justify-between border-b border-[#2cf6c3]/30 bg-[#05070A]/95 px-3 backdrop-blur-md min-[375px]:px-4">
+      <header className="sticky top-0 z-50 flex h-14 items-center justify-between bg-[#05070A]/95 px-3 backdrop-blur-md min-[375px]:px-4">
         <Link to="/" className="flex items-center">
           <img src="/images/logo.png" alt="UPDOWNX" className="h-6 w-auto object-contain min-[375px]:h-7" />
         </Link>
@@ -103,22 +100,22 @@ export const NewChallenge = (): JSX.Element => {
           <Link to="/challenge" className="rounded-lg bg-[#00FFA3] px-2.5 py-1.5 text-[10px] font-bold text-black min-[375px]:px-3 min-[375px]:text-[11px]">
             START
           </Link>
-          <button onClick={() => setSidebarOpen(true)} className="text-gray-300 hover:text-white" aria-label="Open menu">
-            <Menu size={20} />
+          <button onClick={() => setSidebarOpen((p) => !p)} className="text-gray-300 hover:text-white" aria-label="Toggle menu">
+            {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </header>
 
-      {/* ── Horizontal Nav Tabs ── */}
-      <nav className="border-b border-[#1a2a32]/60 bg-[#05070A] px-3 py-3 min-[375px]:px-4">
-        <div className="flex gap-0.5 overflow-x-auto rounded-[16px] border border-[#12313a] bg-[#081018]/80 px-1.5 py-1.5 scrollbar-hide min-[375px]:gap-1 min-[375px]:rounded-[18px] min-[375px]:px-2">
+      {/* ── Horizontal Nav Tabs (shown when hamburger is open) ── */}
+      {sidebarOpen && <nav className="flex justify-center overflow-x-auto scrollbar-hide border-b border-[#1a2a32]/60 bg-[#05070A] px-2 py-2 min-[375px]:px-3 min-[375px]:py-3 md:px-6 md:py-4">
+        <div className="flex shrink-0 gap-0.5 rounded-[13px] border border-[#12313a] bg-[#081018]/80 px-1 py-1 min-[375px]:gap-0.5 min-[375px]:rounded-[16px] min-[375px]:px-1.5 min-[375px]:py-1.5 min-[400px]:gap-1 min-[400px]:rounded-[18px] min-[400px]:px-2 md:gap-2 md:rounded-[22px] md:px-3 md:py-2">
           {mobileNavTabs.map((tab) => {
             const isActive = isMobileTabActive(tab.route);
             return (
               <Link
                 key={tab.route}
                 to={tab.route}
-                className={`relative whitespace-nowrap rounded-xl px-2.5 py-2 text-[11px] font-medium transition-colors min-[375px]:px-3 min-[375px]:text-[12px] ${
+                className={`relative whitespace-nowrap rounded-lg px-2 py-1.5 text-[9px] font-medium transition-colors min-[375px]:rounded-xl min-[375px]:px-2.5 min-[375px]:py-2 min-[375px]:text-[11px] min-[400px]:px-3 min-[400px]:text-[12px] md:rounded-2xl md:px-5 md:py-3 md:text-sm lg:px-6 lg:text-base ${
                   isActive ? "text-[#00FFA3]" : "text-gray-400 hover:text-gray-200"
                 }`}
               >
@@ -132,39 +129,13 @@ export const NewChallenge = (): JSX.Element => {
             );
           })}
         </div>
-      </nav>
-
-      {/* ── Sidebar (slide-over, always overlay) ── */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30" onClick={() => setSidebarOpen(false)} />
-      )}
-      <aside className={`fixed top-0 left-0 z-40 flex flex-col w-[269px] h-screen items-center justify-between px-0 py-[43px] bg-[#05070a] transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
-        <div className="flex flex-col w-[210px] items-start gap-[5px]">
-          {mobileNavTabs.map((tab) => {
-            const isActive = isMobileTabActive(tab.route);
-            return (
-              <Link
-                key={tab.route}
-                to={tab.route}
-                onClick={() => setSidebarOpen(false)}
-                className={`flex w-[210px] items-center gap-1.5 py-2 rounded-xl transition-all duration-200 ${
-                  isActive ? "bg-[#01ffa3] pl-[30px] pr-4" : "bg-transparent hover:bg-white/5 px-4"
-                }`}
-              >
-                <span className={`[font-family:'Inter',Helvetica] text-[13.2px] tracking-[0] leading-5 whitespace-nowrap transition-colors ${
-                  isActive ? "font-semibold text-[#05070a]" : "font-normal text-gray-300"
-                }`}>{tab.label}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </aside>
+      </nav>}
 
       {/* ── Page Content ── */}
       <div className="flex-1 flex flex-col relative">
         <img src="/images/bg-lines.png" alt="" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40" />
         <img src="/images/bg-lines1.png" alt="" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-10 mix-blend-screen" />
-        <div className="relative z-10 px-3 py-4 min-[375px]:px-4 md:px-8 md:py-8 lg:px-12 flex-1 flex flex-col gap-4 md:gap-8">
+        <div className="relative z-10 px-3 py-4 min-[375px]:px-4 md:px-8 md:py-8 lg:px-12 flex-1 flex flex-col gap-4 md:gap-6 md:justify-between">
 
           {/* ── Event Banner ── */}
           <section className="relative overflow-hidden rounded-[20px] border border-[#00FFA3]/45 bg-[linear-gradient(135deg,rgba(19,86,70,0.88)_0%,rgba(9,30,33,0.95)_92%)] px-3.5 py-4.5 shadow-[0_0_0_1px_rgba(0,255,163,0.06)] min-[375px]:rounded-[22px] min-[375px]:px-4 min-[375px]:py-5 md:rounded-3xl md:px-8 md:py-8">
@@ -196,10 +167,12 @@ export const NewChallenge = (): JSX.Element => {
           <div
             ref={scrollRef}
             onScroll={handleScroll}
-            className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2"
+            className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2 -mx-3 min-[375px]:-mx-4 md:-mx-8 lg:-mx-12"
             style={{
-              paddingInline: "max(0.75rem, calc(50vw - clamp(160px, 57vw, 216px) / 2))",
-              scrollPaddingInline: "max(0.75rem, calc(50vw - clamp(160px, 57vw, 216px) / 2))",
+              paddingInline: "max(0.75rem, calc(50vw - clamp(160px, 57vw, 220px) / 2))",
+              scrollPaddingInline: "max(0.75rem, calc(50vw - clamp(160px, 57vw, 220px) / 2))",
+              msOverflowStyle: "none",
+              scrollbarWidth: "none",
             }}
           >
             {plans.map((plan) => {
@@ -209,10 +182,10 @@ export const NewChallenge = (): JSX.Element => {
                   key={plan.id}
                   data-plan-slide
                   className="flex shrink-0 snap-center flex-col gap-2.5 min-[375px]:gap-3"
-                  style={{ width: "clamp(160px, 57vw, 216px)" }}
+                  style={{ width: "clamp(160px, 57vw, 220px)" }}
                 >
                   <article
-                    className={`relative min-h-[270px] rounded-[20px] border px-4 pb-4 pt-3.5 transition-all min-[375px]:min-h-[283px] min-[375px]:rounded-[22px] min-[375px]:px-5 min-[375px]:pb-5 min-[375px]:pt-4 ${
+                    className={`relative min-h-[270px] rounded-[20px] border px-4 pb-4 pt-3.5 transition-all min-[375px]:min-h-[283px] min-[375px]:rounded-[22px] min-[375px]:px-5 min-[375px]:pb-5 min-[375px]:pt-4 md:min-h-[400px] md:px-6 md:pb-6 md:pt-5 ${
                       isPro
                         ? "border-[#00FFA3]/70 bg-[#081018] shadow-[0_0_24px_rgba(0,255,163,0.12)]"
                         : "border-[#1d242c] bg-[#0b1016]"
@@ -298,12 +271,6 @@ export const NewChallenge = (): JSX.Element => {
         </div>
       </div>
     </div>
-  );
-
-  /* ═══════════════════════════════════════════════
-     DESKTOP LAYOUT (>= xl) — uses DashboardLayout
-     ═══════════════════════════════════════════════ */
-  const DesktopLayout = () => (
     <div className="hidden xl:block">
       <DashboardLayout>
         {/* Event banner */}
@@ -405,12 +372,6 @@ export const NewChallenge = (): JSX.Element => {
         </div>
       </DashboardLayout>
     </div>
-  );
-
-  return (
-    <>
-      <MobileLayout />
-      <DesktopLayout />
-    </>
+  </>
   );
 };
