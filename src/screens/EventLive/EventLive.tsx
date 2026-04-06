@@ -203,7 +203,7 @@ export const EventLive = (): JSX.Element => {
                   </div>
                   <div className="flex flex-col gap-1.5 min-[375px]:gap-2">
                     <Link
-                      to={`/checkout/${plan.id}`}
+                      to="/checkout"
                       className="flex h-9 w-full items-center justify-center rounded-[10px] bg-[#00FFA3] px-2 text-[10px] font-black uppercase tracking-[0.03em] text-black transition-all hover:bg-[#00e895] min-[375px]:h-10 min-[375px]:px-3 min-[375px]:text-[11px]"
                     >
                       Crypto Payment
