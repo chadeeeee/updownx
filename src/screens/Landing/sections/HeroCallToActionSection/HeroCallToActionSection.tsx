@@ -1,29 +1,29 @@
-import { Button } from "../../../../components/ui/button";
-import { Card, CardContent } from "../../../../components/ui/card";
+import { Button } from '../../../../components/ui/button'
+import { Card, CardContent } from '../../../../components/ui/card'
 
 // Stat cards data
 const statCards = [
   {
-    icon: "/svg/container-1.svg",
-    title: "160+ Assets",
-    subtitle: "Crypto, Stocks, Forex",
+    icon: '/svg/container-1.svg',
+    title: '160+ Assets',
+    subtitle: 'Crypto, Stocks, Forex',
   },
   {
-    icon: "/svg/container-2.svg",
-    title: "24/7 Support",
-    subtitle: "Always here to help",
+    icon: '/svg/container-2.svg',
+    title: '24/7 Support',
+    subtitle: 'Always here to help',
   },
   {
-    icon: "/svg/container-3.svg",
-    title: "80% Profit Share",
-    subtitle: "Industry leading payouts",
+    icon: '/svg/container-3.svg',
+    title: '80% Profit Share',
+    subtitle: 'Industry leading payouts',
   },
   {
-    icon: "/svg/container-4.svg",
-    title: "5x Leverage",
-    subtitle: "Amplify your trades",
+    icon: '/svg/container-4.svg',
+    title: '5x Leverage',
+    subtitle: 'Amplify your trades',
   },
-];
+]
 
 export const HeroCallToActionSection = (): JSX.Element => {
   return (
@@ -48,28 +48,19 @@ export const HeroCallToActionSection = (): JSX.Element => {
         <div className="flex flex-col items-center gap-12 w-full max-w-[1216px]">
           {/* Headline + subtitle */}
           <div className="flex flex-col items-center gap-4 w-full max-w-[896px]">
-            <div className="flex flex-col items-center px-5">
-              <h1 className="[font-family:'Inter',Helvetica] font-black text-white text-7xl text-center tracking-normal leading-[1.1] whitespace-nowrap uppercase">
-                TRADE PROFITABLY
-              </h1>
-              <div className="[font-family:'Inter',Helvetica] font-black text-transparent text-7xl text-center tracking-normal leading-[1.1] uppercase">
-                <span className="text-white">WITHOUT </span>
-                <span className="text-[#00ffa3]">
-                  RISKING
-                </span>
-                <span className="text-white">
-                  {" "}
-                  YOUR
-                  <br />
-                  CAPITAL
-                </span>
-              </div>
-            </div>
+            <h1 className="[font-family:'Inter',Helvetica] font-black text-white text-5xl md:text-7xl text-center tracking-normal leading-[1.1] uppercase px-5">
+              TRADE PROFITABLY
+              <br />
+              <span className="inline-block whitespace-nowrap">
+                WITHOUT <span className="text-[#00ffa3]">RISKING</span> <span className="text-white">YOUR</span>
+              </span>
+              <br />
+              CAPITAL
+            </h1>
 
             <div className="inline-flex items-center justify-center gap-2.5">
               <p className="[font-family:'Inter',Helvetica] font-normal text-gray-400 text-xl text-center tracking-[0] leading-7">
-                Trade over 160+ crypto assets with up to 1:5 leverage. Prove
-                your skills
+                Trade over 160+ crypto assets with up to 1:5 leverage. Prove your skills
                 <br />
                 and manage up to $100,000 of our liquidity.
               </p>
@@ -152,5 +143,5 @@ export const HeroCallToActionSection = (): JSX.Element => {
         </div>
       </div>
     </section>
-  );
-};
+  )
+}

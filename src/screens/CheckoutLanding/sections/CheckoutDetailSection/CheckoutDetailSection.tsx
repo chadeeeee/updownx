@@ -105,11 +105,6 @@ export const CheckoutDetailSection = (): JSX.Element => {
                       className="bg-transparent border-none outline-none w-full [font-family:'Public_Sans',Helvetica] font-normal text-white text-base tracking-[0] leading-6 cursor-pointer"
                       placeholder="Select Country"
                     />
-                    <img
-                      className="w-6 h-6 flex-shrink-0"
-                      alt="Dropdown arrow"
-                      src="/svg/arrow-right.svg"
-                    />
                   </div>
                 </div>
 

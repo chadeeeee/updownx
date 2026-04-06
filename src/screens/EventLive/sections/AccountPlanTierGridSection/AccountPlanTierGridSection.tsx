@@ -81,7 +81,7 @@ export const AccountPlanTierGridSection = (): JSX.Element => {
   const navigate = useNavigate();
 
   const handleCryptoPayment = (planId: string) => {
-    navigate("/checkout");
+    navigate(`/checkout/${planId}`);
   };
 
   return (
