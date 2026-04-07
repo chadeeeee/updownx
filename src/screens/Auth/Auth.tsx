@@ -135,7 +135,7 @@ export const Auth = (): JSX.Element => {
   /* ── Register layout (unchanged logic) ──────────────────────────── */
   if (isRegister) {
     return (
-      <main className="min-h-screen bg-[#0c1017] font-['Inter',sans-serif] text-white">
+      <main className="min-h-screen bg-[#05070A] font-['Inter',sans-serif] text-white">
         <div className="flex min-h-screen w-full">
           {/* ── left hero image ────────────────────────────────────── */}
           <section className="relative hidden flex-1 overflow-hidden lg:block">
@@ -323,7 +323,7 @@ export const Auth = (): JSX.Element => {
 
   /* ── Login layout (matches screenshot 1:1) ──────────────────────── */
   return (
-    <main className="min-h-screen bg-[#0c1017] font-['Inter',sans-serif] text-white">
+    <main className="min-h-screen bg-[#05070A] font-['Inter',sans-serif] text-white">
       <div className="flex min-h-screen w-full">
         {/* ── left hero image ────────────────────────────────────── */}
         <section className="relative hidden flex-1 overflow-hidden lg:block">
@@ -341,7 +341,7 @@ export const Auth = (): JSX.Element => {
 
         {/* ── right form panel ───────────────────────────────────── */}
         <section
-          className="relative flex w-full items-center justify-center px-10 py-12 lg:w-[480px] lg:shrink-0"
+          className="relative flex w-full items-center justify-center px-10 py-12 lg:w-[595px] lg:shrink-0"
           style={{
             borderLeft: "1px solid rgba(44, 246, 195, 0.18)",
           }}
@@ -355,7 +355,7 @@ export const Auth = (): JSX.Element => {
             }}
           />
 
-          <form onSubmit={onSubmit} className="w-full max-w-[380px]">
+          <form onSubmit={onSubmit} className="w-full max-w-[448px]">
             {/* Logo — centered */}
             <div className="mb-5 flex justify-center">
               <Link to="/">

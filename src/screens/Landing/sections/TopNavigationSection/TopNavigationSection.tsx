@@ -235,7 +235,7 @@ export const TopNavigationSection = (): JSX.Element => {
               </span>
               <Button
                 asChild
-                className="h-9 w-full rounded-[10px] border-none bg-[#00ffa3] text-[13px] font-semibold text-[#05070a] hover:bg-[#00e691] z-10 relative"
+                className="h-9 w-full rounded-[10px] border-none bg-[#00ffa3] [font-family:'Inter',Helvetica] text-[11.1px] font-[600] leading-[16px] text-[#0B0F14] hover:bg-[#00e691] z-10 relative"
               >
                 <a href="#help" onClick={() => setIsMenuOpen(false)}>
                   Contact Support

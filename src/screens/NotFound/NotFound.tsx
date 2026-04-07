@@ -70,9 +70,20 @@ export const NotFound = (): JSX.Element => {
       </section>
 
       {/* Bottom-left support widget */}
-      <div className="absolute bottom-8 left-8 z-10 rounded-2xl border border-[#1a4540] bg-[#0a2420]/90 px-5 py-4 backdrop-blur-sm">
-        <p className="mb-2 text-sm text-[#a0c2b8]">Need assistance?</p>
-        <button className="rounded-xl border border-[#00FFA3] bg-[#00FFA3]/10 px-6 py-2 text-sm font-semibold text-[#00FFA3] transition-colors hover:bg-[#00FFA3]/20">
+      <div
+        className={`
+          absolute bottom-8 left-8 z-10 w-[224px] h-[90px] flex flex-col items-start justify-center gap-2 px-4 rounded-xl
+          bg-[linear-gradient(211deg,rgba(44,246,195,0.3)_0%,rgba(1,50,38,0.3)_100%)]
+          before:content-[''] before:absolute before:inset-0 before:p-px before:rounded-xl
+          before:[background:linear-gradient(227deg,rgba(44,246,195,0.3)_0%,rgba(1,50,38,0.3)_100%)]
+          before:[-webkit-mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)]
+          before:[-webkit-mask-composite:xor] before:[mask-composite:exclude] before:z-[1] before:pointer-events-none
+        `}
+      >
+        <span className="[font-family:'Inter',Helvetica] text-[13px] font-normal text-white leading-5 z-10 relative">
+          Need assistance?
+        </span>
+        <button className="h-9 w-full rounded-[10px] border-none bg-[#00ffa3] [font-family:'Inter',Helvetica] text-[11.1px] font-[600] leading-[16px] text-[#0B0F14] hover:bg-[#00e691] z-10 relative transition-colors">
           Contact Support
         </button>
       </div>
