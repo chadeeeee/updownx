@@ -2,6 +2,17 @@ import "dotenv/config";
 import cors from "cors";
 import express from "express";
 import pg from "pg";
+import nodemailer from "nodemailer";
+
+const transporter = nodemailer.createTransport({
+    host: 'mail.adm.tools',
+    port: 465,
+    secure: true,
+    auth: {
+        user: 'verification@updownxpro.com',
+        pass: 'mR3ilC1xuT4xwO6rkK1y'
+    }
+});
 
 const { Pool } = pg;
 const app = express();
@@ -95,6 +106,56 @@ app.post("/api/auth/register", async (req, res) => {
     }
     console.error("[register] failed", error);
     return res.status(500).json({ message: "Registration failed." });
+  }
+});
+
+app.post("/api/auth/send-code", async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ message: "Email required" });
+
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+  const html = `
+    <div style="background-color: #000000; color: #ffffff; font-family: 'Inter', Helvetica, Arial, sans-serif; padding: 60px 20px; text-align: center; width: 100%; box-sizing: border-box; min-height: 400px;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #000000; text-align: center;">
+        <tr>
+          <td align="center">
+            <img src="cid:logo" alt="UPDOWNX" style="height: 35px; margin-bottom: 40px; display: block;" />
+            <h1 style="color: #ffffff; font-size: 26px; font-weight: 700; margin-bottom: 15px; margin-top: 0;">Verification Code</h1>
+            <p style="color: #a6aabe; font-size: 16px; margin-bottom: 40px; line-height: 1.5; max-width: 400px; margin-left: auto; margin-right: auto;">
+              Please use the following 6-digit code to complete your registration. This code is valid for 10 minutes.
+            </p>
+            
+            <div style="background: #013226; border: 1px solid #00ffa3; border-radius: 12px; padding: 20px; max-width: 240px; margin: 0 auto;">
+              <span style="font-size: 36px; font-weight: 800; letter-spacing: 6px; color: #00ffa3;">${code}</span>
+            </div>
+            
+            <p style="color: #5a6270; font-size: 13px; margin-top: 50px;">
+              If you didn't request this email, please safely ignore it.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </div>
+  `;
+
+  try {
+    const info = await transporter.sendMail({
+      from: 'UPDOWNX <verification@updownxpro.com>',
+      to: email,
+      subject: 'Your Verification Code',
+      html,
+      attachments: [{
+        filename: 'logo.png',
+        path: process.cwd() + '/public/images/logo.png',
+        cid: 'logo' // same cid value as in the html img src
+      }]
+    });
+    console.log("[send-code] success to", email, info.messageId);
+    return res.json({ success: true, code });
+  } catch (error) {
+    console.error("[send-code] error", error);
+    return res.status(500).json({ message: "Failed to send email" });
   }
 });
 

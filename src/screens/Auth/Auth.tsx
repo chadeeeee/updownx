@@ -91,6 +91,38 @@ export const Auth = (): JSX.Element => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isClosingModal, setIsClosingModal] = useState(false);
+
+  const closeModal = () => {
+    setIsClosingModal(true);
+    setTimeout(() => {
+      setShowSuccessModal(false);
+      setIsClosingModal(false);
+    }, 300); // Wait for exit animation
+  };
+
+  const handleGetCode = async () => {
+    if (!form.email) {
+      setError("Please enter your email first to receive the code.");
+      return;
+    }
+    setError("");
+    setSendingCode(true);
+    try {
+      await api.sendCode({ email: form.email.toLowerCase() });
+      setShowSuccessModal(true);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError("Failed to send verification code. Try again.");
+      }
+    } finally {
+      setSendingCode(false);
+    }
+  };
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -220,9 +252,14 @@ export const Auth = (): JSX.Element => {
                     />
                     <button
                       type="button"
-                      className="absolute right-2 top-1/2 h-9 -translate-y-1/2 rounded-[12px] bg-[#00ffa3] px-6 text-[10px] font-black uppercase tracking-[0.5px] text-[#0b0f14]"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleGetCode();
+                      }}
+                      disabled={sendingCode}
+                      className="absolute z-10 right-2 top-1/2 h-9 -translate-y-1/2 rounded-[12px] bg-[#00ffa3] px-6 text-[10px] font-black uppercase tracking-[0.5px] text-[#0b0f14] disabled:opacity-50 transition-opacity"
                     >
-                      Get code
+                      {sendingCode ? "Sending..." : "Get code"}
                     </button>
                   </div>
                 </div>
@@ -317,6 +354,35 @@ export const Auth = (): JSX.Element => {
             </form>
           </section>
         </div>
+
+        {/* Custom Success Modal */}
+        {showSuccessModal && (
+          <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm ${
+            isClosingModal ? "animate-out fade-out duration-300" : "animate-in fade-in duration-300"
+          }`}>
+            <div className={`w-full max-w-sm rounded-[16px] border border-[#1e2733] bg-[#0b0f14] p-8 text-center shadow-[0_10px_30px_-10px_rgba(0,255,163,0.15)] flex flex-col items-center ${
+              isClosingModal ? "animate-out fade-out zoom-out-95 duration-300" : "animate-in slide-in-from-bottom-4 fade-in zoom-in-95 duration-300"
+            }`}>
+              <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#00ffa3]/10">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00ffa3" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
+                </svg>
+              </div>
+              <h2 className="mb-2 text-[22px] font-bold text-white tracking-[-0.2px]">Code Sent!</h2>
+              <p className="mb-8 text-[14px] leading-relaxed text-[#8b949e]">
+                We've sent a 6-digit verification code to <br/> <strong className="text-white font-semibold">{form.email}</strong>
+              </p>
+              <button
+                type="button"
+                onClick={closeModal}
+                className="h-12 w-full rounded-[12px] bg-[#00ffa3] text-[13px] font-black uppercase tracking-[1.5px] text-[#0b0f14] transition-all hover:bg-[#00ec98] shadow-[0_4px_14px_0_rgba(0,255,163,0.25)]"
+              >
+                Got it
+              </button>
+            </div>
+          </div>
+        )}
       </main>
     );
   }
