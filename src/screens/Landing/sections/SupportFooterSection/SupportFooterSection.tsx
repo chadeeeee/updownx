@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../../../../components/ui/button";
 import { Separator } from "../../../../components/ui/separator";
@@ -18,15 +17,13 @@ const resourceLinks = [
 ];
 
 export const SupportFooterSection = (): JSX.Element => {
-  const [email, setEmail] = useState("");
-
   return (
-    <footer className="flex flex-col items-start pt-20 pb-10 px-20 w-full bg-[#05070a] border-t border-[#1e262f] border-r-0 border-b-0 border-l-0">
-      <div className="w-full max-w-screen-xl mx-auto flex flex-col gap-0">
+    <footer className="flex w-full flex-col items-start border-t border-[#1e262f] border-b-0 border-l-0 border-r-0 bg-[#05070a] px-4 pb-10 pt-16 sm:px-6 lg:px-20 lg:pt-20">
+      <div className="mx-auto flex w-full max-w-screen-xl flex-col gap-0">
         {/* Main footer content grid */}
-        <div className="grid grid-cols-[auto_1fr_1fr_auto] gap-x-16 w-full pb-10">
+        <div className="grid w-full grid-cols-1 gap-10 pb-10 sm:grid-cols-2 lg:grid-cols-[auto_1fr_1fr_auto] lg:gap-x-16">
           {/* Column 1: Logo + Description + Social */}
-          <div className="flex flex-col items-start gap-6 pt-[14px] min-w-[220px] max-w-[260px]">
+          <div className="flex min-w-[220px] max-w-[260px] flex-col items-start gap-6 pt-[14px]">
             {/* Logo */}
             <Link to="/" className="flex flex-col items-start gap-2.5 -mt-[14px]">
               <img
@@ -102,7 +99,7 @@ export const SupportFooterSection = (): JSX.Element => {
           </div>
 
           {/* Column 4: Newsletter */}
-          <div className="flex flex-col items-start gap-0 pt-[5px] w-[268px]">
+          <div className="flex w-full flex-col items-start gap-0 pt-[5px] sm:max-w-[320px] lg:w-[268px]">
             <div className="[font-family:'Inter',Helvetica] font-bold text-white text-base tracking-[0] leading-6">
               Newsletter
             </div>
@@ -134,14 +131,8 @@ export const SupportFooterSection = (): JSX.Element => {
         <div className="flex flex-col items-center gap-6 pt-10 w-full">
           {/* Disclaimer */}
           <div className="flex flex-col items-center max-w-4xl w-full">
-            <p className="[font-family:'Inter',Helvetica] font-normal text-gray-600 text-[10px] text-center tracking-[1.00px] leading-[16.2px]">
-              DISCLAIMER: TRADING CRYPTOCURRENCIES INVOLVES SIGNIFICANT RISK AND
-              CAN RESULT IN THE LOSS OF YOUR INVESTED CAPITAL. YOU SHOULD NOT
-              <br />
-              INVEST MORE THAN YOU CAN AFFORD TO LOSE AND SHOULD ENSURE THAT YOU
-              FULLY UNDERSTAND THE RISKS INVOLVED. UPDOWNX IS A PROP
-              <br />
-              TRADING FIRM AND DOES NOT PROVIDE FINANCIAL ADVICE.
+            <p className="[font-family:'Inter',Helvetica] text-center text-[10px] font-normal leading-[16.2px] tracking-[1px] text-gray-600">
+              DISCLAIMER: TRADING CRYPTOCURRENCIES INVOLVES SIGNIFICANT RISK AND CAN RESULT IN THE LOSS OF YOUR INVESTED CAPITAL. YOU SHOULD NOT INVEST MORE THAN YOU CAN AFFORD TO LOSE AND SHOULD ENSURE THAT YOU FULLY UNDERSTAND THE RISKS INVOLVED. UPDOWNX IS A PROP TRADING FIRM AND DOES NOT PROVIDE FINANCIAL ADVICE.
             </p>
           </div>
 

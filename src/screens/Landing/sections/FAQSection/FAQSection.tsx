@@ -31,11 +31,11 @@ const faqItems = [
 
 export const FAQSection = (): JSX.Element => {
   return (
-    <section className="flex w-full flex-col items-center py-24 px-5">
-      <div className="flex w-full max-w-screen-md flex-col items-center gap-16">
+    <section className="flex w-full flex-col items-center px-4 py-16 sm:px-5 lg:py-24">
+      <div className="flex w-full max-w-screen-md flex-col items-center gap-10 lg:gap-16">
       {/* Section heading */}
       <div className="flex items-center justify-center w-full">
-        <h2 className="[font-family:'Inter',Helvetica] font-extrabold text-white text-4xl text-center tracking-[0] leading-10">
+        <h2 className="[font-family:'Inter',Helvetica] text-center text-3xl font-extrabold leading-tight tracking-[0] text-white sm:text-4xl sm:leading-10">
           Frequently Asked Questions
         </h2>
       </div>

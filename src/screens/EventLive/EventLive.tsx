@@ -84,27 +84,25 @@ export const EventLive = (): JSX.Element => {
         </div>
       </header>
 
-      {/* ── Horizontal Nav Tabs (shown when hamburger is open) ── */}
-      {sidebarOpen && <nav className="flex justify-center overflow-x-auto scrollbar-hide border-b border-[#1a2a32]/60 bg-[#05070A] px-2 py-2 min-[375px]:px-3 min-[375px]:py-3 md:px-6 md:py-4">
-        <div className="flex shrink-0 gap-0.5 rounded-[13px] border border-[#12313a] bg-[#081018]/80 px-1 py-1 min-[375px]:gap-0.5 min-[375px]:rounded-[16px] min-[375px]:px-1.5 min-[375px]:py-1.5 min-[400px]:gap-1 min-[400px]:rounded-[18px] min-[400px]:px-2 md:gap-2 md:rounded-[22px] md:px-3 md:py-2">
-          {mobileNavTabs.map((tab) => {
-            const isActive = isMobileTabActive(tab.route);
-            return (
-              <Link
-                key={tab.route}
-                to={tab.route}
-                className={`relative whitespace-nowrap rounded-lg px-2 py-1.5 text-[9px] font-medium transition-colors min-[375px]:rounded-xl min-[375px]:px-2.5 min-[375px]:py-2 min-[375px]:text-[11px] min-[400px]:px-3 min-[400px]:text-[12px] md:rounded-2xl md:px-5 md:py-3 md:text-sm lg:px-6 lg:text-base ${
-                  isActive ? "text-[#00FFA3]" : "text-gray-400 hover:text-gray-200"
-                }`}
-              >
-                {tab.label}
-                <span className={`absolute bottom-1 left-2.5 right-2.5 h-px rounded-full transition-opacity min-[375px]:left-3 min-[375px]:right-3 ${isActive ? "bg-[#00FFA3] opacity-100" : "opacity-0"}`} />
-              </Link>
-            );
-          })}
-        </div>
-      </nav>}
-
+      {/* ── Horizontal Nav Tabs ── */}
+      <nav className="flex overflow-x-auto border-b border-[#1a2a32]/60 bg-[#05070A] px-3 min-[375px]:px-4 md:px-8" style={{ scrollbarWidth: "none" }}>
+        {mobileNavTabs.map((tab) => {
+          const isActive = isMobileTabActive(tab.route);
+          return (
+            <Link
+              key={tab.route}
+              to={tab.route}
+              className={`whitespace-nowrap px-3 py-3 text-[12px] font-medium transition-colors border-b-2 min-[375px]:text-[13px] md:text-sm ${
+                isActive
+                  ? "border-[#00FFA3] text-[#00FFA3]"
+                  : "border-transparent text-gray-400 hover:text-gray-200"
+              }`}
+            >
+              {tab.label}
+            </Link>
+          );
+        })}
+      </nav>
 
       {/* ── Page Content ── */}
       <div className="flex-1 flex flex-col relative">

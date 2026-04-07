@@ -1,45 +1,46 @@
-import { Button } from "../../../../components/ui/button";
-import { Card, CardContent } from "../../../../components/ui/card";
+import { useEffect, useRef, useState, useCallback } from 'react'
+import { Button } from '../../../../components/ui/button'
+import { Card, CardContent } from '../../../../components/ui/card'
 
 // Stat cards data
 const statCards = [
   {
-    icon: "/svg/container-1.svg",
-    title: "160+ Assets",
-    subtitle: "Crypto, Stocks, Forex",
+    icon: '/svg/container-1.svg',
+    title: '160+ Assets',
+    subtitle: 'Crypto, Stocks, Forex',
   },
   {
-    icon: "/svg/container-2.svg",
-    title: "24/7 Support",
-    subtitle: "Always here to help",
+    icon: '/svg/container-2.svg',
+    title: '24/7 Support',
+    subtitle: 'Always here to help',
   },
   {
-    icon: "/svg/container-3.svg",
-    title: "80% Profit Share",
-    subtitle: "Industry leading payouts",
+    icon: '/svg/container-3.svg',
+    title: '80% Profit Share',
+    subtitle: 'Industry leading payouts',
   },
   {
-    icon: "/svg/container-4.svg",
-    title: "5x Leverage",
-    subtitle: "Amplify your trades",
+    icon: '/svg/container-4.svg',
+    title: '5x Leverage',
+    subtitle: 'Amplify your trades',
   },
-];
+]
 
 export const HeroCallToActionSection = (): JSX.Element => {
   return (
-    <section className="relative w-full min-h-[944px] overflow-hidden">
+    <section className="relative w-full overflow-hidden">
       {/* Background glow effects */}
       <div className="absolute w-full h-full top-0 left-0 flex justify-between pointer-events-none">
-        <div className="mt-[-94.4px] w-[500px] h-[500px] ml-36 bg-[#00ffa31a] rounded-full blur-[60px]" />
-        <div className="self-end mb-[-94.4px] w-[500px] h-[500px] mr-36 bg-[#2cf6c31a] rounded-full blur-[60px]" />
+        <div className="mt-[-120px] ml-[-120px] h-[320px] w-[320px] rounded-full bg-[#00ffa31a] blur-[60px] sm:ml-8 sm:h-[420px] sm:w-[420px] lg:ml-36 lg:h-[500px] lg:w-[500px]" />
+        <div className="mb-[-120px] mr-[-120px] h-[320px] w-[320px] self-end rounded-full bg-[#2cf6c31a] blur-[60px] sm:mr-8 sm:h-[420px] sm:w-[420px] lg:mr-36 lg:h-[500px] lg:w-[500px]" />
       </div>
 
       {/* Main content */}
-      <div className="relative w-full flex flex-col items-center gap-8 pt-32 px-20">
+      <div className="relative flex w-full flex-col items-center gap-8 px-4 pb-12 pt-14 sm:px-6 sm:pt-20 lg:px-20 lg:pt-28">
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#ffffff0d] rounded-full border border-solid border-[#ffffff1a]">
+        <div className="inline-flex items-center gap-2 rounded-full border border-solid border-[#ffffff1a] bg-[#ffffff0d] px-3 py-2 sm:px-4">
           <div className="w-2 h-2 bg-[#00ffa3] rounded-full flex-shrink-0" />
-          <span className="[font-family:'Inter',Helvetica] font-bold text-[#2cf6c3] text-xs text-center tracking-[1.20px] leading-4 whitespace-nowrap">
+          <span className="[font-family:'Inter',Helvetica] text-center text-[10px] font-bold leading-4 tracking-[1.20px] text-[#2cf6c3] sm:text-xs">
             REVOLUTIONIZING CRYPTO TRADING
           </span>
         </div>
@@ -47,46 +48,33 @@ export const HeroCallToActionSection = (): JSX.Element => {
         {/* Headline + subtitle + CTA */}
         <div className="flex flex-col items-center gap-12 w-full max-w-[1216px]">
           {/* Headline + subtitle */}
-          <div className="flex flex-col items-center gap-4 w-full max-w-[896px]">
-            <div className="flex flex-col items-center px-5">
-              <h1 className="[font-family:'Inter',Helvetica] font-black text-white text-7xl text-center tracking-normal leading-[1.1] whitespace-nowrap uppercase">
-                TRADE PROFITABLY
-              </h1>
-              <div className="[font-family:'Inter',Helvetica] font-black text-transparent text-7xl text-center tracking-normal leading-[1.1] uppercase">
-                <span className="text-white">WITHOUT </span>
-                <span className="text-[#00ffa3]">
-                  RISKING
-                </span>
-                <span className="text-white">
-                  {" "}
-                  YOUR
-                  <br />
-                  CAPITAL
-                </span>
-              </div>
-            </div>
+          <div className="flex w-full max-w-[896px] flex-col items-center gap-4">
+            <h1 className="[font-family:'Inter',Helvetica] px-1 text-center text-4xl font-black uppercase leading-[1.05] tracking-normal text-white sm:px-5 sm:text-5xl lg:text-7xl">
+              TRADE PROFITABLY
+              <br />
+              WITHOUT <span className="text-[#00ffa3]">RISKING</span> YOUR
+              <br />
+              CAPITAL
+            </h1>
 
             <div className="inline-flex items-center justify-center gap-2.5">
-              <p className="[font-family:'Inter',Helvetica] font-normal text-gray-400 text-xl text-center tracking-[0] leading-7">
-                Trade over 160+ crypto assets with up to 1:5 leverage. Prove
-                your skills
-                <br />
-                and manage up to $100,000 of our liquidity.
+              <p className="[font-family:'Inter',Helvetica] max-w-[760px] text-center text-base font-normal leading-6 tracking-[0] text-gray-400 sm:text-lg sm:leading-7 lg:text-xl">
+                Trade over 160+ crypto assets with up to 1:5 leverage. Prove your skills and manage up to $100,000 of our liquidity.
               </p>
             </div>
           </div>
 
           {/* CTA buttons row */}
-          <div className="flex items-center justify-center gap-6 w-full">
+          <div className="flex w-full flex-col items-stretch justify-center gap-4 sm:items-center sm:gap-6 lg:flex-row">
             {/* Choose Your Account button */}
-            <Button className="h-auto inline-flex flex-col justify-center px-10 py-5 bg-[#00ffa3] rounded-2xl items-center hover:bg-[#00ffa3]/90 border-0">
-              <span className="font-black text-[#05070a] text-lg leading-7 [font-family:'Inter',Helvetica] text-center tracking-[0] whitespace-nowrap">
+            <Button className="inline-flex h-auto w-full flex-col items-center justify-center rounded-2xl border-0 bg-[#00ffa3] px-6 py-4 hover:bg-[#00ffa3]/90 sm:w-auto sm:px-10 sm:py-5">
+              <span className="font-black text-[#05070a] text-base leading-6 [font-family:'Inter',Helvetica] text-center tracking-[0] whitespace-nowrap sm:text-lg sm:leading-7">
                 CHOOSE YOUR ACCOUNT
               </span>
             </Button>
 
             {/* Trustpilot widget */}
-            <div className="inline-flex h-[68px] items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-md py-3 pl-4 pr-6">
+            <div className="inline-flex h-[68px] w-full items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] py-3 pl-4 pr-6 backdrop-blur-md sm:w-auto">
               <div className="flex -space-x-3 overflow-hidden">
                 <img
                   className="inline-block h-10 w-10 rounded-full object-cover ring-2 ring-[#05070a]"
@@ -120,7 +108,13 @@ export const HeroCallToActionSection = (): JSX.Element => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+        {/* Mobile carousel */}
+        <div className="block lg:hidden w-full">
+          <MobileStatsCarousel />
+        </div>
+
+        {/* Desktop grid */}
+        <div className="hidden lg:grid lg:grid-cols-4 gap-4 w-full">
           {statCards.map((card, index) => (
             <Card
               key={index}
@@ -133,7 +127,6 @@ export const HeroCallToActionSection = (): JSX.Element => {
                        hover:bg-white/[0.05] hover:border-[#00ffa3]/20"
             >
               <CardContent className="flex flex-col items-center justify-center p-0 w-full h-full">
-                {/* Іконка */}
                 <div className="absolute top-[22px] left-[24px]">
                   <img className="h-6 w-6" alt="Icon" src={card.icon} />
                 </div>
@@ -142,7 +135,7 @@ export const HeroCallToActionSection = (): JSX.Element => {
                   <span className="text-center font-sans text-xl font-bold leading-7 text-white tracking-tight">
                     {card.title}
                   </span>
-                  <span className="text-cente r font-sans text-sm font-normal leading-5 text-gray-500 mt-1">
+                  <span className="text-center font-sans text-sm font-normal leading-5 text-gray-500 mt-1">
                     {card.subtitle}
                   </span>
                 </div>
@@ -152,5 +145,123 @@ export const HeroCallToActionSection = (): JSX.Element => {
         </div>
       </div>
     </section>
+  )
+}
+
+// Mobile carousel component - always scrolls right
+function MobileStatsCarousel() {
+  const [activePage, setActivePage] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(true);
+  const totalPages = Math.ceil(statCards.length / 2);
+  const autoScrollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Create pages with a clone of first page at the end for seamless loop
+  const pages = Array.from({ length: totalPages + 1 }).map((_, i) => {
+    const realIndex = i % totalPages;
+    return statCards.slice(realIndex * 2, realIndex * 2 + 2);
+  });
+
+  const startAutoScroll = useCallback(() => {
+    if (autoScrollRef.current) clearInterval(autoScrollRef.current);
+    autoScrollRef.current = setInterval(() => {
+      setIsTransitioning(true);
+      setActivePage((prev) => prev + 1);
+    }, 3000);
+  }, []);
+
+  // When reaching the clone page, snap back instantly
+  useEffect(() => {
+    if (activePage === totalPages) {
+      const timeout = setTimeout(() => {
+        setIsTransitioning(false);
+        setActivePage(0);
+      }, 500); // wait for transition to finish
+      return () => clearTimeout(timeout);
+    }
+  }, [activePage, totalPages]);
+
+  // Re-enable transition after instant snap
+  useEffect(() => {
+    if (!isTransitioning && activePage === 0) {
+      const timeout = setTimeout(() => {
+        setIsTransitioning(true);
+      }, 50);
+      return () => clearTimeout(timeout);
+    }
+  }, [isTransitioning, activePage]);
+
+  // Auto-scroll
+  useEffect(() => {
+    startAutoScroll();
+    return () => {
+      if (autoScrollRef.current) clearInterval(autoScrollRef.current);
+    };
+  }, [startAutoScroll]);
+
+  const handleDotClick = (page: number) => {
+    if (autoScrollRef.current) clearInterval(autoScrollRef.current);
+    setIsTransitioning(true);
+    setActivePage(page);
+    startAutoScroll();
+  };
+
+  return (
+    <div className="w-full overflow-hidden">
+      {/* Sliding container */}
+      <div
+        className="flex"
+        style={{
+          transform: `translateX(-${activePage * 100}%)`,
+          transition: isTransitioning ? 'transform 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'none',
+        }}
+      >
+        {pages.map((pageCards, pageIndex) => (
+          <div
+            key={pageIndex}
+            className="flex w-full flex-shrink-0 gap-3 px-1"
+          >
+            {pageCards.map((card, cardIndex) => (
+              <Card
+                key={cardIndex}
+                className="relative flex h-[160px] w-[calc(50%-6px)] flex-shrink-0 flex-col items-center justify-center gap-1 rounded-[16px]
+                         border border-white/5
+                         bg-white/[0.02]
+                         backdrop-blur-xl
+                         p-[20px]"
+              >
+                <CardContent className="flex flex-col items-center justify-center p-0 w-full h-full">
+                  <div className="absolute top-[18px] left-[18px]">
+                    <img className="h-6 w-6" alt="Icon" src={card.icon} />
+                  </div>
+                  <div className="flex flex-col items-center mt-2">
+                    <span className="text-center font-sans text-lg font-bold leading-6 text-white tracking-tight">
+                      {card.title}
+                    </span>
+                    <span className="text-center font-sans text-xs font-normal leading-4 text-gray-500 mt-1">
+                      {card.subtitle}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      {/* Dot indicators */}
+      <div className="flex items-center justify-center gap-2 mt-5">
+        {Array.from({ length: totalPages }).map((_, index) => (
+          <button
+            key={index}
+            onClick={() => handleDotClick(index)}
+            className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${
+              (activePage % totalPages) === index
+                ? 'bg-[#00ffa3]'
+                : 'bg-[#1e262f]'
+            }`}
+          />
+        ))}
+      </div>
+    </div>
   );
-};
+}

@@ -10,6 +10,10 @@ import { Checkout } from "./screens/Checkout";
 import { CheckoutLanding } from "./screens/CheckoutLanding";
 import { EventLive } from "./screens/EventLive";
 import { Trading } from "./screens/Trading";
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/master
 import { ControlPanel } from "./screens/ControlPanel";
 import { AuthProvider, useAuth } from "./lib/auth";
 

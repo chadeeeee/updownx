@@ -26,12 +26,11 @@ const testimonials = [
 
 export const TraderTestimonialsSection = (): JSX.Element => {
   return (
-    <section className="w-full bg-[#0b0f1433] py-16 flex">
-      <div className="flex-1 mx-20 flex flex-col gap-16">
+    <section className="flex w-full bg-[#0b0f1433] py-16">
+      <div className="mx-4 flex flex-1 flex-col gap-10 sm:mx-6 lg:mx-20 lg:gap-16">
         {/* Header */}
         <div className="flex flex-col gap-4 items-center">
-          <h2 className="flex items-center justify-center gap-3 [font-family:'Inter',Helvetica] font-extrabold text-white text-4xl tracking-[0] leading-10 whitespace-nowrap">
-            
+          <h2 className="flex items-center justify-center gap-3 text-center [font-family:'Inter',Helvetica] text-3xl font-extrabold leading-tight tracking-[0] text-white sm:text-4xl sm:leading-10">
             Loved by Professional Traders
           </h2>
 
@@ -44,7 +43,7 @@ export const TraderTestimonialsSection = (): JSX.Element => {
         </div>
 
         {/* Testimonial Cards */}
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
           {testimonials.map((testimonial, index) => (
             <Card
               key={index}

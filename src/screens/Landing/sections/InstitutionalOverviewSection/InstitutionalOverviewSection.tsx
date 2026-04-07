@@ -8,39 +8,39 @@ const stats = [
     label: "ACTIVE TRADERS",
     valueColor: "text-white",
     labelColor: "text-[#00ffa3]",
-    row: "row-[1_/_2]",
-    col: "col-[1_/_2]",
+    row: "lg:row-[1_/_2]",
+    col: "lg:col-[1_/_2]",
   },
   {
     value: "$11M+",
     label: "TOTAL PAYOUTS",
     valueColor: "text-white",
     labelColor: "text-[#00ffa3]",
-    row: "row-[1_/_2]",
-    col: "col-[2_/_3]",
+    row: "lg:row-[1_/_2]",
+    col: "lg:col-[2_/_3]",
   },
   {
     value: "$14,200",
     label: "AVG. MONTHLY PAYOUT",
     valueColor: "text-white",
     labelColor: "text-[#00ffa3]",
-    row: "row-[2_/_3]",
-    col: "col-[1_/_2]",
+    row: "lg:row-[2_/_3]",
+    col: "lg:col-[1_/_2]",
   },
   {
     value: "99.9%",
     label: "UPTIME RELIABILITY",
     valueColor: "text-[#00ffa3]",
     labelColor: "text-[#ffffff80]",
-    row: "row-[2_/_3]",
-    col: "col-[2_/_3]",
+    row: "lg:row-[2_/_3]",
+    col: "lg:col-[2_/_3]",
   },
 ];
 
 export const InstitutionalOverviewSection = (): JSX.Element => {
   return (
-    <section className="flex flex-col w-full items-start px-28 py-24 bg-[#0b0f144c]">
-      <div className="flex items-center gap-16 relative self-stretch w-full">
+    <section className="flex w-full flex-col items-start bg-[#0b0f144c] px-4 py-16 sm:px-6 lg:px-28 lg:py-24">
+      <div className="relative flex w-full flex-col gap-10 self-stretch lg:flex-row lg:items-center lg:gap-16">
         {/* Left: Text content */}
         <div className="flex flex-col items-start gap-[16.5px] relative flex-1 grow">
           {/* OUR STORY label */}
@@ -49,23 +49,16 @@ export const InstitutionalOverviewSection = (): JSX.Element => {
           </span>
 
           {/* Heading */}
-          <h2 className="self-stretch [font-family:'Inter',Helvetica] font-extrabold text-white text-4xl tracking-[0] leading-[45px]">
+          <h2 className="self-stretch [font-family:'Inter',Helvetica] text-3xl font-extrabold leading-tight tracking-[0] text-white sm:text-4xl sm:leading-[45px]">
             Empowering Global Traders
             <br />
             with Institutional Power
           </h2>
 
           {/* Description */}
-          <div className="flex flex-col items-start pt-[7.5px] pb-0 px-0 self-stretch w-full">
-            <p className="self-stretch [font-family:'Inter',Helvetica] font-normal text-gray-400 text-lg tracking-[0] leading-[29.2px]">
-              UPDOWNX was born from the vision of professional traders who
-              <br />
-              believe talent should never be limited by capital. We provide the
-              <br />
-              infrastructure, liquidity, and risk management tools to turn
-              skilled
-              <br />
-              individuals into institutional-grade crypto traders.
+          <div className="flex w-full flex-col items-start self-stretch px-0 pb-0 pt-[7.5px]">
+            <p className="self-stretch [font-family:'Inter',Helvetica] text-base font-normal leading-7 tracking-[0] text-gray-400 sm:text-lg sm:leading-[29.2px]">
+              UPDOWNX was born from the vision of professional traders who believe talent should never be limited by capital. We provide the infrastructure, liquidity, and risk management tools to turn skilled individuals into institutional-grade crypto traders.
             </p>
           </div>
 
@@ -81,25 +74,25 @@ export const InstitutionalOverviewSection = (): JSX.Element => {
         </div>
 
         {/* Right: Stats grid */}
-        <div className="grid grid-cols-2 grid-rows-[126px_126px] h-[276px] gap-6">
+        <div className="grid h-auto w-full grid-cols-2 gap-3 sm:gap-6 lg:max-w-[560px]">
           {stats.map((stat, index) => (
             <Card
               key={index}
-              className={`${stat.row} ${stat.col} w-full h-fit flex flex-col items-start justify-center p-8 rounded-3xl bg-[#0b0f14] border border-solid border-[#1e262f]`}
+              className={`${stat.row} ${stat.col} h-[98px] sm:h-fit w-full rounded-[24px] border border-solid border-[#1e262f] bg-[#0b0f14] p-[10px] sm:p-8 flex flex-col items-center justify-center`}
             >
-              <CardContent className="p-0 flex flex-col items-start w-full gap-0">
+              <CardContent className="p-0 flex flex-col items-center sm:items-start w-full gap-0">
                 {/* Stat value */}
-                <div className="flex flex-col items-start pb-1 w-full">
+                <div className="flex flex-col items-center sm:items-start pb-1 w-full">
                   <span
-                    className={`self-stretch [font-family:'Inter',Helvetica] font-black ${stat.valueColor} text-3xl tracking-[0] leading-9`}
+                    className={`self-stretch text-center sm:text-left [font-family:'Inter',Helvetica] font-black ${stat.valueColor} text-2xl sm:text-3xl tracking-[0] leading-7 sm:leading-9`}
                   >
                     {stat.value}
                   </span>
                 </div>
                 {/* Stat label */}
-                <div className="flex flex-col items-start w-full">
+                <div className="flex flex-col items-center sm:items-start w-full">
                   <span
-                    className={`self-stretch [font-family:'Inter',Helvetica] font-bold ${stat.labelColor} text-sm tracking-[0.70px] leading-5`}
+                    className={`self-stretch text-center sm:text-left [font-family:'Inter',Helvetica] font-bold ${stat.labelColor} text-[10px] sm:text-sm tracking-[0.70px] leading-4 sm:leading-5`}
                   >
                     {stat.label}
                   </span>

@@ -54,28 +54,28 @@ export const ChallengePricingSection = (): JSX.Element => {
   const [activeTab, setActiveTab] = useState("5K");
 
   return (
-    <section className="flex flex-col w-full items-center gap-16 px-8 py-0">
+    <section className="flex w-full flex-col items-center gap-10 px-4 py-0 sm:px-6 lg:gap-16 lg:px-8">
       {/* Header */}
       <div className="flex flex-col items-center gap-4 w-full">
         <div className="flex flex-col items-center w-full">
-          <h2 className="[font-family:'Inter',Helvetica] font-extrabold text-white text-4xl leading-10 text-center tracking-[0] whitespace-nowrap">
+          <h2 className="[font-family:'Inter',Helvetica] text-center text-3xl font-extrabold leading-tight tracking-[0] text-white sm:text-4xl sm:leading-10">
             Choose Your Challenge
           </h2>
         </div>
 
         <div className="flex flex-col items-center pb-4 w-full">
-          <p className="[font-family:'Inter',Helvetica] font-normal text-gray-400 text-base text-center tracking-[0] leading-6 whitespace-nowrap">
+          <p className="[font-family:'Inter',Helvetica] text-center text-base font-normal leading-6 tracking-[0] text-gray-400">
             Select an account size that fits your expertise and trading style.
           </p>
         </div>
 
         {/* Account size tabs */}
-        <div className="inline-flex items-start p-1 bg-[#0b0f14] rounded-2xl overflow-x-auto border border-solid border-[#1e262f]">
+        <div className="inline-flex w-full items-start overflow-x-auto rounded-2xl border border-solid border-[#1e262f] bg-[#0b0f14] p-1 sm:w-auto">
           {accountSizeTabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`inline-flex flex-col justify-center px-6 py-3 rounded-xl items-center cursor-pointer transition-colors ${
+              className={`inline-flex min-w-[72px] flex-col items-center justify-center rounded-xl px-5 py-3 transition-colors sm:px-6 ${
                 activeTab === tab ? "bg-[#00ffa3]" : "bg-transparent"
               }`}
             >
@@ -162,10 +162,10 @@ export const ChallengePricingSection = (): JSX.Element => {
                 {planSteps.map((step, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between px-0 py-2 w-full border-b border-solid border-[#ffffff0d]"
+                    className="flex w-full items-center justify-between gap-2 border-b border-solid border-[#ffffff0d] px-0 py-2"
                   >
                     <span
-                      className={`[font-family:'Inter',Helvetica] font-normal text-gray-400 tracking-[0] whitespace-nowrap ${
+                      className={`[font-family:'Inter',Helvetica] font-normal text-gray-400 tracking-[0] ${
                         plan.featured
                           ? "text-[14.7px] leading-[21px]"
                           : "text-sm leading-5"
@@ -174,7 +174,7 @@ export const ChallengePricingSection = (): JSX.Element => {
                       {step.label}
                     </span>
                     <span
-                      className={`[font-family:'Inter',Helvetica] font-bold tracking-[0] whitespace-nowrap ${
+                      className={`[font-family:'Inter',Helvetica] text-right font-bold tracking-[0] ${
                         step.highlight ? "text-[#00ffa3]" : "text-white"
                       } ${plan.featured ? "text-[14.7px] leading-[21px]" : "text-sm leading-5"}`}
                     >

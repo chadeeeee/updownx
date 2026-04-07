@@ -44,23 +44,47 @@ export const Checkout = (): JSX.Element => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    api.challenges().then(setPlans).catch(() => setPlans([]));
+    console.log("Loading challenges...");
+    api.challenges()
+      .then((data) => {
+        console.log("Challenges loaded:", data);
+        setPlans(data);
+      })
+      .catch((error) => {
+        console.error("Failed to load challenges:", error);
+        setPlans([]);
+      });
   }, []);
 
-  const plan = useMemo(() => plans.find((item) => item.id === planId), [plans, planId]);
+  const plan = useMemo(() => {
+    const found = plans.find((item) => item.id === planId);
+    console.log("Plan lookup:", { planId, plans, found });
+    return found;
+  }, [plans, planId]);
 
   const handleOrder = async () => {
-    if (!plan || !user) return;
+    console.log("handleOrder called", { plan, user, loading });
+    if (!plan || !user) {
+      console.error("Missing plan or user", { plan, user });
+      alert(`Cannot create order: ${!plan ? "Plan not found" : "User not logged in"}`);
+      return;
+    }
     setLoading(true);
     try {
-      await api.createOrder({
+      const order = await api.createOrder({
         userId: user.id,
         challengeId: plan.id,
         country,
         city,
         paymentMethod: "crypto",
       });
+      console.log("Order created successfully", order);
+      // TODO: Redirect to payment gateway (e.g., crypto payment provider)
+      // For now, just navigate to payments page
       navigate("/payments");
+    } catch (error) {
+      console.error("Failed to create order", error);
+      alert("Failed to create order. Please try again.");
     } finally {
       setLoading(false);
     }

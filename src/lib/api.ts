@@ -65,6 +65,11 @@ export const api = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
+  sendCode: (payload: { email: string }) =>
+    request<{ success: boolean; code: string }>("/api/auth/send-code", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
   challenges: () => request<Challenge[]>("/api/challenges"),
   createOrder: (payload: {
     userId: number;
