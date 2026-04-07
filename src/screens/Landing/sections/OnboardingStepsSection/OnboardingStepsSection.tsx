@@ -59,17 +59,17 @@ const onboardingSteps = [
 
 export const OnboardingStepsSection = (): JSX.Element => {
   return (
-    <section className="flex w-full flex-col items-center bg-[#05070a] py-24 px-8">
-      <div className="flex w-full max-w-screen-xl flex-col items-center gap-16">
+    <section className="flex w-full flex-col items-center bg-[#05070a] px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+      <div className="flex w-full max-w-screen-xl flex-col items-center gap-10 lg:gap-16">
         {/* Section heading */}
         <div className="flex items-center justify-center w-full">
-          <h2 className="[font-family:'Inter',Helvetica] font-extrabold text-white text-4xl text-center tracking-[0] leading-10 whitespace-nowrap">
+          <h2 className="[font-family:'Inter',Helvetica] text-center text-3xl font-extrabold leading-tight tracking-[0] text-white sm:text-4xl sm:leading-10">
             How to get Started
           </h2>
         </div>
 
         {/* Steps grid */}
-        <div className="grid grid-cols-5 gap-x-[39px] gap-y-8 w-full">
+        <div className="grid w-full grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-5 lg:gap-x-[39px]">
           {onboardingSteps.map((step) => (
             <div
               key={step.number}
