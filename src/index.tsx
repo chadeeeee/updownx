@@ -10,7 +10,6 @@ import { Checkout } from "./screens/Checkout";
 import { CheckoutLanding } from "./screens/CheckoutLanding";
 import { EventLive } from "./screens/EventLive";
 import { Trading } from "./screens/Trading";
-import { MainLayout } from "./components/MainLayout";
 import { ControlPanel } from "./screens/ControlPanel";
 import { AuthProvider, useAuth } from "./lib/auth";
 
@@ -52,12 +51,10 @@ createRoot(document.getElementById("app") as HTMLElement).render(
             path="/help"
             element={<PrivateRoute><Accounts /></PrivateRoute>}
           />
-          <Route element={<MainLayout />}>
-            <Route
-              path="/payments"
-              element={<PrivateRoute><Payments /></PrivateRoute>}
-            />
-          </Route>
+          <Route
+            path="/payments"
+            element={<PrivateRoute><Payments /></PrivateRoute>}
+          />
           <Route path="/event-live" element={<EventLive />} />
           <Route
             path="/trading"

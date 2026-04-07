@@ -401,7 +401,7 @@ export const Trading = (): JSX.Element => {
       </div>
 
       {/* Top navigation bar */}
-      <div className="relative z-30">
+      <div className="sticky top-0 z-50 w-full">
         <TopBar
           onMenuToggle={() => setSidebarOpen(true)}
           logoSrc="https://c.animaapp.com/mnh4g5xzo5XXIf/img/logo.png"

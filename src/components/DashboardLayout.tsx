@@ -31,9 +31,9 @@ export const DashboardLayout = ({ children }: PropsWithChildren): JSX.Element =>
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#05070A] font-['Inter',sans-serif] text-white overflow-x-hidden">
+    <main className="min-h-screen bg-[#05070A] font-['Inter',sans-serif] text-white">
       {/* ═══ Top header bar ═══ */}
-      <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-[#0f2f35]/60 bg-[#05070A]/95 px-4 sm:px-6 backdrop-blur-md">
+      <header className="sticky top-0 z-50 flex h-16 2xl:h-20 items-center justify-between border-b border-[#0f2f35]/60 bg-[#05070A]/95 px-4 sm:px-6 2xl:px-10 backdrop-blur-md">
         {/* Left: hamburger + Logo */}
         <div className="flex items-center gap-3">
           <button
@@ -44,14 +44,14 @@ export const DashboardLayout = ({ children }: PropsWithChildren): JSX.Element =>
             <Menu size={24} />
           </button>
           <Link to="/" className="flex items-center">
-            <img src="/images/logo.png" alt="UPDOWNX" className="h-8 w-auto object-contain" />
+            <img src="/images/logo.png" alt="UPDOWNX" className="h-8 2xl:h-10 w-auto object-contain" />
           </Link>
         </div>
 
         {/* Right side controls */}
         <div className="flex items-center gap-4">
           {/* Language */}
-          <button className="flex items-center gap-1 text-sm text-[#89a4ad] transition-colors hover:text-white">
+          <button className="flex items-center gap-1 text-sm 2xl:text-base text-[#89a4ad] transition-colors hover:text-white">
             <Globe size={14} />
             EN
             <ChevronDown size={12} />
@@ -121,12 +121,12 @@ export const DashboardLayout = ({ children }: PropsWithChildren): JSX.Element =>
         </div>
       </header>
 
-      <div className="mx-auto flex min-h-[calc(100vh-64px)] max-w-[1440px]">
+      <div className="mx-auto flex min-h-[calc(100vh-64px)] max-w-[1920px]">
         {/* ═══ Sidebar ═══ */}
         <Sidebar mobileOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         {/* ═══ Main content ═══ */}
-        <section className="relative flex-1 overflow-auto">
+        <section className="relative flex-1">
           {/* Background texture */}
           <img
             src="/images/bg-lines.png"
@@ -139,7 +139,7 @@ export const DashboardLayout = ({ children }: PropsWithChildren): JSX.Element =>
             className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-11 mix-blend-screen"
           />
 
-          <div className="relative z-10 p-4 sm:p-6 lg:p-8">{children}</div>
+          <div className="relative z-10 p-4 sm:p-6 lg:p-8 2xl:p-12">{children}</div>
         </section>
       </div>
     </main>

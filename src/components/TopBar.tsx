@@ -26,7 +26,7 @@ export const TopBar = ({
   const initials = getInitials(displayName);
 
   return (
-    <header className="w-full h-16 flex bg-[#0b0f14] border-b border-[#2cf6c3] shrink-0 z-30">
+    <header className="w-full h-16 2xl:h-20 flex bg-[#0b0f14] border-b border-[#2cf6c3] shrink-0 z-30">
       <div className="flex-1 flex items-center justify-between px-4 sm:px-[30px] py-2.5">
         {/* Left: hamburger (mobile) + logo */}
         <div className="flex items-center gap-3">

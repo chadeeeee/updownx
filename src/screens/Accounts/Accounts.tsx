@@ -182,17 +182,15 @@ export const Accounts = () => {
     {/* ═══ DESKTOP LAYOUT (≥ xl) ═══ */}
     <div className="hidden xl:block">
       <DashboardLayout>
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 2xl:gap-10">
           <NavAccountsSubsection />
-          <div className="flex flex-col gap-1.5">
-            <header className="font-bold text-gray-400 text-[10px] tracking-[2px] uppercase">Trading Identity</header>
-            <h1 className="text-white text-4xl tracking-tight">ID: 200050316</h1>
-            <p className="text-gray-400 text-sm">Institutional Prop Account • Multi-Asset Environment</p>
+          <div className="flex flex-col gap-1.5 2xl:gap-2.5">
+            <header className="font-bold text-gray-400 text-[10px] 2xl:text-[13px] tracking-[2px] uppercase">Trading Identity</header>
+            <h1 className="text-white text-4xl 2xl:text-5xl tracking-tight">ID: 200050316</h1>
+            <p className="text-gray-400 text-sm 2xl:text-base">Institutional Prop Account • Multi-Asset Environment</p>
           </div>
-          <section className="overflow-x-auto pb-2">
-            <div className="min-w-[560px]">
-              <MainHedgeModuleSubsection />
-            </div>
+          <section className="pb-2">
+            <MainHedgeModuleSubsection />
           </section>
         </div>
       </DashboardLayout>
