@@ -7,7 +7,6 @@ import { Landing } from "./screens/Landing";
 import { Accounts } from "./screens/Accounts";
 import { Payments } from "./screens/Payments";
 import { Checkout } from "./screens/Checkout";
-import { CheckoutLanding } from "./screens/CheckoutLanding";
 import { EventLive } from "./screens/EventLive";
 import { Trading } from "./screens/Trading";
 import { ControlPanel } from "./screens/ControlPanel";
@@ -55,6 +54,10 @@ createRoot(document.getElementById("app") as HTMLElement).render(
             path="/payments"
             element={<PrivateRoute><Payments /></PrivateRoute>}
           />
+          <Route
+            path="/payments/:paymentId"
+            element={<PrivateRoute><Payments /></PrivateRoute>}
+          />
           <Route path="/event-live" element={<EventLive />} />
           <Route
             path="/trading"
@@ -77,7 +80,7 @@ createRoot(document.getElementById("app") as HTMLElement).render(
             path="/checkout"
             element={
               <PrivateRoute>
-                <CheckoutLanding />
+                <Checkout />
               </PrivateRoute>
             }
           />

@@ -226,15 +226,13 @@ export const Trading = (): JSX.Element => {
               <p className="text-gray-400 text-[11px] min-[375px]:text-xs md:text-base leading-relaxed mb-4 md:mb-5">
                 Your institutional-grade control panel is ready. Access deep liquidity and real-time execution.
               </p>
-              <a
-                href="https://trade.updownx.com"
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to="/trading"
                 className="inline-flex items-center gap-1.5 bg-[#00ffa3] hover:bg-[#00e693] text-[#05070a] font-semibold text-[11px] min-[375px]:text-xs md:text-base px-4 py-2 min-[375px]:px-5 min-[375px]:py-2.5 md:px-6 md:py-3 rounded-xl transition-colors no-underline"
               >
                 Go to Trading
                 <ArrowUpRight size={14} />
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -430,15 +428,13 @@ export const Trading = (): JSX.Element => {
                 Your institutional-grade control panel is ready. Access<br />
                 deep liquidity and real-time execution.
               </p>
-              <a
-                href="https://trade.updownx.com"
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to="/trading"
                 className="inline-flex items-center gap-2 bg-[#00ffa3] hover:bg-[#00e693] text-[#05070a] font-inter font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors no-underline"
               >
                 Go to Trading
                 <ArrowUpRight size={16} />
-              </a>
+              </Link>
             </div>
           </div>
 

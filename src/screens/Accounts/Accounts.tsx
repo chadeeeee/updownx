@@ -1,9 +1,11 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DashboardLayout } from "../../components/DashboardLayout";
 import { NavAccountsSubsection } from "./sections/NavAccountsSubsection";
 import { MainHedgeModuleSubsection } from "./sections/MainHedgeModuleSubsection";
 import { ChevronDown, Menu, X } from "lucide-react";
+import { ApiError, api, type AppUser } from "../../lib/api";
+import { useAuth } from "../../lib/auth";
 
 const mobileNavTabs = [
   { label: "New challenge", route: "/challenge" },
@@ -29,11 +31,43 @@ const NeedAssistance = () => (
   </div>
 );
 
+const sameUser = (left: AppUser | null | undefined, right: AppUser | null | undefined) =>
+  Boolean(left) &&
+  Boolean(right) &&
+  left?.id === right?.id &&
+  left?.name === right?.name &&
+  left?.surname === right?.surname &&
+  left?.email === right?.email &&
+  left?.account_id === right?.account_id &&
+  left?.created_at === right?.created_at;
+
 export const Accounts = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("challenge");
+  const [liveUser, setLiveUser] = useState<AppUser | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, setUser } = useAuth();
+  const tradingIdentity = liveUser?.account_id || user?.account_id || "000000000000";
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    api.accounts(user.id)
+      .then((response) => {
+        if (response.user) {
+          setLiveUser((current) => (sameUser(current, response.user) ? current : response.user));
+          if (!sameUser(user, response.user)) {
+            setUser(response.user);
+          }
+        }
+      })
+      .catch((error) => {
+        console.error("[accounts] failed to refresh user", error instanceof ApiError ? error.message : error);
+      });
+  }, [setUser, user?.id]);
 
   const isMobileTabActive = (route: string) =>
     location.pathname.startsWith(route);
@@ -109,7 +143,7 @@ export const Accounts = () => {
           {/* Trading Identity */}
           <div className="flex flex-col gap-1 md:gap-1.5 lg:gap-2 pb-3 min-[375px]:pb-4 md:pb-5 lg:pb-6 border-b border-white/5">
             <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-gray-500 min-[375px]:text-[10px] md:text-[11px] lg:text-[13px]">Trading Identity</span>
-            <h1 className="text-[22px] font-bold text-white tracking-tight min-[375px]:text-[26px] md:text-[32px] lg:text-[40px]">ID: 200050316</h1>
+            <h1 className="text-[22px] font-bold text-white tracking-tight min-[375px]:text-[26px] md:text-[32px] lg:text-[40px]">ID: {tradingIdentity}</h1>
             <p className="text-[10px] text-gray-400 min-[375px]:text-[11px] md:text-sm lg:text-base">Institutional Prop Account • Multi-Asset Environment</p>
           </div>
 
@@ -126,7 +160,7 @@ export const Accounts = () => {
                   <div className="flex flex-col">
                     <span className="text-[8px] min-[375px]:text-[9px] md:text-[10px] lg:text-[12px] text-gray-500 font-bold tracking-[0.2em] uppercase">Master Equity</span>
                     <span className="text-white text-xs min-[375px]:text-sm md:text-sm lg:text-lg tracking-[0.4em] mt-1 min-[375px]:mt-1.5 md:mt-2 opacity-80">•••• •••• •••• ••••</span>
-                    <span className="text-white text-base min-[375px]:text-lg md:text-xl lg:text-2xl font-medium tracking-widest mt-1 min-[375px]:mt-1.5 md:mt-2">5316</span>
+                    <span className="text-white text-base min-[375px]:text-lg md:text-xl lg:text-2xl font-medium tracking-widest mt-1 min-[375px]:mt-1.5 md:mt-2">{tradingIdentity.slice(-4)}</span>
                   </div>
                 </div>
 
@@ -186,7 +220,7 @@ export const Accounts = () => {
           <NavAccountsSubsection />
           <div className="flex flex-col gap-1.5 2xl:gap-2.5">
             <header className="font-bold text-gray-400 text-[10px] 2xl:text-[13px] tracking-[2px] uppercase">Trading Identity</header>
-            <h1 className="text-white text-4xl 2xl:text-5xl tracking-tight">ID: 200050316</h1>
+            <h1 className="text-white text-4xl 2xl:text-5xl tracking-tight">ID: {tradingIdentity}</h1>
             <p className="text-gray-400 text-sm 2xl:text-base">Institutional Prop Account • Multi-Asset Environment</p>
           </div>
           <section className="pb-2">

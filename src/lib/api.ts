@@ -15,17 +15,102 @@ export type Challenge = {
 export type AppUser = {
   id: number;
   name: string;
+  surname: string;
+  account_id: string;
   email: string;
   created_at: string;
 };
 
+export type AuthResponse = {
+  user: AppUser;
+  token: string;
+};
+
+export type LegacyAuthResponse = AppUser;
+
+export type LoginResponse = AuthResponse | LegacyAuthResponse;
+
+export type CreateOrderPayload = {
+  userId: number;
+  challengeId: string;
+  fullName: string;
+  email: string;
+  country: string;
+  city: string;
+  paymentMethod: string;
+};
+
+export type CreateOrderResponse = {
+  id?: number;
+  payment_url?: string | null;
+  order: {
+    id: number;
+    user_id: number;
+    challenge_id: string;
+    challenge_name: string;
+    amount: number | string;
+    billing_full_name: string;
+    billing_email: string;
+    country: string;
+    city: string;
+    payment_method: string;
+    status: string;
+    created_at: string;
+    provider: string | null;
+    provider_invoice_id: string | null;
+    provider_payment_id: string | null;
+    merchant_order_id: string | null;
+    payment_url: string | null;
+    pay_address?: string | null;
+    pay_amount?: string | null;
+    pay_currency?: string | null;
+  };
+  payment?: PaymentRecord | null;
+  paymentRecordId?: number | null;
+  paymentUrl: string | null;
+  payAddress?: string | null;
+  payAmount?: string | null;
+  payCurrency?: string | null;
+  demoMode?: boolean;
+  provider: string | null;
+  providerInvoiceId: string | null;
+  providerPaymentId: string | null;
+};
+
+export type PaymentRecord = {
+  id: number;
+  challenge_order_id: number | null;
+  challenge_id: string;
+  challenge_name: string;
+  amount: number | string;
+  billing_full_name: string;
+  billing_email: string;
+  country: string;
+  city: string;
+  payment_method: string;
+  status: "COMPLETED" | "PENDING" | "CANCELLED";
+  provider: string | null;
+  provider_invoice_id: string | null;
+  provider_payment_id: string | null;
+  merchant_order_id: string | null;
+  payment_url: string | null;
+  pay_address: string | null;
+  pay_amount: string | null;
+  pay_currency: string | null;
+  demo_mode: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = localStorage.getItem("updownx-token");
   let response: Response;
   try {
     response = await fetch(`${API_URL}${path}`, {
       ...init,
       headers: {
         "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(init?.headers || {}),
       },
     });
@@ -55,30 +140,24 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  register: (payload: { name: string; email: string; password: string }) =>
-    request<AppUser>("/api/auth/register", {
+  register: (payload: { name: string; surname: string; email: string; password: string; verificationCode: string; invitationCode: string }) =>
+    request<LoginResponse>("/api/auth/register", {
       method: "POST",
       body: JSON.stringify(payload),
     }),
   login: (payload: { email: string; password: string }) =>
-    request<AppUser>("/api/auth/login", {
+    request<LoginResponse>("/api/auth/login", {
       method: "POST",
       body: JSON.stringify(payload),
     }),
   sendCode: (payload: { email: string }) =>
-    request<{ success: boolean; code: string }>("/api/auth/send-code", {
+    request<{ success: boolean }>("/api/auth/send-code", {
       method: "POST",
       body: JSON.stringify(payload),
     }),
   challenges: () => request<Challenge[]>("/api/challenges"),
-  createOrder: (payload: {
-    userId: number;
-    challengeId: string;
-    country: string;
-    city: string;
-    paymentMethod: string;
-  }) =>
-    request("/api/orders", {
+  createOrder: (payload: CreateOrderPayload) =>
+    request<CreateOrderResponse>("/api/orders", {
       method: "POST",
       body: JSON.stringify(payload),
     }),
@@ -87,7 +166,7 @@ export const api = {
       `/api/accounts/${userId}`,
     ),
   payments: (userId: number) =>
-    request<Array<{ id: number; challenge_name: string; amount: number; payment_method: string; status: string; created_at: string }>>(
-      `/api/payments/${userId}`,
-    ),
+    request<PaymentRecord[]>(`/api/payments/${userId}`),
+  payment: (userId: number, paymentId: number) =>
+    request<{ payment: PaymentRecord; providerStatus: string | null }>(`/api/payments/${userId}/${paymentId}`),
 };

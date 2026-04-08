@@ -95,6 +95,10 @@ export const Auth = (): JSX.Element => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isClosingModal, setIsClosingModal] = useState(false);
 
+  const normalizeAuthResponse = (
+    response: Awaited<ReturnType<typeof api.login>>,
+  ) => ("user" in response ? response : { user: response, token: null });
+
   const closeModal = () => {
     setIsClosingModal(true);
     setTimeout(() => {
@@ -135,24 +139,20 @@ export const Auth = (): JSX.Element => {
 
     setLoading(true);
 
-    if (!isRegister && form.email === "admin" && form.password === "admin") {
-      setUser({ id: 0, name: "Admin", email: "admin", created_at: new Date().toISOString() });
-      navigate("/challenge");
-      setLoading(false);
-      return;
-    }
-
     try {
-      const fullName = [form.firstName, form.lastName].filter(Boolean).join(" ").trim();
-      const user = isRegister
+      const authResponse = isRegister
         ? await api.register({
-            name: fullName || form.firstName || "Trader",
+            name: form.firstName,
+            surname: form.lastName,
             email: form.email,
             password: form.password,
+            verificationCode: form.verificationCode,
+            invitationCode: form.invitationCode,
           })
         : await api.login({ email: form.email, password: form.password });
-      setUser(user);
-      navigate("/challenge");
+      const auth = normalizeAuthResponse(authResponse);
+      setUser(auth.user, auth.token);
+      navigate("/challenge", { replace: true });
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);

@@ -1,9 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DashboardLayout } from "../../components/DashboardLayout";
 import { AccountPlanTierGridSection } from "./sections/AccountPlanTierGridSection";
 import { EventPromotionHeroSection } from "./sections/EventPromotionHeroSection";
 import { ArrowRight, CheckCircle2, ChevronDown, Menu, X } from "lucide-react";
+import { api, type Challenge } from "../../lib/api";
 
 /* ── Shared constants ── */
 const mobileNavTabs = [
@@ -11,14 +12,6 @@ const mobileNavTabs = [
   { label: "Accounts", route: "/accounts" },
   { label: "Payments", route: "/payments" },
   { label: "Withdrawals", route: "/withdrawals" },
-];
-
-const mobilePlans = [
-  { id: "starter", name: "STARTER", balance: "$799", price: "$799", isPro: false },
-  { id: "boost", name: "BOOST", balance: "$5,000", price: "$49", isPro: false },
-  { id: "pro", name: "PRO", balance: "$25,000", price: "$199", isPro: true },
-  { id: "elite", name: "ELITE", balance: "$50,000", price: "$399", isPro: false },
-  { id: "legend", name: "LEGEND", balance: "$100,000", price: "$699", isPro: false },
 ];
 
 const features = [
@@ -41,10 +34,17 @@ const NeedAssistance = () => (
 );
 
 export const EventLive = (): JSX.Element => {
+  const [plans, setPlans] = useState<Challenge[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeCard, setActiveCard] = useState(1);
   const scrollRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+
+  useEffect(() => {
+    api.challenges()
+      .then(setPlans)
+      .catch(() => setPlans([]));
+  }, []);
 
   const handleScroll = () => {
     const el = scrollRef.current;
@@ -148,78 +148,85 @@ export const EventLive = (): JSX.Element => {
               scrollbarWidth: "none",
             }}
           >
-            {mobilePlans.map((plan) => (
-              <div
-                key={plan.id}
-                data-plan-slide
-                className="flex shrink-0 snap-center flex-col gap-2.5 min-[375px]:gap-3"
-                style={{ width: "clamp(160px, 57vw, 220px)" }}
-              >
-                <article
-                  className={`relative min-h-[270px] rounded-[20px] border px-4 pb-4 pt-3.5 transition-all min-[375px]:min-h-[283px] min-[375px]:rounded-[22px] min-[375px]:px-5 min-[375px]:pb-5 min-[375px]:pt-4 md:min-h-[400px] md:px-6 md:pb-6 md:pt-5 ${
-                    plan.isPro
-                      ? "border-[#00FFA3]/70 bg-[#081018] shadow-[0_0_24px_rgba(0,255,163,0.12)]"
-                      : "border-[#1d242c] bg-[#0b1016]"
-                  }`}
+            {plans.map((plan) => {
+              const isPro = plan.id.toLowerCase().includes("pro");
+
+              return (
+                <div
+                  key={plan.id}
+                  data-plan-slide
+                  className="flex shrink-0 snap-center flex-col gap-2.5 min-[375px]:gap-3"
+                  style={{ width: "clamp(160px, 57vw, 220px)" }}
                 >
-                  <div className="mb-4 min-[375px]:mb-5">
-                    <h3 className={`mb-3 text-[10px] font-bold uppercase tracking-[0.2em] min-[375px]:mb-4 min-[375px]:text-[11px] ${plan.isPro ? "text-[#00FFA3]" : "text-[#97aab2]"}`}>
-                      {plan.name}
-                    </h3>
-                    <span className="text-[16px] font-black leading-none text-white min-[375px]:text-[18px]">
-                      {plan.balance}
-                    </span>
-                    <span className="mt-2 block text-[8px] font-bold uppercase tracking-[0.16em] text-[#586b74] min-[375px]:text-[9px]">
-                      Account Balance
-                    </span>
-                  </div>
-                  <div className="space-y-2.5 min-[375px]:space-y-3">
-                    {features.map((feature, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
-                        <CheckCircle2 size={12} className="shrink-0 text-[#00FFA3]" />
-                        <span className="text-[10px] font-medium leading-tight text-[#95a7af] min-[375px]:text-[11px]">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                  {plan.isPro && (
-                    <div className="absolute inset-x-0 -bottom-3 flex justify-center">
-                      <span className="rounded-full bg-[#00FFA3] px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-black whitespace-nowrap min-[375px]:px-3 min-[375px]:text-[9px]">
-                        Most Popular
+                  <article
+                    className={`relative min-h-[270px] rounded-[20px] border px-4 pb-4 pt-3.5 transition-all min-[375px]:min-h-[283px] min-[375px]:rounded-[22px] min-[375px]:px-5 min-[375px]:pb-5 min-[375px]:pt-4 md:min-h-[400px] md:px-6 md:pb-6 md:pt-5 ${
+                      isPro
+                        ? "border-[#00FFA3]/70 bg-[#081018] shadow-[0_0_24px_rgba(0,255,163,0.12)]"
+                        : "border-[#1d242c] bg-[#0b1016]"
+                    }`}
+                  >
+                    <div className="mb-4 min-[375px]:mb-5">
+                      <h3 className={`mb-3 text-[10px] font-bold uppercase tracking-[0.2em] min-[375px]:mb-4 min-[375px]:text-[11px] ${isPro ? "text-[#00FFA3]" : "text-[#97aab2]"}`}>
+                        {plan.name.toUpperCase()}
+                      </h3>
+                      <span className="text-[16px] font-black leading-none text-white min-[375px]:text-[18px]">
+                        ${plan.balance.toLocaleString()}
+                      </span>
+                      <span className="mt-2 block text-[8px] font-bold uppercase tracking-[0.16em] text-[#586b74] min-[375px]:text-[9px]">
+                        Account Balance
                       </span>
                     </div>
-                  )}
-                </article>
+                    <div className="space-y-2.5 min-[375px]:space-y-3">
+                      {features.map((feature, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <CheckCircle2 size={12} className="shrink-0 text-[#00FFA3]" />
+                          <span className="text-[10px] font-medium leading-tight text-[#95a7af] min-[375px]:text-[11px]">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                    {isPro && (
+                      <div className="absolute inset-x-0 -bottom-3 flex justify-center">
+                        <span className="rounded-full bg-[#00FFA3] px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-black whitespace-nowrap min-[375px]:px-3 min-[375px]:text-[9px]">
+                          Most Popular
+                        </span>
+                      </div>
+                    )}
+                  </article>
 
-                <div
-                  className={`rounded-[16px] border p-2.5 min-[375px]:rounded-[18px] min-[375px]:p-3 ${
-                    plan.isPro ? "border-[#00FFA3]/30 bg-[#0d141a]/95" : "border-[#1d242c] bg-[#0b1016]/92"
-                  }`}
-                >
-                  <div className="mb-2.5 flex items-center justify-between gap-2 min-[375px]:mb-3">
-                    <span className={`text-[9px] font-black uppercase tracking-[0.16em] min-[375px]:text-[10px] ${plan.isPro ? "text-[#00FFA3]" : "text-[#6f8189]"}`}>
-                      {plan.name}
-                    </span>
-                    <span className="text-[16px] font-black leading-none text-white min-[375px]:text-[18px]">{plan.price}</span>
-                  </div>
-                  <div className="flex flex-col gap-1.5 min-[375px]:gap-2">
-                    <Link
-                      to="/checkout"
-                      className="flex h-9 w-full items-center justify-center rounded-[10px] bg-[#00FFA3] px-2 text-[10px] font-black uppercase tracking-[0.03em] text-black transition-all hover:bg-[#00e895] min-[375px]:h-10 min-[375px]:px-3 min-[375px]:text-[11px]"
-                    >
-                      Crypto Payment
-                    </Link>
-                    <button className="flex h-9 w-full items-center justify-center rounded-[10px] border border-[#1f2c34] bg-transparent px-2 text-[10px] font-bold uppercase text-white/90 transition-all hover:bg-white/5 min-[375px]:h-10 min-[375px]:text-[11px]">
-                      PIX
-                    </button>
+                  <div
+                    className={`rounded-[16px] border p-2.5 min-[375px]:rounded-[18px] min-[375px]:p-3 ${
+                      isPro ? "border-[#00FFA3]/30 bg-[#0d141a]/95" : "border-[#1d242c] bg-[#0b1016]/92"
+                    }`}
+                  >
+                    <div className="mb-2.5 flex items-center justify-between gap-2 min-[375px]:mb-3">
+                      <span className={`text-[9px] font-black uppercase tracking-[0.16em] min-[375px]:text-[10px] ${isPro ? "text-[#00FFA3]" : "text-[#6f8189]"}`}>
+                        {plan.name.toUpperCase()}
+                      </span>
+                      <span className="text-[16px] font-black leading-none text-white min-[375px]:text-[18px]">${plan.fee}</span>
+                    </div>
+                    <div className="flex flex-col gap-1.5 min-[375px]:gap-2">
+                      <Link
+                        to={`/checkout/${plan.id}?method=crypto`}
+                        className="flex h-9 w-full items-center justify-center rounded-[10px] bg-[#00FFA3] px-2 text-[10px] font-black uppercase tracking-[0.03em] text-black transition-all hover:bg-[#00e895] min-[375px]:h-10 min-[375px]:px-3 min-[375px]:text-[11px]"
+                      >
+                        Crypto Payment
+                      </Link>
+                      <Link
+                        to={`/checkout/${plan.id}?method=pix`}
+                        className="flex h-9 w-full items-center justify-center rounded-[10px] border border-[#1f2c34] bg-transparent px-2 text-[10px] font-bold uppercase text-white/90 transition-all hover:bg-white/5 min-[375px]:h-10 min-[375px]:text-[11px]"
+                      >
+                        PIX
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* ── Carousel dots ── */}
           <div className="flex justify-center gap-1.5">
-            {mobilePlans.map((_, idx) => (
+            {plans.map((_, idx) => (
               <div
                 key={idx}
                 className={`h-1.5 w-1.5 rounded-full transition-colors ${idx === activeCard ? "bg-[#00FFA3]" : "bg-[#38464d]"}`}
@@ -235,7 +242,7 @@ export const EventLive = (): JSX.Element => {
       <DashboardLayout>
         <div className="px-0">
           <EventPromotionHeroSection />
-          <AccountPlanTierGridSection />
+          <AccountPlanTierGridSection plans={plans} />
         </div>
       </DashboardLayout>
     </div>

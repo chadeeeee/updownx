@@ -186,13 +186,13 @@ export const ControlPanel = (): JSX.Element => {
         </header>
 
         {/* ═══ Main Grid ═══ */}
-        <div className="flex flex-col flex-1 p-4 gap-4 overflow-hidden">
+        <div className="flex flex-1 p-2 gap-2 overflow-hidden min-h-0">
 
-          {/* Top Row: Left area (Chart + Order Book) + Right area (Trade Panel) */}
-          <div className="flex flex-1 gap-4 overflow-hidden min-h-[300px]">
-            
-            {/* Left Side (Chart + Order Book) */}
-            <div className="flex flex-1 gap-4 overflow-hidden min-h-0">
+          {/* Left Column: Chart + Order Book (top) + Positions (bottom) */}
+          <div className="flex flex-col flex-1 gap-2 overflow-hidden min-h-0">
+
+            {/* Top: Chart + Order Book */}
+            <div className="flex flex-[3] gap-2 overflow-hidden min-h-0">
               
               {/* Chart Panel */}
               <GradientBorderPanel className="flex-1">
@@ -271,240 +271,238 @@ export const ControlPanel = (): JSX.Element => {
               </GradientBorderPanel>
             </div>
 
-            {/* Trade Panel */}
-            <GradientBorderPanel width="273px" className="shrink-0">
-              <div className="flex flex-col p-4 h-full">
-                <span className="text-sm font-bold text-[#A6B2C8] tracking-wider uppercase mb-5 mt-1">Trade</span>
-
-                {/* Order type toggle */}
-                <div className="flex gap-1 bg-[#111820] rounded-xl p-1 mb-5">
-                  {(["Limit", "Market", "Trigger"] as const).map((type) => (
+            {/* Bottom: Positions Panel */}
+            <GradientBorderPanel className="w-full shrink-0 flex-1 min-h-[200px]">
+              {/* Tabs */}
+              <div className="flex items-center gap-6 px-6 pt-3 border-b border-white/5 shrink-0">
+                {bottomTabs.map((tab) => {
+                  const isActive = bottomTab === tab.id;
+                  return (
                     <button
-                      key={type}
-                      onClick={() => setOrderType(type)}
-                      className={`flex-1 py-1.5 text-[12px] font-bold rounded-lg border-none cursor-pointer transition-colors ${
-                        orderType === type
-                          ? "bg-[#00FFA3] text-[#05070A]"
-                          : "bg-transparent text-gray-500 hover:text-white"
-                      }`}
+                      key={tab.id}
+                      onClick={() => setBottomTab(tab.id)}
+                      className={`pb-3 text-[11px] font-bold tracking-wider border-none cursor-pointer transition-all relative ${isActive ? "text-[#00ffa3] drop-shadow-[0_0_6px_rgba(0,255,163,0.8)]" : "text-[#A6B2C8] hover:text-white"}`}
+                      style={{ background: "transparent", minWidth: "max-content" }}
                     >
-                      {type}
+                      {tab.label}
+                      {isActive && (
+                        <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00ffa3] shadow-[0_0_8px_rgba(0,255,163,1)] rounded-t-full" />
+                      )}
                     </button>
-                  ))}
-                </div>
+                  );
+                })}
+              </div>
 
-                {/* Margin Type / Leverage */}
-                <div className="flex gap-2 mb-5 relative">
-                  {/* Margin Dropdown Container */}
-                  <div className="flex-1 relative flex flex-col">
-                    <div 
-                      onClick={() => { setMarginDropdownOpen(!marginDropdownOpen); setLeverageDropdownOpen(false); }}
-                      className="bg-[#111820] rounded-xl px-4 py-2.5 flex flex-1 items-center justify-between cursor-pointer border border-[#111820] hover:border-white/10 transition-colors"
-                    >
-                      <span className="text-[11px] text-white font-bold">{marginType}</span>
-                      <svg width="10" height="6" viewBox="0 0 10 6" fill="white"><path d="M0 0l5 6 5-6z"/></svg>
-                    </div>
-                    
-                    {marginDropdownOpen && (
-                      <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-[#111820] border border-white/10 rounded-lg z-50 overflow-hidden shadow-2xl py-1">
-                        {["CROSS", "ISOLATED"].map(type => (
-                          <div
-                            key={type}
-                            onClick={() => { setMarginType(type as any); setMarginDropdownOpen(false); }}
-                            className={`px-4 py-2 text-[11px] font-bold cursor-pointer transition-colors ${marginType === type ? "text-[#00ffa3] bg-white/5" : "text-white hover:bg-white/5"}`}
-                          >
-                            {type}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Leverage Dropdown Container */}
-                  <div className="flex-1 relative flex flex-col">
-                    <div 
-                      onClick={() => { setLeverageDropdownOpen(!leverageDropdownOpen); setMarginDropdownOpen(false); }}
-                      className="bg-[#111820] rounded-xl px-4 py-2.5 flex flex-1 items-center justify-between cursor-pointer border border-[#111820] hover:border-white/10 transition-colors"
-                    >
-                      <span className="text-[11px] text-white font-bold">{leverage}x</span>
-                      <svg width="10" height="6" viewBox="0 0 10 6" fill="white"><path d="M0 0l5 6 5-6z"/></svg>
-                    </div>
-                    
-                    {leverageDropdownOpen && (
-                      <div className="absolute right-0 top-[calc(100%+4px)] w-full bg-[#111820] border border-white/10 rounded-lg z-50 shadow-2xl py-1 max-h-[180px] overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 hover:[&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full">
-                        <div className="flex flex-col">
-                          {[1, 3, 5, 10, 25, 50, 100].map(val => (
-                            <div 
-                              key={val}
-                              onClick={() => { setLeverage(val); setLeverageDropdownOpen(false); }} 
-                              className={`px-4 py-2 text-left text-[11px] font-bold cursor-pointer transition-colors ${leverage === val ? "text-[#00ffa3] bg-white/5" : "text-white hover:bg-white/5 bg-transparent"}`}
-                            >
-                              {val}x
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+              {/* Table Header */}
+              <div className="grid grid-cols-6 gap-2 px-6 py-2 border-b border-white/5 shrink-0">
+                {positionCols.map((col) => (
+                  <span key={col} className="text-[10px] text-[#A6B2C8] font-semibold tracking-[0.5px] uppercase">{col}</span>
+                ))}
+              </div>
 
-                {/* Price (Editable) */}
-                <div className="mb-4">
-                  <div className="flex justify-between mb-1">
-                    <span className="text-[12px] text-gray-500 font-bold">Price</span>
-                    <span className="text-[11px] text-gray-500">USDT</span>
-                  </div>
-                  <div className="bg-[#111820] rounded-xl px-3 py-2 border border-transparent focus-within:border-[#00ffa3]/30 transition-colors flex items-center">
-                    <input
-                      type="number"
-                      value={priceInput}
-                      onChange={(e) => setPriceInput(e.target.value)}
-                      placeholder="0.00"
-                      className="w-full bg-transparent border-none outline-none text-[15px] font-medium text-white placeholder-gray-700 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    />
-                  </div>
-                </div>
+              {/* Empty State */}
+              <div className="flex flex-col items-center justify-center flex-1 gap-3">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4a5568" strokeWidth="1.5">
+                  <rect x="2" y="3" width="20" height="14" rx="2" />
+                  <path d="M8 21h8M12 17v4" />
+                  <circle cx="16" cy="15" r="2" />
+                  <path d="M16 13v-1" />
+                  <path d="M16 18v-1" />
+                  <path d="M18.5 15h-1" />
+                  <path d="M14.5 15h-1" />
+                </svg>
+                <span className="text-gray-500 text-[11px]">No Open Positions</span>
+              </div>
 
-                {/* Size (Editable) */}
-                <div className="mb-5">
-                  <div className="flex justify-between mb-1">
-                    <span className="text-[12px] text-gray-500 font-bold">Size</span>
-                    <span className="text-[11px] text-gray-500">BTC</span>
+              {/* Module Footer */}
+              <div className="flex items-center justify-between px-6 py-2 border-t border-white/5 bg-[#05070A] shrink-0">
+                <div className="flex items-center gap-5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#00ffa3] shadow-[0_0_5px_#00ffa3]" />
+                    <span className="text-[10.5px] text-[#afc0c9]">Connection: Secure</span>
                   </div>
-                  <div className="bg-[#111820] rounded-xl px-3 py-2 border border-transparent focus-within:border-[#00ffa3]/30 transition-colors flex items-center">
-                    <input
-                      type="number"
-                      value={sizeInput}
-                      onChange={(e) => setSizeInput(e.target.value)}
-                      placeholder="0.00"
-                      className="w-full bg-transparent border-none outline-none text-[15px] font-medium text-white placeholder-gray-700 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    />
-                  </div>
+                  <span className="text-[10.5px] text-[#89a4ad]">Server Time: 14:22:15 (UTC)</span>
                 </div>
-
-                {/* Timer & Slider */}
-                <div className="flex flex-col gap-1 mb-5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[12px] text-gray-500">Timer</span>
-                    <span className="text-[18px] font-bold text-white font-mono tracking-wider">00:32</span>
-                  </div>
-                  
-                  <div className="mt-4 px-1">
-                    <input 
-                      type="range" 
-                      min="0" max="100" 
-                      value={percent} 
-                      onChange={(e) => {
-                        const newPercent = Number(e.target.value);
-                        setPercent(newPercent);
-                        // Optional: Link slider to sizeInput (e.g. 100% of 0.5 BTC max based on dummy balance)
-                        // This makes the slider update the size field dynamically!
-                        const dummyBalance = 0.5; // Let's pretend max BTC we can buy is roughly 0.5 BTC with 12k USDT. 
-                        const newSize = (dummyBalance * (newPercent / 100));
-                        if(newPercent > 0) {
-                          setSizeInput(newSize.toFixed(3));
-                        } else {
-                          setSizeInput("");
-                        }
-                      }}
-                      className="w-full h-[3px] appearance-none cursor-pointer rounded-full outline-none accent-[#00FFA3]"
-                      style={{
-                        background: `linear-gradient(to right, #00FFA3 ${percent}%, #111820 ${percent}%)`
-                      }}
-                    />
-                    <div className="flex justify-between items-center mt-3">
-                      {[0, 25, 50, 75, 100].map((p) => (
-                        <button 
-                          key={p} 
-                          onClick={() => {
-                            setPercent(p);
-                            const dummyBalance = 0.5;
-                            const newSize = (dummyBalance * (p / 100));
-                            setSizeInput(p > 0 ? newSize.toFixed(3) : "");
-                          }} 
-                          className={`text-[9px] font-bold bg-transparent border-none cursor-pointer transition-colors ${percent === p ? "text-[#00FFA3]" : "text-gray-500 hover:text-white"}`}
-                        >
-                          {p}%
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Available Balance */}
-                <div className="flex justify-between items-center mt-auto mb-4">
-                  <span className="text-[12px] text-gray-500">Available Balance</span>
-                  <span className="text-[12px] font-bold text-white">12,450.00 USDT</span>
-                </div>
-
-                {/* Buy / Sell Buttons */}
-                <div className="flex flex-col gap-2.5">
-                  <button className="w-full h-[45px] rounded-[10px] bg-gradient-to-b from-[#00FFA3] to-[#009962] hover:brightness-110 border-none cursor-pointer transition-all flex flex-col items-center justify-center shadow-[0_0_15px_rgba(0,255,163,0.3)]">
-                    <span className="font-bold text-[#05070a] text-[15px] tracking-wide leading-none mb-0.5">BUY / LONG</span>
-                    <span className="text-[9px] text-[#05070a]/80 font-bold tracking-widest uppercase leading-none">PRICE: {priceInput || currentPrice}</span>
-                  </button>
-                  <button className="w-full h-[45px] rounded-[10px] bg-gradient-to-b from-[#FF3B3B] to-[#992323] hover:brightness-110 border-none cursor-pointer transition-all flex flex-col items-center justify-center shadow-[0_0_15px_rgba(255,59,59,0.3)]">
-                    <span className="font-bold text-white text-[15px] tracking-wide leading-none mb-0.5">SELL / SHORT</span>
-                    <span className="text-[9px] text-white/80 font-bold tracking-widest uppercase leading-none">PRICE: {priceInput || currentPrice}</span>
-                  </button>
-                </div>
+                <span className="text-[10px] text-[#A6B2C8] font-bold tracking-widest">HEDGE PROTOCOL V2.4.1</span>
               </div>
             </GradientBorderPanel>
           </div>
 
-          {/* Bottom Row: Positions Panel (Spanning full width!) */}
-          <GradientBorderPanel height="255px" className="w-full shrink-0">
-            {/* Tabs */}
-            <div className="flex items-center gap-6 px-6 pt-3 border-b border-white/5 shrink-0">
-              {bottomTabs.map((tab) => {
-                const isActive = bottomTab === tab.id;
-                return (
+          {/* Right Column: Trade Panel (full height) */}
+          <GradientBorderPanel width="273px" className="shrink-0">
+            <div className="flex flex-col p-4 h-full">
+              <span className="text-sm font-bold text-[#A6B2C8] tracking-wider uppercase mb-3 mt-1">Trade</span>
+
+              {/* Order type toggle */}
+              <div className="flex gap-1 bg-[#111820] rounded-xl p-1 mb-3">
+                {(["Limit", "Market", "Trigger"] as const).map((type) => (
                   <button
-                    key={tab.id}
-                    onClick={() => setBottomTab(tab.id)}
-                    className={`pb-3 text-[11px] font-bold tracking-wider border-none cursor-pointer transition-all relative ${isActive ? "text-[#00ffa3] drop-shadow-[0_0_6px_rgba(0,255,163,0.8)]" : "text-[#A6B2C8] hover:text-white"}`}
-                    style={{ background: "transparent", minWidth: "max-content" }}
+                    key={type}
+                    onClick={() => setOrderType(type)}
+                    className={`flex-1 py-1.5 text-[12px] font-bold rounded-lg border-none cursor-pointer transition-colors ${
+                      orderType === type
+                        ? "bg-[#00FFA3] text-[#05070A]"
+                        : "bg-transparent text-gray-500 hover:text-white"
+                    }`}
                   >
-                    {tab.label}
-                    {isActive && (
-                      <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00ffa3] shadow-[0_0_8px_rgba(0,255,163,1)] rounded-t-full" />
-                    )}
+                    {type}
                   </button>
-                );
-              })}
-            </div>
-
-            {/* Table Header */}
-            <div className="grid grid-cols-6 gap-2 px-6 py-4 border-b border-white/5 shrink-0">
-              {positionCols.map((col) => (
-                <span key={col} className="text-[10px] text-[#A6B2C8] font-semibold tracking-[0.5px] uppercase">{col}</span>
-              ))}
-            </div>
-
-            {/* Empty State */}
-            <div className="flex flex-col items-center justify-center flex-1 gap-3">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4a5568" strokeWidth="1.5">
-                <rect x="2" y="3" width="20" height="14" rx="2" />
-                <path d="M8 21h8M12 17v4" />
-                <circle cx="16" cy="15" r="2" />
-                <path d="M16 13v-1" />
-                <path d="M16 18v-1" />
-                <path d="M18.5 15h-1" />
-                <path d="M14.5 15h-1" />
-              </svg>
-              <span className="text-gray-500 text-[11px]">No Open Positions</span>
-            </div>
-
-            {/* Module Footer */}
-            <div className="flex items-center justify-between px-6 py-3 border-t border-white/5 bg-[#05070A] shrink-0">
-              <div className="flex items-center gap-5">
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#00ffa3] shadow-[0_0_5px_#00ffa3]" />
-                  <span className="text-[10.5px] text-[#afc0c9]">Connection: Secure</span>
-                </div>
-                <span className="text-[10.5px] text-[#89a4ad]">Server Time: 14:22:15 (UTC)</span>
+                ))}
               </div>
-              <span className="text-[10px] text-[#A6B2C8] font-bold tracking-widest">HEDGE PROTOCOL V2.4.1</span>
+
+              {/* Margin Type / Leverage */}
+              <div className="flex gap-2 mb-3 relative">
+                {/* Margin Dropdown Container */}
+                <div className="flex-1 relative flex flex-col">
+                  <div 
+                    onClick={() => { setMarginDropdownOpen(!marginDropdownOpen); setLeverageDropdownOpen(false); }}
+                    className="bg-[#111820] rounded-xl px-4 py-2.5 flex flex-1 items-center justify-between cursor-pointer border border-[#111820] hover:border-white/10 transition-colors"
+                  >
+                    <span className="text-[11px] text-white font-bold">{marginType}</span>
+                    <svg width="10" height="6" viewBox="0 0 10 6" fill="white"><path d="M0 0l5 6 5-6z"/></svg>
+                  </div>
+                  
+                  {marginDropdownOpen && (
+                    <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-[#111820] border border-white/10 rounded-lg z-50 overflow-hidden shadow-2xl py-1">
+                      {["CROSS", "ISOLATED"].map(type => (
+                        <div
+                          key={type}
+                          onClick={() => { setMarginType(type as any); setMarginDropdownOpen(false); }}
+                          className={`px-4 py-2 text-[11px] font-bold cursor-pointer transition-colors ${marginType === type ? "text-[#00ffa3] bg-white/5" : "text-white hover:bg-white/5"}`}
+                        >
+                          {type}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                
+                {/* Leverage Dropdown Container */}
+                <div className="flex-1 relative flex flex-col">
+                  <div 
+                    onClick={() => { setLeverageDropdownOpen(!leverageDropdownOpen); setMarginDropdownOpen(false); }}
+                    className="bg-[#111820] rounded-xl px-4 py-2.5 flex flex-1 items-center justify-between cursor-pointer border border-[#111820] hover:border-white/10 transition-colors"
+                  >
+                    <span className="text-[11px] text-white font-bold">{leverage}x</span>
+                    <svg width="10" height="6" viewBox="0 0 10 6" fill="white"><path d="M0 0l5 6 5-6z"/></svg>
+                  </div>
+                  
+                  {leverageDropdownOpen && (
+                    <div className="absolute right-0 top-[calc(100%+4px)] w-full bg-[#111820] border border-white/10 rounded-lg z-50 shadow-2xl py-1 max-h-[180px] overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 hover:[&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full">
+                      <div className="flex flex-col">
+                        {[1, 3, 5, 10, 25, 50, 100].map(val => (
+                          <div 
+                            key={val}
+                            onClick={() => { setLeverage(val); setLeverageDropdownOpen(false); }} 
+                            className={`px-4 py-2 text-left text-[11px] font-bold cursor-pointer transition-colors ${leverage === val ? "text-[#00ffa3] bg-white/5" : "text-white hover:bg-white/5 bg-transparent"}`}
+                          >
+                            {val}x
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Price (Editable) */}
+              <div className="mb-3">
+                <div className="flex justify-between mb-1">
+                  <span className="text-[12px] text-gray-500 font-bold">Price</span>
+                  <span className="text-[11px] text-gray-500">USDT</span>
+                </div>
+                <div className="bg-[#111820] rounded-xl px-3 py-2 border border-transparent focus-within:border-[#00ffa3]/30 transition-colors flex items-center">
+                  <input
+                    type="number"
+                    value={priceInput}
+                    onChange={(e) => setPriceInput(e.target.value)}
+                    placeholder="0.00"
+                    className="w-full bg-transparent border-none outline-none text-[15px] font-medium text-white placeholder-gray-700 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+              </div>
+
+              {/* Size (Editable) */}
+              <div className="mb-3">
+                <div className="flex justify-between mb-1">
+                  <span className="text-[12px] text-gray-500 font-bold">Size</span>
+                  <span className="text-[11px] text-gray-500">BTC</span>
+                </div>
+                <div className="bg-[#111820] rounded-xl px-3 py-2 border border-transparent focus-within:border-[#00ffa3]/30 transition-colors flex items-center">
+                  <input
+                    type="number"
+                    value={sizeInput}
+                    onChange={(e) => setSizeInput(e.target.value)}
+                    placeholder="0.00"
+                    className="w-full bg-transparent border-none outline-none text-[15px] font-medium text-white placeholder-gray-700 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+              </div>
+
+              {/* Timer & Slider */}
+              <div className="flex flex-col gap-1 mb-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] text-gray-500">Timer</span>
+                  <span className="text-[18px] font-bold text-white font-mono tracking-wider">00:32</span>
+                </div>
+                
+                <div className="mt-4 px-1">
+                  <input 
+                    type="range" 
+                    min="0" max="100" 
+                    value={percent} 
+                    onChange={(e) => {
+                      const newPercent = Number(e.target.value);
+                      setPercent(newPercent);
+                      const dummyBalance = 0.5;
+                      const newSize = (dummyBalance * (newPercent / 100));
+                      if(newPercent > 0) {
+                        setSizeInput(newSize.toFixed(3));
+                      } else {
+                        setSizeInput("");
+                      }
+                    }}
+                    className="w-full h-[3px] appearance-none cursor-pointer rounded-full outline-none accent-[#00FFA3]"
+                    style={{
+                      background: `linear-gradient(to right, #00FFA3 ${percent}%, #111820 ${percent}%)`
+                    }}
+                  />
+                  <div className="flex justify-between items-center mt-3">
+                    {[0, 25, 50, 75, 100].map((p) => (
+                      <button 
+                        key={p} 
+                        onClick={() => {
+                          setPercent(p);
+                          const dummyBalance = 0.5;
+                          const newSize = (dummyBalance * (p / 100));
+                          setSizeInput(p > 0 ? newSize.toFixed(3) : "");
+                        }} 
+                        className={`text-[9px] font-bold bg-transparent border-none cursor-pointer transition-colors ${percent === p ? "text-[#00FFA3]" : "text-gray-500 hover:text-white"}`}
+                      >
+                        {p}%
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Available Balance */}
+              <div className="flex justify-between items-center mt-auto mb-2">
+                <span className="text-[12px] text-gray-500">Available Balance</span>
+                <span className="text-[12px] font-bold text-white">12,450.00 USDT</span>
+              </div>
+
+              {/* Buy / Sell Buttons */}
+              <div className="flex flex-col gap-2.5">
+                <button className="w-full h-[45px] rounded-[10px] bg-gradient-to-b from-[#00FFA3] to-[#009962] hover:brightness-110 border-none cursor-pointer transition-all flex flex-col items-center justify-center shadow-[0_0_15px_rgba(0,255,163,0.3)]">
+                  <span className="font-bold text-[#05070a] text-[15px] tracking-wide leading-none mb-0.5">BUY / LONG</span>
+                  <span className="text-[9px] text-[#05070a]/80 font-bold tracking-widest uppercase leading-none">PRICE: {priceInput || currentPrice}</span>
+                </button>
+                <button className="w-full h-[45px] rounded-[10px] bg-gradient-to-b from-[#FF3B3B] to-[#992323] hover:brightness-110 border-none cursor-pointer transition-all flex flex-col items-center justify-center shadow-[0_0_15px_rgba(255,59,59,0.3)]">
+                  <span className="font-bold text-white text-[15px] tracking-wide leading-none mb-0.5">SELL / SHORT</span>
+                  <span className="text-[9px] text-white/80 font-bold tracking-widest uppercase leading-none">PRICE: {priceInput || currentPrice}</span>
+                </button>
+              </div>
             </div>
           </GradientBorderPanel>
         </div>

@@ -1,7 +1,10 @@
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../../lib/auth";
 
 export const MainHedgeModuleSubsection = (): JSX.Element => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const accountSuffix = user?.account_id?.slice(-4) || "0000";
 
   return (
     <div className="w-full relative rounded-2xl 2xl:rounded-3xl p-6 sm:p-8 2xl:p-10 flex flex-col xl:flex-row items-center justify-between gap-8 2xl:gap-12 border border-white/5 bg-[linear-gradient(90deg,#0a2118_0%,#05110e_100%)] overflow-hidden">
@@ -22,9 +25,9 @@ export const MainHedgeModuleSubsection = (): JSX.Element => {
              <div className="flex items-center mt-2 opacity-80">
                <span className="text-white text-sm 2xl:text-base tracking-[0.4em] leading-none">•••• •••• •••• ••••</span>
              </div>
-             <span className="font-inter font-medium text-white text-lg 2xl:text-xl tracking-widest mt-1 leading-none">5316</span>
-           </div>
-        </div>
+              <span className="font-inter font-medium text-white text-lg 2xl:text-xl tracking-widest mt-1 leading-none">{accountSuffix}</span>
+            </div>
+         </div>
 
         {/* Info columns */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center flex-1 gap-8 sm:gap-12 2xl:gap-16 w-full">

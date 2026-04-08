@@ -1,12 +1,13 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ChevronDown, Menu } from "lucide-react";
 import { CheckoutDetailSection } from "./sections/CheckoutDetailSection/CheckoutDetailSection";
 import { LandingSlidebarSubsection } from "./sections/LandingSlidebarSubsection";
 import { PrimaryNavigationSection } from "./sections/PrimaryNavigationSection";
 import { Button } from "../../components/ui/button";
+import { api, type Challenge } from "../../lib/api";
+import { useAuth } from "../../lib/auth";
 
-/* ── Mobile nav tabs ── */
 const mobileNavTabs = [
   { label: "New challenge", route: "/challenge" },
   { label: "Accounts", route: "/accounts" },
@@ -14,11 +15,22 @@ const mobileNavTabs = [
   { label: "Withdrawals", route: "/withdrawals" },
 ];
 
-/* ── Gradient border card class ── */
 const gradientCardClass =
   "relative bg-[#05070a] rounded-xl border-none before:content-[''] before:absolute before:inset-0 before:p-px before:rounded-xl before:[background:linear-gradient(227deg,rgba(44,246,195,0.3)_0%,rgba(1,50,38,0.3)_100%)] before:[-webkit-mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] before:[-webkit-mask-composite:xor] before:[mask-composite:exclude] before:z-[1] before:pointer-events-none";
 
-/* ── Need Assistance footer (mobile) ── */
+const currencyFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+const formatAmount = (value?: number) =>
+  typeof value === "number" ? currencyFormatter.format(value) : "$0.00";
+
+const formatAccountSize = (value?: number) =>
+  typeof value === "number" ? `${(value / 1000).toFixed(0)}K Account Size` : "—";
+
 const NeedAssistance = () => (
   <div className="mt-4 md:mt-6 rounded-xl border border-[#163e4a]/40 bg-[#08141c]/60 p-4 md:p-6">
     <p className="mb-3 md:mb-4 text-xs md:text-sm text-gray-400">Need assistance?</p>
@@ -29,141 +41,143 @@ const NeedAssistance = () => (
   </div>
 );
 
-/* ── Mobile Step 1: Billing + Payment ── */
-const MobileStep1 = ({ onNext }: { onNext: () => void }) => {
-  const [billingInfo, setBillingInfo] = useState({ fullName: "", email: "", country: "UK", city: "London" });
+interface MobileStep1Props {
+  city: string;
+  country: string;
+  email: string;
+  fullName: string;
+  onCityChange: (value: string) => void;
+  onCountryChange: (value: string) => void;
+  onEmailChange: (value: string) => void;
+  onFullNameChange: (value: string) => void;
+  onNext: () => void;
+}
 
-  const handleInputChange = (field: string, value: string) => {
-    setBillingInfo((prev) => ({ ...prev, [field]: value }));
-  };
-
-  return (
-    <div className="flex flex-col gap-4 md:gap-6 lg:gap-8 flex-1">
-      {/* Title + breadcrumb */}
-      <div>
-        <h1 className="[font-family:'Public_Sans',Helvetica] text-2xl md:text-3xl lg:text-4xl font-black tracking-tight">CHECKOUT</h1>
-        <div className="mt-1 md:mt-2 flex items-center gap-1.5 text-xs md:text-sm">
-          <Link to="/challenge" className="text-gray-500">New Challenge</Link>
-          <span className="text-gray-600">›</span>
-          <span className="text-[#00FFA3]">Order Confirmation</span>
-        </div>
+const MobileStep1 = ({
+  city,
+  country,
+  email,
+  fullName,
+  onCityChange,
+  onCountryChange,
+  onEmailChange,
+  onFullNameChange,
+  onNext,
+}: MobileStep1Props) => (
+  <div className="flex flex-col gap-4 md:gap-6 lg:gap-8 flex-1">
+    <div>
+      <h1 className="[font-family:'Public_Sans',Helvetica] text-2xl md:text-3xl lg:text-4xl font-black tracking-tight">CHECKOUT</h1>
+      <div className="mt-1 md:mt-2 flex items-center gap-1.5 text-xs md:text-sm">
+        <Link to="/challenge" className="text-gray-500">New Challenge</Link>
+        <span className="text-gray-600">›</span>
+        <span className="text-[#00FFA3]">Order Confirmation</span>
       </div>
-
-      {/* Billing Details */}
-      <div className={`${gradientCardClass} flex flex-col gap-5 md:gap-7 lg:gap-8 w-full p-4 md:p-6 lg:p-8`}>
-        <div className="flex items-center gap-2 md:gap-3">
-          <img src="/svg/billing-man.svg" alt="" className="h-5 w-5 md:h-6 md:w-6" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-          <span className="[font-family:'Public_Sans',Helvetica] font-bold text-white text-sm md:text-lg tracking-[-0.25px]">
-            BILLING DETAILS
-          </span>
-        </div>
-        <div className="grid grid-cols-2 gap-3 md:gap-5 lg:gap-6">
-          <div className="flex flex-col gap-1.5 md:gap-2">
-            <label className="[font-family:'Public_Sans',Helvetica] font-bold text-gray-500 text-[9px] md:text-xs tracking-[1px] leading-3 md:leading-4">FULL NAME</label>
-            <div className="flex items-center h-11 md:h-14 lg:h-16 bg-[#0b0f14] rounded-lg border border-[#00ffa333] px-3 md:px-4">
-              <input
-                value={billingInfo.fullName}
-                onChange={(e) => handleInputChange("fullName", e.target.value)}
-                className="bg-transparent border-none outline-none w-full text-white text-xs md:text-sm"
-                placeholder="Alex Stormer"
-              />
-            </div>
-          </div>
-          <div className="flex flex-col gap-1.5 md:gap-2">
-            <label className="[font-family:'Public_Sans',Helvetica] font-bold text-gray-500 text-[9px] md:text-xs tracking-[1px] leading-3 md:leading-4">E-MAIL ADDRESS</label>
-            <div className="flex items-center h-11 md:h-14 lg:h-16 bg-[#0b0f14] rounded-lg border border-[#00ffa333] px-3 md:px-4">
-              <input
-                value={billingInfo.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-                className="bg-transparent border-none outline-none w-full text-white text-xs md:text-sm"
-                placeholder="alex.stormer@example.com"
-              />
-            </div>
-          </div>
-          <div className="flex flex-col gap-1.5 md:gap-2">
-            <label className="[font-family:'Public_Sans',Helvetica] font-bold text-gray-500 text-[9px] md:text-xs tracking-[1px] leading-3 md:leading-4">COUNTRY/REGION</label>
-            <div className="relative flex items-center h-11 md:h-14 lg:h-16 bg-[#0b0f14] rounded-lg border border-[#00ffa333] px-3 md:px-4">
-              <select
-                value={billingInfo.country}
-                onChange={(e) => handleInputChange("country", e.target.value)}
-                className="bg-transparent border-none outline-none w-full text-white text-xs md:text-sm appearance-none cursor-pointer pr-6"
-              >
-                <option value="UK">UK</option>
-                <option value="US">United States</option>
-                <option value="DE">Germany</option>
-                <option value="PL">Poland</option>
-                <option value="UA">Ukraine</option>
-                <option value="BR">Brazil</option>
-              </select>
-              <ChevronDown size={12} className="pointer-events-none absolute right-3 md:right-4 top-1/2 -translate-y-1/2 text-[#00ffa3]" />
-            </div>
-          </div>
-          <div className="flex flex-col gap-1.5 md:gap-2">
-            <label className="[font-family:'Public_Sans',Helvetica] font-bold text-gray-500 text-[9px] md:text-xs tracking-[1px] leading-3 md:leading-4">CITY/TOWN</label>
-            <div className="relative flex items-center h-11 md:h-14 lg:h-16 bg-[#0b0f14] rounded-lg border border-[#00ffa333] px-3 md:px-4">
-              <select
-                value={billingInfo.city}
-                onChange={(e) => handleInputChange("city", e.target.value)}
-                className="bg-transparent border-none outline-none w-full text-white text-xs md:text-sm appearance-none cursor-pointer pr-6"
-              >
-                <option value="London">London</option>
-                <option value="Manchester">Manchester</option>
-                <option value="Birmingham">Birmingham</option>
-              </select>
-              <ChevronDown size={12} className="pointer-events-none absolute right-3 md:right-4 top-1/2 -translate-y-1/2 text-[#00ffa3]" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Payment Method */}
-      <div className={`${gradientCardClass} flex flex-col gap-4 md:gap-6 w-full p-4 md:p-6 lg:p-8`}>
-        <div className="flex items-center gap-2 md:gap-3">
-          <img src="/svg/wallet.svg" alt="" className="h-5 w-5 md:h-6 md:w-6" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-          <span className="[font-family:'Public_Sans',Helvetica] font-bold text-white text-sm md:text-lg tracking-[-0.25px]">
-            PAYMENT METHOD
-          </span>
-        </div>
-        <div className="relative flex items-center gap-3 md:gap-4 h-[72px] md:h-[90px] lg:h-[100px] bg-[#2cf6c30d] rounded-xl border-none p-4 md:p-5 before:content-[''] before:absolute before:inset-0 before:p-[1px] before:rounded-xl before:[background:linear-gradient(227deg,rgba(44,246,195,0.3)_0%,rgba(1,50,38,0.3)_100%)] before:[-webkit-mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] before:[-webkit-mask-composite:xor] before:[mask-composite:exclude] before:z-[1] before:pointer-events-none">
-          <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-lg border border-[#00ffa333] bg-[#05070a] flex-shrink-0">
-            <img src="/svg/btc.svg" alt="BTC" className="w-[14px] h-[18px] md:w-[18px] md:h-[22px]" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="[font-family:'Public_Sans',Helvetica] font-bold text-white text-xs md:text-sm">CRYPTO PAYMENT</p>
-            <p className="[font-family:'Public_Sans',Helvetica] text-[10px] md:text-xs text-slate-500">BTC, ETH, USDT, USDC (Fast &amp; Secure)</p>
-          </div>
-          <div className="flex h-5 w-5 md:h-6 md:w-6 items-center justify-center rounded-full border-2 border-[#00FFA3] flex-shrink-0 bg-[#00ffa333]">
-            <img src="/svg/tick.svg" alt="" className="w-3 h-3 md:w-3.5 md:h-3.5" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-          </div>
-        </div>
-      </div>
-
-      {/* SSL badge */}
-      <div className="flex items-center gap-3 md:gap-4 rounded-xl border border-[#1e3a42]/40 bg-[#050f15]/50 p-3 md:p-5 lg:p-6">
-        <div className="flex h-9 w-9 md:h-12 md:w-12 items-center justify-center rounded-full bg-[#00FFA3]/10 flex-shrink-0">
-          <img src="/svg/ssl-secure.svg" alt="" className="w-4 h-5 md:w-5 md:h-6" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-        </div>
-        <div>
-          <p className="[font-family:'Public_Sans',Helvetica] text-[11px] md:text-sm font-bold text-white">SSL SECURE PAYMENT</p>
-          <p className="[font-family:'Public_Sans',Helvetica] text-[9px] md:text-xs text-gray-500 leading-relaxed">Your information is protected by industry-leading encryption standards.</p>
-        </div>
-      </div>
-
-      {/* COMPLETE ORDER → go to step 2 */}
-      <button
-        onClick={onNext}
-        className="flex h-12 md:h-16 w-full items-center justify-center rounded-xl md:rounded-2xl bg-[#00FFA3] [font-family:'Public_Sans',Helvetica] text-sm md:text-lg font-black uppercase tracking-wider text-black transition-all hover:bg-[#00e895]"
-      >
-        COMPLETE ORDER
-      </button>
-
-      <NeedAssistance />
     </div>
-  );
-};
 
-/* ── Mobile Step 2: Order Summary ── */
-const MobileStep2 = () => (
+    <div className={`${gradientCardClass} flex flex-col gap-5 md:gap-7 lg:gap-8 w-full p-4 md:p-6 lg:p-8`}>
+      <div className="flex items-center gap-2 md:gap-3">
+        <img src="/svg/billing-man.svg" alt="" className="h-5 w-5 md:h-6 md:w-6" />
+        <span className="[font-family:'Public_Sans',Helvetica] font-bold text-white text-sm md:text-lg tracking-[-0.25px]">
+          BILLING DETAILS
+        </span>
+      </div>
+      <div className="grid grid-cols-2 gap-3 md:gap-5 lg:gap-6">
+        <div className="flex flex-col gap-1.5 md:gap-2">
+          <label className="[font-family:'Public_Sans',Helvetica] font-bold text-gray-500 text-[9px] md:text-xs tracking-[1px] leading-3 md:leading-4">FULL NAME</label>
+          <div className="flex items-center h-11 md:h-14 lg:h-16 bg-[#0b0f14] rounded-lg border border-[#00ffa333] px-3 md:px-4">
+            <input value={fullName} onChange={(event) => onFullNameChange(event.target.value)} className="bg-transparent border-none outline-none w-full text-white text-xs md:text-sm" />
+          </div>
+        </div>
+        <div className="flex flex-col gap-1.5 md:gap-2">
+          <label className="[font-family:'Public_Sans',Helvetica] font-bold text-gray-500 text-[9px] md:text-xs tracking-[1px] leading-3 md:leading-4">E-MAIL ADDRESS</label>
+          <div className="flex items-center h-11 md:h-14 lg:h-16 bg-[#0b0f14] rounded-lg border border-[#00ffa333] px-3 md:px-4">
+            <input value={email} onChange={(event) => onEmailChange(event.target.value)} className="bg-transparent border-none outline-none w-full text-white text-xs md:text-sm" />
+          </div>
+        </div>
+        <div className="flex flex-col gap-1.5 md:gap-2">
+          <label className="[font-family:'Public_Sans',Helvetica] font-bold text-gray-500 text-[9px] md:text-xs tracking-[1px] leading-3 md:leading-4">COUNTRY/REGION</label>
+          <div className="flex items-center h-11 md:h-14 lg:h-16 bg-[#0b0f14] rounded-lg border border-[#00ffa333] px-3 md:px-4">
+            <input
+              value={country}
+              onChange={(event) => onCountryChange(event.target.value)}
+              placeholder="Enter Country"
+              className="bg-transparent border-none outline-none w-full text-white text-xs md:text-sm"
+            />
+          </div>
+        </div>
+        <div className="flex flex-col gap-1.5 md:gap-2">
+          <label className="[font-family:'Public_Sans',Helvetica] font-bold text-gray-500 text-[9px] md:text-xs tracking-[1px] leading-3 md:leading-4">CITY/TOWN</label>
+          <div className="flex items-center h-11 md:h-14 lg:h-16 bg-[#0b0f14] rounded-lg border border-[#00ffa333] px-3 md:px-4">
+            <input
+              value={city}
+              onChange={(event) => onCityChange(event.target.value)}
+              placeholder="Enter City"
+              className="bg-transparent border-none outline-none w-full text-white text-xs md:text-sm"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div className={`${gradientCardClass} flex flex-col gap-4 md:gap-6 w-full p-4 md:p-6 lg:p-8`}>
+      <div className="flex items-center gap-2 md:gap-3">
+        <img src="/svg/wallet.svg" alt="" className="h-5 w-5 md:h-6 md:w-6" />
+        <span className="[font-family:'Public_Sans',Helvetica] font-bold text-white text-sm md:text-lg tracking-[-0.25px]">
+          PAYMENT METHOD
+        </span>
+      </div>
+      <div className="relative flex items-center gap-3 md:gap-4 h-[72px] md:h-[90px] lg:h-[100px] bg-[#2cf6c30d] rounded-xl border-none p-4 md:p-5 before:content-[''] before:absolute before:inset-0 before:p-[1px] before:rounded-xl before:[background:linear-gradient(227deg,rgba(44,246,195,0.3)_0%,rgba(1,50,38,0.3)_100%)] before:[-webkit-mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] before:[-webkit-mask-composite:xor] before:[mask-composite:exclude] before:z-[1] before:pointer-events-none">
+        <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-lg border border-[#00ffa333] bg-[#05070a] flex-shrink-0">
+          <img src="/svg/btc.svg" alt="BTC" className="w-[14px] h-[18px] md:w-[18px] md:h-[22px]" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="[font-family:'Public_Sans',Helvetica] font-bold text-white text-xs md:text-sm">CRYPTO PAYMENT</p>
+          <p className="[font-family:'Public_Sans',Helvetica] text-[10px] md:text-xs text-slate-500">BTC, ETH, USDT, USDC (Fast &amp; Secure)</p>
+        </div>
+        <div className="flex h-5 w-5 md:h-6 md:w-6 items-center justify-center rounded-full border-2 border-[#00FFA3] flex-shrink-0 bg-[#00ffa333]">
+          <img src="/svg/tick.svg" alt="" className="w-3 h-3 md:w-3.5 md:h-3.5" />
+        </div>
+      </div>
+    </div>
+
+    <div className="flex items-center gap-3 md:gap-4 rounded-xl border border-[#1e3a42]/40 bg-[#050f15]/50 p-3 md:p-5 lg:p-6">
+      <div className="flex h-9 w-9 md:h-12 md:w-12 items-center justify-center rounded-full bg-[#00FFA3]/10 flex-shrink-0">
+        <img src="/svg/ssl-secure.svg" alt="" className="w-4 h-5 md:w-5 md:h-6" />
+      </div>
+      <div>
+        <p className="[font-family:'Public_Sans',Helvetica] text-[11px] md:text-sm font-bold text-white">SSL SECURE PAYMENT</p>
+        <p className="[font-family:'Public_Sans',Helvetica] text-[9px] md:text-xs text-gray-500 leading-relaxed">Your information is protected by industry-leading encryption standards.</p>
+      </div>
+    </div>
+
+    <button
+      onClick={onNext}
+      className="flex h-12 md:h-16 w-full items-center justify-center rounded-xl md:rounded-2xl bg-[#00FFA3] [font-family:'Public_Sans',Helvetica] text-sm md:text-lg font-black uppercase tracking-wider text-black transition-all hover:bg-[#00e895]"
+    >
+      COMPLETE ORDER
+    </button>
+
+    <NeedAssistance />
+  </div>
+);
+
+interface MobileStep2Props {
+  amountLabel: string;
+  challengeLabel: string;
+  accountSizeLabel: string;
+  loading: boolean;
+  onCompleteOrder: () => void;
+  plan?: Challenge;
+}
+
+const MobileStep2 = ({
+  amountLabel,
+  challengeLabel,
+  accountSizeLabel,
+  loading,
+  onCompleteOrder,
+  plan,
+}: MobileStep2Props) => (
   <div className="flex flex-col gap-4 md:gap-6 lg:gap-8 flex-1">
     <div className={`${gradientCardClass} flex flex-col gap-6 md:gap-8 lg:gap-10 w-full p-5 md:p-8 lg:p-10`}>
       <h2 className="[font-family:'Public_Sans',Helvetica] font-bold text-white text-xl md:text-2xl lg:text-3xl tracking-[-0.5px]">YOUR ORDER</h2>
@@ -171,20 +185,20 @@ const MobileStep2 = () => (
       <div className="relative flex items-center justify-between h-[70px] md:h-[90px] lg:h-[100px] bg-[#05070a] rounded-lg px-4 md:px-6 before:content-[''] before:absolute before:inset-0 before:p-px before:rounded-lg before:[background:linear-gradient(227deg,rgba(44,246,195,0.3)_0%,rgba(1,50,38,0.3)_100%)] before:[-webkit-mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] before:[-webkit-mask-composite:xor] before:[mask-composite:exclude] before:z-[1] before:pointer-events-none">
         <div className="flex items-center gap-3 md:gap-4 min-w-0">
           <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-lg border border-[#00ffa333] bg-[#0b0f14] flex-shrink-0">
-            <img src="/svg/diamond.svg" alt="" className="w-5 h-5 md:w-6 md:h-6" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            <img src="/svg/diamond.svg" alt="" className="w-5 h-5 md:w-6 md:h-6" />
           </div>
           <div className="min-w-0">
-            <p className="[font-family:'Public_Sans',Helvetica] font-bold text-white text-sm md:text-base">ELITE CHALLENGE</p>
-            <p className="[font-family:'Public_Sans',Helvetica] text-[11px] md:text-sm text-slate-500">100K Account Size</p>
+            <p className="[font-family:'Public_Sans',Helvetica] font-bold text-white text-sm md:text-base">{challengeLabel}</p>
+            <p className="[font-family:'Public_Sans',Helvetica] text-[11px] md:text-sm text-slate-500">{accountSizeLabel}</p>
           </div>
         </div>
-        <span className="[font-family:'Public_Sans',Helvetica] font-bold text-white text-lg md:text-xl flex-shrink-0">$799.00</span>
+        <span className="[font-family:'Public_Sans',Helvetica] font-bold text-white text-lg md:text-xl flex-shrink-0">{amountLabel}</span>
       </div>
 
       <div className="flex flex-col gap-2.5 md:gap-4 pt-3 md:pt-5" style={{ borderTop: "1px solid", borderImage: "linear-gradient(227deg,rgba(44,246,195,0.3) 0%,rgba(1,50,38,0.3) 100%) 1" }}>
         <div className="flex justify-between text-sm md:text-base">
           <span className="[font-family:'Public_Sans',Helvetica] text-gray-500">Subtotal</span>
-          <span className="[font-family:'Public_Sans',Helvetica] font-medium text-white">$799.00</span>
+          <span className="[font-family:'Public_Sans',Helvetica] font-medium text-white">{amountLabel}</span>
         </div>
         <div className="flex justify-between text-sm md:text-base">
           <span className="[font-family:'Public_Sans',Helvetica] text-gray-500">Platform Fee</span>
@@ -194,11 +208,15 @@ const MobileStep2 = () => (
 
       <div className="flex items-end justify-between mt-2 md:mt-4">
         <span className="[font-family:'Public_Sans',Helvetica] font-bold text-gray-500 text-[10px] md:text-xs tracking-[1.2px]">TOTAL AMOUNT</span>
-        <span className="[font-family:'Public_Sans',Helvetica] font-black text-white text-3xl md:text-4xl">$799.00</span>
+        <span className="[font-family:'Public_Sans',Helvetica] font-black text-white text-3xl md:text-4xl">{amountLabel}</span>
       </div>
 
-      <Button className="w-full h-14 md:h-16 bg-[#00ffa3] hover:bg-[#00ffa3]/90 rounded-2xl [font-family:'Public_Sans',Helvetica] font-black text-slate-950 text-lg md:text-xl tracking-[-0.9px] border-none">
-        COMPLETE ORDER
+      <Button
+        disabled={loading || !plan}
+        onClick={onCompleteOrder}
+        className="w-full h-14 md:h-16 bg-[#00ffa3] hover:bg-[#00ffa3]/90 rounded-2xl [font-family:'Public_Sans',Helvetica] font-black text-slate-950 text-lg md:text-xl tracking-[-0.9px] border-none disabled:opacity-60"
+      >
+        {loading ? "PROCESSING..." : "COMPLETE ORDER"}
       </Button>
 
       <div className="rounded-lg border border-[#ffffff0d] bg-[#02061780] px-4 md:px-6 py-4 md:py-5">
@@ -213,8 +231,33 @@ const MobileStep2 = () => (
   </div>
 );
 
-/* ── Desktop Layout (>= xl) ── */
-const DesktopLayout = () => (
+interface DesktopLayoutProps {
+  city: string;
+  country: string;
+  email: string;
+  fullName: string;
+  loading: boolean;
+  onCityChange: (value: string) => void;
+  onCompleteOrder: () => void;
+  onCountryChange: (value: string) => void;
+  onEmailChange: (value: string) => void;
+  onFullNameChange: (value: string) => void;
+  plan?: Challenge;
+}
+
+const DesktopLayout = ({
+  city,
+  country,
+  email,
+  fullName,
+  loading,
+  onCityChange,
+  onCompleteOrder,
+  onCountryChange,
+  onEmailChange,
+  onFullNameChange,
+  plan,
+}: DesktopLayoutProps) => (
   <div className="hidden xl:block bg-[#05070a] w-full relative overflow-hidden">
     <img src="/images/bg-lines.png" alt="" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40" />
     <img src="/images/bg-lines1.png" alt="" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-11 mix-blend-screen" />
@@ -227,26 +270,175 @@ const DesktopLayout = () => (
             <span className="[font-family:'Public_Sans',Helvetica] font-black text-white text-3xl tracking-[-0.75px] leading-9">CHECKOUT</span>
           </div>
           <div className="flex flex-row items-center gap-0 h-5">
-            <span className="[font-family:'Public_Sans',Helvetica] font-normal text-gray-500 text-sm tracking-[0] leading-5 whitespace-nowrap">New Challenge</span>
+            <span className="[font-family:'Public_Sans',Helvetica] font-normal text-[#00ffa3] text-sm tracking-[0] leading-5 whitespace-nowrap">New Challenge</span>
             <img className="w-5 h-14 mx-[8px]" alt="Container" src="/svg/arrow-right-another.svg" />
-            <span className="[font-family:'Public_Sans',Helvetica] font-normal text-[#00ffa3] text-sm tracking-[0] leading-5 whitespace-nowrap">Order Confirmation</span>
+            <span className="[font-family:'Public_Sans',Helvetica] font-normal text-gray-500 text-sm tracking-[0] leading-5 whitespace-nowrap">Order Confirmation</span>
           </div>
         </header>
-        <CheckoutDetailSection />
+        <CheckoutDetailSection
+          city={city}
+          country={country}
+          email={email}
+          fullName={fullName}
+          loading={loading}
+          onCityChange={onCityChange}
+          onCompleteOrder={onCompleteOrder}
+          onCountryChange={onCountryChange}
+          onEmailChange={onEmailChange}
+          onFullNameChange={onFullNameChange}
+          plan={plan}
+        />
       </div>
     </div>
-    <img className="fixed top-20 left-[270px] w-px h-[994px] pointer-events-none" alt="Vector" src="/vector-6.svg" />
   </div>
 );
 
 export const CheckoutLanding = (): JSX.Element => {
   const [mobileStep, setMobileStep] = useState<1 | 2>(1);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [plans, setPlans] = useState<Challenge[]>([]);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [redirectNotice, setRedirectNotice] = useState<{ paymentId: string; challengeName: string } | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { planId: routePlanId = "" } = useParams();
+  const [searchParams] = useSearchParams();
+  const planId = routePlanId || searchParams.get("plan") || "";
+  const paymentMethod = searchParams.get("method") || "crypto";
+
+  useEffect(() => {
+    api.challenges()
+      .then(setPlans)
+      .catch(() => setPlans([]));
+  }, []);
+
+  useEffect(() => {
+    setFullName((current) => current || user?.name || "");
+    setEmail((current) => current || user?.email || "");
+  }, [user?.email, user?.name]);
+
+  const plan = useMemo(
+    () => plans.find((item) => item.id === planId),
+    [planId, plans],
+  );
+
+  const amountLabel = formatAmount(plan?.fee);
+  const challengeLabel = plan ? `${plan.name.toUpperCase()} CHALLENGE` : "CHALLENGE";
+  const accountSizeLabel = formatAccountSize(plan?.balance);
+
+  const handleCompleteOrder = async () => {
+    if (!plan || !user) {
+      alert(`Cannot create order: ${!plan ? "Plan not found" : "User not logged in"}`);
+      return;
+    }
+
+    const normalizedFullName = fullName.trim();
+    const normalizedEmail = email.trim();
+    const normalizedCountry = country.trim();
+    const normalizedCity = city.trim();
+
+    if (!normalizedFullName || !normalizedEmail || !normalizedCountry || !normalizedCity) {
+      alert("Please fill in full name, email, country, and city before completing the order.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await api.createOrder({
+        userId: user.id,
+        challengeId: plan.id,
+        fullName: normalizedFullName,
+        email: normalizedEmail,
+        country: normalizedCountry,
+        city: normalizedCity,
+        paymentMethod,
+      });
+
+      const paymentUrl =
+        result.paymentUrl ||
+        result.order?.payment_url ||
+        result.payment_url ||
+        null;
+
+      if (paymentMethod === "crypto") {
+        if (!paymentUrl) {
+          const paymentRecordId = result.paymentRecordId ?? result.payment?.id ?? null;
+          const payAddress = result.payAddress || result.order?.pay_address || null;
+          const payAmount = result.payAmount || result.order?.pay_amount || null;
+          const payCurrency = result.payCurrency || result.order?.pay_currency || null;
+
+          if (paymentRecordId) {
+            navigate(`/payments/${paymentRecordId}`);
+            return;
+          }
+
+          if (payAddress) {
+            if (navigator.clipboard?.writeText) {
+              navigator.clipboard.writeText(payAddress).catch(() => undefined);
+            }
+
+            const amountLine = payAmount && payCurrency ? `Amount: ${payAmount} ${String(payCurrency).toUpperCase()}\n` : "";
+            alert(
+              `Demo payment created and order saved in the database.\n${amountLine}Address: ${payAddress}\nThe payment address was copied if clipboard access is available.`,
+            );
+            return;
+          }
+
+          throw new Error("NOWPayments payment details were not returned. Restart the API server and try again.");
+        }
+
+        const nowPaymentsId =
+          result.providerPaymentId ||
+          result.providerInvoiceId ||
+          result.payment?.provider_payment_id ||
+          result.payment?.provider_invoice_id ||
+          result.order?.provider_payment_id ||
+          result.order?.provider_invoice_id ||
+          "—";
+
+        setRedirectNotice({
+          paymentId: nowPaymentsId,
+          challengeName: challengeLabel,
+        });
+
+        window.setTimeout(() => {
+          window.location.href = paymentUrl;
+        }, 1400);
+        return;
+      }
+
+      navigate("/payments");
+    } catch (error) {
+      console.error("Failed to create order", error);
+      alert(error instanceof Error ? error.message : "Failed to create order. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
-      {/* ── MOBILE LAYOUT (< xl) ── */}
+      {redirectNotice ? (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/75 p-4">
+          <div className="w-full max-w-lg rounded-3xl border border-[#163e4a]/60 bg-[#08141c] p-6 text-center shadow-2xl">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#00FFA3]">Payment Created</p>
+            <h2 className="mt-3 text-2xl font-black text-white">Thank you for your order</h2>
+            <p className="mt-3 text-sm text-gray-300">
+              {redirectNotice.challengeName} has been created. Redirecting you to NOWPayments to complete the payment.
+            </p>
+            <div className="mt-5 rounded-2xl border border-[#163e4a]/60 bg-[#05070a] px-4 py-3">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-gray-500">NOWPayments ID</p>
+              <p className="mt-2 break-all text-sm font-semibold text-white">{redirectNotice.paymentId}</p>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <div className="xl:hidden min-h-screen bg-[#05070A] font-['Inter',sans-serif] text-white overflow-x-hidden flex flex-col">
         <header className="sticky top-0 z-50 flex h-14 items-center justify-between border-b border-[#2cf6c3]/30 bg-[#05070A]/95 px-4 backdrop-blur-md">
           <Link to="/" className="flex items-center">
@@ -288,14 +480,45 @@ export const CheckoutLanding = (): JSX.Element => {
           <img src="/images/bg-lines.png" alt="" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40" />
           <img src="/images/bg-lines1.png" alt="" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-10 mix-blend-screen" />
           <div className="relative z-10 px-4 md:px-8 lg:px-12 py-5 md:py-8 flex-1 flex flex-col">
-            {mobileStep === 1
-              ? <MobileStep1 onNext={() => setMobileStep(2)} />
-              : <MobileStep2 />}
+            {mobileStep === 1 ? (
+              <MobileStep1
+                city={city}
+                country={country}
+                email={email}
+                fullName={fullName}
+                onCityChange={setCity}
+                onCountryChange={setCountry}
+                onEmailChange={setEmail}
+                onFullNameChange={setFullName}
+                onNext={() => setMobileStep(2)}
+              />
+            ) : (
+              <MobileStep2
+                accountSizeLabel={accountSizeLabel}
+                amountLabel={amountLabel}
+                challengeLabel={challengeLabel}
+                loading={loading}
+                onCompleteOrder={handleCompleteOrder}
+                plan={plan}
+              />
+            )}
           </div>
         </div>
       </div>
 
-      <DesktopLayout />
+      <DesktopLayout
+        city={city}
+        country={country}
+        email={email}
+        fullName={fullName}
+        loading={loading}
+        onCityChange={setCity}
+        onCompleteOrder={handleCompleteOrder}
+        onCountryChange={setCountry}
+        onEmailChange={setEmail}
+        onFullNameChange={setFullName}
+        plan={plan}
+      />
     </>
   );
 };
