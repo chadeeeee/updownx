@@ -1,5 +1,5 @@
 const mode = import.meta.env.VITE_MODE || "local";
-const API_URL = mode === "host" ? "http://173.242.59.206:4000" : "http://localhost:4000";
+const API_URL = mode === "host" ? "https://api.updownxpro.com" : "http://localhost:4000";
 
 export class ApiError extends Error {
   status?: number;
