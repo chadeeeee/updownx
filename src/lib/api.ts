@@ -1,4 +1,5 @@
-const API_URL = (import.meta.env.VITE_API_URL as string) || "http://localhost:4000";
+const mode = import.meta.env.VITE_MODE || "local";
+const API_URL = mode === "host" ? "http://173.242.59.206:4000" : "http://localhost:4000";
 
 export class ApiError extends Error {
   status?: number;
