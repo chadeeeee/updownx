@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { AdvancedRealTimeChart } from "react-ts-tradingview-widgets";
 import { useAuth } from "../../lib/auth";
 import { api } from "../../lib/api";
-import { Globe, Search, X, ChevronDown } from "lucide-react";
+import { Globe, Search, X, ChevronDown, Menu } from "lucide-react";
 
 /* ═══════════════════════ Types ═══════════════════════ */
 type Position = {
@@ -102,6 +102,7 @@ export const ControlPanel = (): JSX.Element => {
   /* ─── State ─── */
   const [orderType, setOrderType] = useState<"Limit"|"Market"|"Trigger">("Market");
   const [bottomTab, setBottomTab] = useState("positions");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [topNav, setTopNav] = useState("Trading");
   const [percent, setPercent] = useState(0);
   const [orderBookView, setOrderBookView] = useState<"both"|"bids"|"asks">("both");
@@ -119,6 +120,7 @@ export const ControlPanel = (): JSX.Element => {
   const [coinSelectorOpen, setCoinSelectorOpen] = useState(false);
   const [coinSearch, setCoinSearch] = useState("");
   const coinSelectorRef = useRef<HTMLDivElement>(null);
+  const mobileCoinRef = useRef<HTMLDivElement>(null);
 
   const [userBalance, setUserBalance] = useState(0);
   const [positions, setPositions] = useState<Position[]>([]);
@@ -149,7 +151,9 @@ export const ControlPanel = (): JSX.Element => {
   useEffect(() => {
     if (!coinSelectorOpen) return;
     const handler = (e: MouseEvent) => {
-      if (coinSelectorRef.current && !coinSelectorRef.current.contains(e.target as Node)) setCoinSelectorOpen(false);
+      const t = e.target as Node;
+      if (coinSelectorRef.current?.contains(t) || mobileCoinRef.current?.contains(t)) return;
+      setCoinSelectorOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -364,9 +368,356 @@ export const ControlPanel = (): JSX.Element => {
 
   const topNavItems = ["Trading","Markets","Balance","Tournaments","History","Settings"];
 
+  /* ═══════════════════════ Slider CSS (shared) ═══════════════════════ */
+  const sliderStyles = `
+    .trade-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; border-radius: 2px; outline: none; cursor: pointer; }
+    .trade-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #00FFA3; cursor: pointer; border: 2px solid #05070A; box-shadow: 0 0 6px rgba(0,255,163,0.5); margin-top: -1px; }
+    .trade-slider::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: #00FFA3; cursor: pointer; border: 2px solid #05070A; box-shadow: 0 0 6px rgba(0,255,163,0.5); }
+  `;
+
+  /* ═══════════════════════ Bottom tabs config ═══════════════════════ */
+  const bottomTabs = [
+    { id: "positions", label: `POSITIONS (${positions.length})` },
+    { id: "open-orders", label: `OPEN ORDERS (${pendingOrders.length})` },
+    { id: "order-history", label: "ORDER HISTORY" },
+    { id: "trade-history", label: "TRADE HISTORY" },
+    { id: "assets", label: "ASSETS" },
+  ];
+
   /* ═══════════════════════ Render ═══════════════════════ */
-  return (
-    <div className="flex flex-col h-screen bg-[#05070A] text-white font-inter overflow-hidden relative">
+  return (<>
+    {/* Global slider styles */}
+    <style>{sliderStyles}</style>
+
+    {/* ═══ MOBILE LAYOUT (< xl) ═══ */}
+    <div className="xl:hidden flex flex-col min-h-screen bg-[#05070A] text-white font-inter relative">
+      {/* Background */}
+      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+        <img src="/images/bg-lines.png" alt="" className="absolute inset-0 h-full w-full object-cover opacity-40" />
+        <img src="/images/bg-lines1.png" alt="" className="absolute inset-0 h-full w-full object-cover opacity-10 mix-blend-screen" />
+      </div>
+
+      {/* ─── Header ─── */}
+      <header className="sticky top-0 z-50 flex h-12 min-[375px]:h-14 md:h-16 items-center justify-between bg-[#05070A]/95 px-3 min-[375px]:px-4 md:px-6 backdrop-blur-md border-b border-white/5 shrink-0">
+        <Link to="/" className="flex items-center shrink-0">
+          <img src="/images/logo.png" alt="UPDOWNX" className="h-5 min-[375px]:h-6 md:h-8 w-auto" />
+        </Link>
+        <div className="flex items-center gap-2 min-[375px]:gap-3 md:gap-4">
+          <button className="flex items-center gap-1 text-[10px] min-[375px]:text-[11px] md:text-sm text-gray-400 bg-transparent border-none cursor-pointer">
+            EN <ChevronDown className="w-2.5 h-2.5 md:w-3.5 md:h-3.5" />
+          </button>
+          <Link to="/challenge" className="rounded-lg bg-[#00FFA3] px-2.5 py-1 min-[375px]:px-3 min-[375px]:py-1.5 md:px-5 md:py-2 text-[9px] min-[375px]:text-[10px] md:text-sm font-bold text-black no-underline">
+            START
+          </Link>
+          <button onClick={() => setSidebarOpen(p => !p)} className="text-gray-300 hover:text-white bg-transparent border-none cursor-pointer p-0" aria-label="Toggle menu">
+            {sidebarOpen ? <X className="w-5 h-5 md:w-6 md:h-6" /> : <Menu className="w-5 h-5 md:w-6 md:h-6" />}
+          </button>
+        </div>
+      </header>
+
+      {/* ─── Sub-nav tabs (toggled by hamburger) ─── */}
+      {sidebarOpen && (
+        <nav className="relative z-30 flex justify-center border-b border-[#1a2a32]/60 bg-[#05070A] px-1 py-2 min-[375px]:px-2 min-[375px]:py-3 md:px-6 md:py-4 lg:px-10 lg:py-6 w-full">
+          <div className="flex w-full justify-evenly rounded-[13px] border border-[#12313a] bg-[#081018]/80 p-1 min-[375px]:rounded-[16px] min-[375px]:p-1.5 min-[400px]:rounded-[18px] md:gap-2 md:rounded-[22px] md:px-3 md:py-2 lg:gap-4 lg:rounded-[28px] lg:px-5 lg:py-3">
+            {["Trade", "Markets", "Positions", "Traders"].map(item => (
+              <button
+                key={item}
+                className={`flex-1 relative flex items-center justify-center text-center rounded-lg px-0.5 py-1.5 text-[8px] leading-tight font-medium transition-colors min-[375px]:rounded-xl min-[375px]:px-1 min-[375px]:py-2 min-[375px]:text-[10px] min-[400px]:px-2 min-[400px]:text-[11px] md:rounded-2xl md:px-6 md:py-3 md:text-sm lg:px-10 lg:py-5 lg:text-lg ${
+                  item === "Trade" ? "text-[#00FFA3]" : "text-gray-400 hover:text-gray-200"
+                }`}
+                style={{background:"transparent"}}
+              >
+                {item}
+                <span className={`absolute bottom-1 left-2.5 right-2.5 h-px rounded-full transition-opacity min-[375px]:left-3 min-[375px]:right-3 md:bottom-2 md:left-3 md:right-3 md:h-0.5 lg:bottom-3 lg:left-5 lg:right-5 ${item === "Trade" ? "bg-[#00FFA3] opacity-100" : "opacity-0"}`} />
+              </button>
+            ))}
+          </div>
+        </nav>
+      )}
+
+      {/* ─── Main Scrollable Content ─── */}
+      <div className="relative z-10 flex-1 overflow-y-auto overflow-x-hidden pb-16 md:pb-20 px-2 min-[375px]:px-3 md:px-4 flex flex-col gap-2 min-[375px]:gap-3 md:gap-4 pt-2 min-[375px]:pt-3 md:pt-4">
+
+        {/* Pair Header + Timeframes */}
+        <div className="flex items-center justify-between px-3 min-[375px]:px-4 md:px-6 py-2 min-[375px]:py-2.5 md:py-4 border border-[#1a2a32] rounded-[16px] bg-[#0A0F14]/90 backdrop-blur-md relative" ref={mobileCoinRef}>
+          <div className="flex items-center gap-1.5 min-[375px]:gap-2 cursor-pointer select-none" onClick={() => setCoinSelectorOpen(o => !o)}>
+            <CoinIcon symbol={selectedCoin.symbol} color={selectedCoin.color} size={18} />
+            <span className="font-bold text-[12px] min-[375px]:text-[13px] md:text-[15px] text-white">{selectedCoin.symbol}/USDT</span>
+            <span className={`px-1 py-0.5 rounded text-[8px] min-[375px]:text-[9px] md:text-[10px] font-bold ${isPositive ? "text-[#00ffa3] bg-[#00ffa3]/10" : "text-[#ff4d4d] bg-[#ff4d4d]/10"}`}>{isPositive ? "+" : ""}{priceChangePercent}%</span>
+          </div>
+          <div className="flex items-center gap-0.5 min-[375px]:gap-1">
+            {["5m","1h","4h","1D"].map((tf,i) => (
+              <button key={tf} className={`px-1 min-[375px]:px-1.5 md:px-2.5 py-0.5 min-[375px]:py-1 text-[8px] min-[375px]:text-[9px] md:text-[11px] font-semibold rounded border-none cursor-pointer transition-colors ${i===0?"bg-[#00ffa3]/15 text-[#00ffa3]":"text-gray-500 hover:text-white bg-transparent"}`}>{tf}</button>
+            ))}
+            <button className="px-1 min-[375px]:px-1.5 md:px-2.5 py-0.5 min-[375px]:py-1 text-[8px] min-[375px]:text-[9px] md:text-[11px] font-semibold rounded text-gray-500 bg-transparent border-none cursor-pointer">More</button>
+          </div>
+          {/* Coin Selector Dropdown */}
+          {coinSelectorOpen && (
+            <div className="absolute top-full left-3 right-3 min-[375px]:left-4 min-[375px]:right-4 md:left-6 md:right-6 bg-[#0b0f14] border border-white/10 rounded-xl shadow-2xl z-[200] flex flex-col" style={{maxHeight:320}}>
+              <div className="p-2 min-[375px]:p-3 border-b border-white/5 shrink-0">
+                <div className="flex items-center gap-2 bg-[#111820] rounded-lg px-2 min-[375px]:px-3 py-1.5">
+                  <Search className="w-3.5 h-3.5 text-gray-500 shrink-0" />
+                  <input type="text" placeholder="Search..." value={coinSearch} onChange={e => setCoinSearch(e.target.value)} autoFocus className="bg-transparent border-none outline-none text-xs text-white placeholder-gray-600 w-full" />
+                  {coinSearch && <button onClick={() => setCoinSearch("")} className="text-gray-500 hover:text-white bg-transparent border-none cursor-pointer p-0"><X className="w-3 h-3" /></button>}
+                </div>
+              </div>
+              <div className={`overflow-y-auto flex-1 ${scrollbarCls}`} style={{maxHeight:260}}>
+                {filteredCoins.map(coin => (
+                  <div key={coin.symbol} className={`flex items-center gap-2 px-3 py-2 cursor-pointer transition-colors hover:bg-white/5 ${coin.symbol===selectedCoin.symbol?"bg-[#00ffa3]/10":""}`}
+                    onMouseDown={(e) => {e.preventDefault();e.stopPropagation();setSelectedCoin(coin);setCoinSelectorOpen(false);setCoinSearch("");}}>
+                    <CoinIcon symbol={coin.symbol} color={coin.color} size={20} />
+                    <span className="text-xs font-semibold text-white">{coin.symbol}</span>
+                    <span className="text-[10px] text-gray-500">{coin.name}</span>
+                  </div>
+                ))}
+                {!filteredCoins.length && <div className="px-4 py-4 text-center text-gray-500 text-xs">No coins found</div>}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ─── TradingView Chart ─── */}
+        <div className="h-[180px] min-[375px]:h-[220px] md:h-[300px] lg:h-[360px] bg-[#0A0F14]/90 backdrop-blur-md border border-[#1a2a32] rounded-[16px] overflow-hidden relative" key={`m-chart-${selectedCoin.pair}`}>
+          <AdvancedRealTimeChart theme="dark" symbol={`BINANCE:${selectedCoin.pair}`} interval="5" hide_legend allow_symbol_change={false} save_image={false} backgroundColor="#05070A" autosize />
+        </div>
+
+        {/* ─── Order Book + Trade Panel (side by side) ─── */}
+        <div className="flex gap-2 min-[375px]:gap-3 md:gap-4">
+
+          {/* Order Book */}
+          <div className="w-1/2 border border-[#1a2a32] rounded-[16px] bg-[#0A0F14]/90 backdrop-blur-md flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between px-2 min-[375px]:px-2.5 md:px-4 py-1.5 min-[375px]:py-2 border-b border-[#1a2a32] shrink-0">
+              <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] font-bold text-[#A6B2C8] tracking-wider uppercase">Order Book</span>
+              <div className="flex bg-[#111820] rounded p-0.5 gap-0.5">
+                {(["both","bids","asks"] as const).map(v => (
+                  <button key={v} onClick={() => setOrderBookView(v)} className={`w-4 min-[375px]:w-5 md:w-6 h-3 min-[375px]:h-3.5 md:h-5 rounded flex items-center justify-center border-none cursor-pointer p-0 ${orderBookView===v?"bg-[#2A3441]":"bg-transparent"}`}>
+                    <div className={`w-2 min-[375px]:w-2.5 md:w-3 h-1.5 min-[375px]:h-2 md:h-2.5 rounded-[1px] ${v==="both"?"bg-gradient-to-b from-[#ff4d4d] to-[#00ffa3]":v==="bids"?"bg-[#00ffa3]":"bg-[#ff4d4d]"}`} />
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* Column headers */}
+            <div className="grid grid-cols-3 px-2 min-[375px]:px-2.5 md:px-4 py-0.5 min-[375px]:py-1 shrink-0">
+              {["PRICE","SIZE","SUM"].map(h => <span key={h} className={`text-[5px] min-[375px]:text-[6px] md:text-[8px] text-[#A6B2C8] font-semibold tracking-wide uppercase ${h!=="PRICE"?"text-right":""}`}>{h}</span>)}
+            </div>
+            {/* Asks */}
+            {orderBookView !== "bids" && (
+              <div className="flex flex-col px-2 min-[375px]:px-2.5 md:px-4 justify-end border-b border-[#05070A]/50">
+                {(orderBookView==="asks"?asks.slice(-10):asks.slice(-8)).map((r,i) => (
+                  <div key={`ma${i}`} onClick={() => {setPriceInput(r.price.replace(/,/g,""));setOrderType("Limit");}} className="grid grid-cols-3 py-[1px] cursor-pointer hover:bg-white/5">
+                    <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-[#ff4d4d] font-semibold truncate">{r.price}</span>
+                    <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-300 text-right font-mono truncate">{r.size}</span>
+                    <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-500 text-right font-mono truncate">{r.total}</span>
+                  </div>
+                ))}
+                {!asks.length && <div className="text-[7px] text-gray-600 py-2 text-center">Loading...</div>}
+              </div>
+            )}
+            {/* Spread */}
+            <div className="px-2 min-[375px]:px-2.5 md:px-4 py-1 min-[375px]:py-1.5 border-y border-white/5 flex items-center gap-1.5 shrink-0">
+              <span className={`text-[9px] min-[375px]:text-[10px] md:text-[13px] font-bold ${isPositive?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{currentPrice}</span>
+              <span className="text-[6px] min-[375px]:text-[7px] md:text-[9px] text-gray-500 font-medium">Spread {bids.length && asks.length ? (parseFloat(asks[asks.length-1]?.price.replace(/,/g,'') || '0') - parseFloat(bids[0]?.price.replace(/,/g,'') || '0')).toFixed(2) : '—'}</span>
+            </div>
+            {/* Bids */}
+            {orderBookView !== "asks" && (
+              <div className="flex flex-col px-2 min-[375px]:px-2.5 md:px-4">
+                {(orderBookView==="bids"?bids.slice(0,10):bids.slice(0,8)).map((r,i) => (
+                  <div key={`mb${i}`} onClick={() => {setPriceInput(r.price.replace(/,/g,""));setOrderType("Limit");}} className="grid grid-cols-3 py-[1px] cursor-pointer hover:bg-white/5">
+                    <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-[#00ffa3] font-semibold truncate">{r.price}</span>
+                    <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-300 text-right font-mono truncate">{r.size}</span>
+                    <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-500 text-right font-mono truncate">{r.total}</span>
+                  </div>
+                ))}
+                {!bids.length && <div className="text-[7px] text-gray-600 py-2 text-center">Loading...</div>}
+              </div>
+            )}
+          </div>
+
+          {/* Trade Panel */}
+          <div className="w-1/2 flex flex-col p-2 min-[375px]:p-2.5 md:p-4 border border-[#1a2a32] rounded-[16px] bg-[#0A0F14]/90 backdrop-blur-md relative overflow-hidden">
+            <span className="text-[8px] min-[375px]:text-[9px] md:text-sm font-bold text-[#A6B2C8] tracking-wider uppercase mb-1.5 min-[375px]:mb-2 md:mb-3">Trade</span>
+            {/* Limit / Market / Trigger */}
+            <div className="flex gap-0.5 bg-[#111820] rounded-lg p-0.5 mb-1.5 min-[375px]:mb-2 md:mb-3">
+              {(["Limit","Market","Trigger"] as const).map(t => (
+                <button key={t} onClick={() => setOrderType(t)} className={`flex-1 py-1 min-[375px]:py-1.5 text-[7px] min-[375px]:text-[8px] md:text-[11px] font-bold rounded-md border-none cursor-pointer transition-colors ${orderType===t?"bg-[#00FFA3] text-[#05070A]":"bg-transparent text-gray-500 hover:text-white"}`}>{t}</button>
+              ))}
+            </div>
+            {/* Margin + Leverage dropdowns */}
+            <div className="flex gap-1 mb-1.5 min-[375px]:mb-2 md:mb-3 relative">
+              <div className="flex-1 relative">
+                <div onClick={() => {setMarginDropdownOpen(!marginDropdownOpen);setLeverageDropdownOpen(false);}} className="bg-[#111820] rounded-lg px-1.5 min-[375px]:px-2 md:px-3 py-1 min-[375px]:py-1.5 flex items-center justify-between cursor-pointer border border-[#111820]">
+                  <span className="text-[7px] min-[375px]:text-[8px] md:text-[11px] text-white font-bold">{marginType}</span>
+                  <ChevronDown className="w-2 h-2 min-[375px]:w-2.5 min-[375px]:h-2.5 text-gray-400" />
+                </div>
+                {marginDropdownOpen && <div className="absolute top-[calc(100%+2px)] left-0 w-full bg-[#111820] border border-white/10 rounded-lg z-50 shadow-2xl py-0.5">
+                  {(["CROSS","ISOLATED"] as const).map(t => <div key={t} onClick={() => {setMarginType(t);setMarginDropdownOpen(false);}} className={`px-2 py-1 text-[7px] min-[375px]:text-[8px] md:text-[11px] font-bold cursor-pointer ${marginType===t?"text-[#00ffa3] bg-white/5":"text-white hover:bg-white/5"}`}>{t}</div>)}
+                </div>}
+              </div>
+              <div className="flex-1 relative">
+                <div onClick={() => {setLeverageDropdownOpen(!leverageDropdownOpen);setMarginDropdownOpen(false);}} className="bg-[#111820] rounded-lg px-1.5 min-[375px]:px-2 md:px-3 py-1 min-[375px]:py-1.5 flex items-center justify-between cursor-pointer border border-[#111820]">
+                  <span className="text-[7px] min-[375px]:text-[8px] md:text-[11px] text-white font-bold">{leverage}X</span>
+                  <ChevronDown className="w-2 h-2 min-[375px]:w-2.5 min-[375px]:h-2.5 text-gray-400" />
+                </div>
+                {leverageDropdownOpen && <div className="absolute right-0 top-[calc(100%+2px)] w-full bg-[#111820] border border-white/10 rounded-lg z-50 shadow-2xl py-0.5">
+                  {[1,2,3,4,5].map(v => <div key={v} onClick={() => {setLeverage(v);setLeverageDropdownOpen(false);}} className={`px-2 py-1 text-[7px] min-[375px]:text-[8px] md:text-[11px] font-bold cursor-pointer ${leverage===v?"text-[#00ffa3] bg-white/5":"text-white hover:bg-white/5"}`}>{v}X</div>)}
+                </div>}
+              </div>
+            </div>
+            {/* Trigger Price */}
+            {orderType === "Trigger" && (
+              <div className="mb-1">
+                <div className="flex justify-between mb-0.5"><span className="text-[7px] min-[375px]:text-[8px] text-gray-500 font-bold">Trigger</span><span className="text-[6px] min-[375px]:text-[7px] text-gray-500">USDT</span></div>
+                <div className="bg-[#111820] rounded-lg px-1.5 min-[375px]:px-2 py-1 border border-transparent focus-within:border-[#00ffa3]/30">
+                  <input type="number" value={triggerPriceInput} onChange={e => setTriggerPriceInput(e.target.value)} placeholder="0.00" className="w-full bg-transparent border-none outline-none text-[9px] min-[375px]:text-[10px] md:text-[12px] font-medium text-white placeholder-gray-700 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                </div>
+              </div>
+            )}
+            {/* Price */}
+            {!(orderType === "Trigger" && triggerExecType === "Market") && (
+              <div className="mb-1">
+                <div className="flex justify-between mb-0.5"><span className="text-[7px] min-[375px]:text-[8px] text-gray-500 font-bold">Price</span><span className="text-[6px] min-[375px]:text-[7px] text-gray-500">USDT</span></div>
+                <div className="bg-[#111820] rounded-lg px-1.5 min-[375px]:px-2 py-1 border border-transparent focus-within:border-[#00ffa3]/30">
+                  <input type="number" value={orderType==="Market"?(priceNumeric>0?priceNumeric.toFixed(2):""):priceInput} onChange={e => setPriceInput(e.target.value)} placeholder={orderType==="Market"?"Market":"0.00"} disabled={orderType==="Market"} className="w-full bg-transparent border-none outline-none text-[9px] min-[375px]:text-[10px] md:text-[12px] font-medium text-white placeholder-gray-700 disabled:text-gray-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                </div>
+              </div>
+            )}
+            {/* Size */}
+            <div className="mb-1">
+              <div className="flex justify-between mb-0.5"><span className="text-[7px] min-[375px]:text-[8px] text-gray-500 font-bold">Size</span><span className="text-[6px] min-[375px]:text-[7px] text-gray-500">BTC</span></div>
+              <div className="bg-[#111820] rounded-lg px-1.5 min-[375px]:px-2 py-1 border border-transparent focus-within:border-[#00ffa3]/30">
+                <input type="number" value={sizeInput} onChange={e => handleSizeChange(e.target.value)} placeholder="0.00" className="w-full bg-transparent border-none outline-none text-[9px] min-[375px]:text-[10px] md:text-[12px] font-medium text-white placeholder-gray-700 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+              </div>
+            </div>
+
+            {/* Slider */}
+            <div className="mb-1 px-0.5">
+              <input type="range" min="0" max="100" value={percent} onChange={e => handleSliderChange(Number(e.target.value))} className="trade-slider w-full" style={{background:`linear-gradient(to right,#00FFA3 ${percent}%,#111820 ${percent}%)`}} />
+              <div className="flex justify-between mt-0.5">
+                {[0,25,50,75,100].map(p => <button key={p} onClick={() => handleSliderChange(p)} className={`text-[6px] min-[375px]:text-[7px] md:text-[8px] font-bold bg-transparent border-none cursor-pointer ${percent===p?"text-[#00FFA3]":"text-gray-500"}`}>{p}%</button>)}
+              </div>
+            </div>
+            {/* Available Balance */}
+            <div className="flex justify-between items-center py-0.5 mb-1.5 min-[375px]:mb-2">
+              <span className="text-[7px] min-[375px]:text-[8px] text-gray-500">Available Balance</span>
+              <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] font-bold text-white">{fmt(availableBalance)} USDT</span>
+            </div>
+            {/* Buy / Sell Buttons */}
+            <div className="flex flex-col gap-1 min-[375px]:gap-1.5">
+              <button onClick={() => openTrade("long")} className="w-full h-7 min-[375px]:h-8 md:h-10 rounded-lg bg-gradient-to-b from-[#00FFA3] to-[#009962] hover:brightness-110 border-none cursor-pointer transition-all flex flex-col items-center justify-center shadow-[0_0_8px_rgba(0,255,163,0.2)]">
+                <span className="font-bold text-[#05070a] text-[9px] min-[375px]:text-[10px] md:text-[12px] tracking-wide leading-none">{orderType==="Market"?"BUY / LONG":`${orderType.toUpperCase()} BUY`}</span>
+                <span className="text-[5px] min-[375px]:text-[6px] text-[#05070a]/70 font-bold tracking-wider leading-none mt-0.5">PRICE: {orderType==="Market"?currentPrice:priceInput||"—"}</span>
+              </button>
+              <button onClick={() => openTrade("short")} className="w-full h-7 min-[375px]:h-8 md:h-10 rounded-lg bg-gradient-to-b from-[#FF3B3B] to-[#992323] hover:brightness-110 border-none cursor-pointer transition-all flex flex-col items-center justify-center shadow-[0_0_8px_rgba(255,59,59,0.2)]">
+                <span className="font-bold text-white text-[9px] min-[375px]:text-[10px] md:text-[12px] tracking-wide leading-none">{orderType==="Market"?"SELL / SHORT":`${orderType.toUpperCase()} SELL`}</span>
+                <span className="text-[5px] min-[375px]:text-[6px] text-white/70 font-bold tracking-wider leading-none mt-0.5">PRICE: {orderType==="Market"?currentPrice:priceInput||"—"}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ─── Positions / Orders Section ─── */}
+        <div className="border border-[#1a2a32] rounded-[16px] bg-[#0A0F14]/90 backdrop-blur-md overflow-hidden">
+          {/* Tabs */}
+          <div className={`flex items-center gap-2 min-[375px]:gap-3 md:gap-5 px-3 min-[375px]:px-4 md:px-6 pt-2 border-b border-white/5 overflow-x-auto shrink-0 ${scrollbarCls}`}>
+            {bottomTabs.map(tab => {
+              const on = bottomTab===tab.id;
+              return <button key={tab.id} onClick={() => setBottomTab(tab.id)} className={`pb-2 text-[6px] min-[375px]:text-[7px] md:text-[9px] font-bold tracking-wider border-none cursor-pointer relative whitespace-nowrap ${on?"text-[#00ffa3]":"text-[#A6B2C8] hover:text-white"}`} style={{background:"transparent"}}>
+                {tab.label}{on && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#00ffa3] shadow-[0_0_6px_rgba(0,255,163,1)] rounded-t-full" />}
+              </button>;
+            })}
+          </div>
+          {/* Tab Content */}
+          <div className="overflow-x-auto">
+            {bottomTab === "positions" && (<>
+              <div className="grid grid-cols-7 gap-1 px-3 min-[375px]:px-4 md:px-6 py-1.5 border-b border-white/5 min-w-[500px]">
+                {["SIZE","ENTRY PRICE","MARK PRICE","LIQ.PRICE","MARGIN/RATIO","PNL (ROE%)",""].map(c => <span key={c} className="text-[6px] min-[375px]:text-[7px] md:text-[9px] text-[#A6B2C8] font-semibold tracking-[0.5px] uppercase">{c}</span>)}
+              </div>
+              {positions.length ? positions.map(pos => {
+                const mark = priceMap[pos.pair]||pos.entryPrice;
+                const pnl = calcPnl(pos, mark);
+                const roe = (pnl/pos.margin)*100;
+                const up = pnl>=0;
+                return <div key={pos.id} className="grid grid-cols-7 gap-1 py-1.5 px-3 min-[375px]:px-4 md:px-6 border-b border-white/5 items-center min-w-[500px]">
+                  <span className={`text-[7px] min-[375px]:text-[8px] md:text-[10px] font-bold ${pos.side==="long"?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>${fmt(pos.sizeUsdt)}</span>
+                  <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-white font-mono">{fmt(pos.entryPrice)}</span>
+                  <span className={`text-[7px] min-[375px]:text-[8px] md:text-[10px] font-mono ${up?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{fmt(mark)}</span>
+                  <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-[#ff9500] font-mono">{fmt(pos.liqPrice)}</span>
+                  <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-white font-mono">${fmt(pos.margin)}</span>
+                  <span className={`text-[7px] min-[375px]:text-[8px] md:text-[10px] font-bold ${up?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{up?"+":""}{pnl.toFixed(2)}</span>
+                  <button onClick={() => closePosition(pos.id)} className="text-[6px] min-[375px]:text-[7px] font-bold text-gray-400 bg-[#1a2030] px-1 py-0.5 rounded border-none cursor-pointer w-fit">Close</button>
+                </div>;
+              }) : <div className="flex flex-col items-center justify-center gap-2 py-6">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4a5568" strokeWidth="1.5"><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></svg>
+                <span className="text-gray-500 text-[8px] min-[375px]:text-[9px] md:text-[10px]">No Open Positions</span>
+              </div>}
+            </>)}
+
+            {bottomTab === "open-orders" && (
+              pendingOrders.length ? <div className="px-3 min-[375px]:px-4 md:px-6 py-2">
+                {pendingOrders.map(o => <div key={o.id} className="flex items-center justify-between py-1.5 border-b border-white/5">
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-[8px] min-[375px]:text-[9px] font-bold ${o.side==="long"?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{o.symbol} {o.side==="long"?"Buy":"Sell"}</span>
+                    <span className="text-[8px] text-gray-400">{fmt(o.price)}</span>
+                  </div>
+                  <button onClick={() => cancelOrder(o.id)} className="text-[7px] font-bold text-[#ff4d4d] bg-[#2a1520] px-1.5 py-0.5 rounded border-none cursor-pointer">Cancel</button>
+                </div>)}
+              </div> : <div className="flex items-center justify-center py-6 text-gray-500 text-[8px] min-[375px]:text-[9px]">No Open Orders</div>
+            )}
+
+            {bottomTab === "order-history" && (
+              orderHistory.length ? <div className="px-3 min-[375px]:px-4 md:px-6 py-2">
+                {orderHistory.map(o => <div key={o.id} className="flex items-center justify-between py-1.5 border-b border-white/5">
+                  <span className={`text-[8px] min-[375px]:text-[9px] font-bold ${o.side==="long"?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{o.symbol} {o.type}</span>
+                  <span className="text-[8px] text-gray-400">{fmtDate(o.createdAt)}</span>
+                </div>)}
+              </div> : <div className="flex items-center justify-center py-6 text-gray-500 text-[8px] min-[375px]:text-[9px]">No Order History</div>
+            )}
+
+            {bottomTab === "trade-history" && (
+              tradeHistory.length ? <div className="px-3 min-[375px]:px-4 md:px-6 py-2">
+                {tradeHistory.map(t => {
+                  const up=t.pnl>=0;
+                  return <div key={t.id} className="flex items-center justify-between py-1.5 border-b border-white/5">
+                    <span className={`text-[8px] min-[375px]:text-[9px] font-bold ${t.side==="long"?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{t.symbol} {t.side==="long"?"Long":"Short"}</span>
+                    <span className={`text-[8px] font-bold ${up?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{up?"+":""}{t.pnl.toFixed(2)}</span>
+                  </div>;
+                })}
+              </div> : <div className="flex items-center justify-center py-6 text-gray-500 text-[8px] min-[375px]:text-[9px]">No Trade History</div>
+            )}
+
+            {bottomTab === "assets" && <div className="flex items-center justify-center py-6 text-gray-500 text-[8px] min-[375px]:text-[9px]">Assets view coming soon</div>}
+          </div>
+        </div>
+
+        {/* ─── Footer Info ─── */}
+        <div className="flex flex-wrap items-center justify-between px-3 min-[375px]:px-4 md:px-6 py-2 min-[375px]:py-2.5">
+          <div className="flex items-center gap-2 min-[375px]:gap-3">
+            <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-[#00ffa3] shadow-[0_0_5px_#00ffa3]" /><span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-[#afc0c9]">Connection: Secure</span></div>
+            <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-[#89a4ad]">Server Time: {kyivTime} (UTC)</span>
+          </div>
+          <span className="text-[6px] min-[375px]:text-[7px] md:text-[9px] text-[#A6B2C8] font-bold tracking-widest">HEDGE PROTOCOL V2.4.1</span>
+        </div>
+      </div>
+
+      {/* ─── Fixed Bottom Navigation ─── */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around bg-[#05070A]/95 backdrop-blur-md border-t border-white/5 py-1.5 min-[375px]:py-2 md:py-3 xl:hidden">
+        {[
+          {label:"Trading",icon:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>,active:true},
+          {label:"Balance",icon:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg>},
+          {label:"Tournaments",icon:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/></svg>},
+          {label:"History",icon:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>},
+          {label:"Account",icon:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>},
+        ].map(item => (
+          <button key={item.label} className={`flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer transition-colors ${item.active?"text-[#00ffa3]":"text-gray-500 hover:text-gray-300"}`}>
+            <div className="w-4 h-4 min-[375px]:w-[18px] min-[375px]:h-[18px] md:w-5 md:h-5 flex items-center justify-center">{item.icon}</div>
+            <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] font-semibold">{item.label}</span>
+          </button>
+        ))}
+      </nav>
+    </div>
+
+    {/* ═══ DESKTOP LAYOUT (≥ xl) ═══ */}
+    <div className="hidden xl:flex flex-col h-screen bg-[#05070A] text-white font-inter overflow-hidden relative">
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden bg-[#05070a]">
         <img src="/images/bg-lines.png" alt="" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40" />
         <img src="/images/bg-lines1.png" alt="" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-11 mix-blend-screen" />
@@ -491,13 +842,7 @@ export const ControlPanel = (): JSX.Element => {
             {/* ─── Bottom Panel: Positions / Orders / History ─── */}
             <GradientBorderPanel className="w-full shrink-0 flex-1 min-h-[200px]">
               <div className={`flex items-center gap-6 px-6 pt-3 border-b border-white/5 shrink-0 overflow-x-auto ${scrollbarCls}`}>
-                {[
-                  { id: "positions", label: `POSITIONS (${positions.length})` },
-                  { id: "open-orders", label: `OPEN ORDERS (${pendingOrders.length})` },
-                  { id: "order-history", label: "ORDER HISTORY" },
-                  { id: "trade-history", label: "TRADE HISTORY" },
-                  { id: "assets", label: "ASSETS" },
-                ].map(tab => {
+                {bottomTabs.map(tab => {
                   const on = bottomTab === tab.id;
                   return <button key={tab.id} onClick={() => setBottomTab(tab.id)} className={`pb-3 text-[11px] font-bold tracking-wider border-none cursor-pointer transition-all relative whitespace-nowrap ${on?"text-[#00ffa3]":"text-[#A6B2C8] hover:text-white"}`} style={{ background:"transparent" }}>
                     {tab.label}{on && <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#00ffa3] shadow-[0_0_8px_rgba(0,255,163,1)] rounded-t-full" />}
@@ -687,11 +1032,6 @@ export const ControlPanel = (): JSX.Element => {
 
                 {/* Slider */}
                 <div className="mb-2 px-1">
-                  <style>{`
-                    .trade-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; border-radius: 2px; outline: none; cursor: pointer; }
-                    .trade-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #00FFA3; cursor: pointer; border: 2px solid #05070A; box-shadow: 0 0 6px rgba(0,255,163,0.5); margin-top: -1px; }
-                    .trade-slider::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: #00FFA3; cursor: pointer; border: 2px solid #05070A; box-shadow: 0 0 6px rgba(0,255,163,0.5); }
-                  `}</style>
                   <input type="range" min="0" max="100" value={percent} onChange={e => handleSliderChange(Number(e.target.value))}
                     className="trade-slider"
                     style={{ background: `linear-gradient(to right,#00FFA3 ${percent}%,#111820 ${percent}%)` }} />
@@ -734,5 +1074,5 @@ export const ControlPanel = (): JSX.Element => {
         </div>
       </div>
     </div>
-  );
+  </>);
 };
