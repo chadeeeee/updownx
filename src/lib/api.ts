@@ -102,6 +102,15 @@ export type PaymentRecord = {
   updated_at: string;
 };
 
+export type ActiveChallenge = {
+  id: number;
+  challenge_id: string;
+  challenge_name: string;
+  balance: number;
+  status: string;
+  created_at: string;
+};
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const token = localStorage.getItem("updownx-token");
   let response: Response;
@@ -162,9 +171,11 @@ export const api = {
       body: JSON.stringify(payload),
     }),
   accounts: (userId: number) =>
-    request<{ user: AppUser | null; orders: Array<{ id: number; challenge_name: string; amount: number; status: string; created_at: string }> }>(
+    request<{ user: AppUser | null; orders: Array<{ id: number; challenge_name: string; amount: number; status: string; created_at: string }>; challenges: ActiveChallenge[] }>(
       `/api/accounts/${userId}`,
     ),
+  balance: (userId: number) =>
+    request<{ balance: number }>(`/api/balance/${userId}`),
   payments: (userId: number) =>
     request<PaymentRecord[]>(`/api/payments/${userId}`),
   payment: (userId: number, paymentId: number) =>

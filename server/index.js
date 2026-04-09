@@ -558,6 +558,36 @@ const createNowPaymentsCharge = async ({
 
 const isValidAccountId = (value) => typeof value === "string" && /^\d{12}$/.test(value);
 
+const creditBalanceForOrder = async (userId, orderId, challenge, db = pool) => {
+  // Check if already credited
+  const existing = await db.query(
+    "SELECT 1 FROM balance_transactions WHERE challenge_order_id = $1 LIMIT 1",
+    [orderId],
+  );
+  if (existing.rowCount) {
+    return; // Already credited
+  }
+
+  // Insert balance transaction
+  await db.query(
+    `INSERT INTO balance_transactions(user_id, challenge_order_id, challenge_id, challenge_name, amount, type, description)
+     VALUES($1, $2, $3, $4, $5, 'credit', $6)`,
+    [userId, orderId, challenge.id, challenge.name, challenge.balance, `Challenge ${challenge.name} purchased`],
+  );
+
+  // Upsert balance
+  await db.query(
+    `INSERT INTO balances(user_id, balance, updated_at)
+     VALUES($1, $2, NOW())
+     ON CONFLICT(user_id) DO UPDATE SET
+       balance = balances.balance + $2,
+       updated_at = NOW()`,
+    [userId, challenge.balance],
+  );
+
+  console.log(`[balance] credited ${challenge.balance} to user ${userId} for order ${orderId} (${challenge.name})`);
+};
+
 const generateNumericAccountId = () =>
   Array.from({ length: 12 }, () => Math.floor(Math.random() * 10)).join("");
 
@@ -669,6 +699,49 @@ const ensureSchema = async () => {
        AND provider_payment_id IS NULL
        AND (payment_url IS NULL OR payment_url = '')`,
   );
+
+  // Create balances table
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS balances (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+      balance NUMERIC NOT NULL DEFAULT 0,
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(user_id)
+    );
+  `);
+
+  // Create balance_transactions table to track each credit/debit
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS balance_transactions (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+      challenge_order_id INTEGER,
+      challenge_id TEXT,
+      challenge_name TEXT,
+      amount NUMERIC NOT NULL,
+      type TEXT NOT NULL DEFAULT 'credit',
+      description TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+  `);
+
+  // Backfill balances for completed orders that haven't been credited yet
+  const completedOrders = await pool.query(
+    `SELECT co.id, co.user_id, co.challenge_id, co.challenge_name
+     FROM challenge_orders co
+     WHERE co.status = '${PAYMENT_STATUS.COMPLETED}'
+       AND NOT EXISTS (
+         SELECT 1 FROM balance_transactions bt WHERE bt.challenge_order_id = co.id
+       )
+     ORDER BY co.created_at ASC`,
+  );
+  for (const order of completedOrders.rows) {
+    const challenge = challenges.find((c) => c.id === order.challenge_id);
+    if (challenge) {
+      await creditBalanceForOrder(order.user_id, order.id, challenge);
+    }
+  }
 
   const users = await pool.query("SELECT id, account_id FROM app_users ORDER BY id ASC");
   for (const user of users.rows) {
@@ -864,7 +937,29 @@ app.get("/api/accounts/:userId", requireAuth, async (req, res) => {
     `SELECT id, challenge_name, amount, status, created_at FROM ${paymentsTableIdentifier} ORDER BY created_at DESC`,
   );
 
-  return res.json({ user: user.rows[0], orders: orders.rows });
+  // Get active challenges (COMPLETED payments)
+  const activeChallenges = await pool.query(
+    `SELECT co.id, co.challenge_id, co.challenge_name, co.created_at, co.status
+     FROM challenge_orders co
+     WHERE co.user_id = $1 AND co.status = '${PAYMENT_STATUS.COMPLETED}'
+     ORDER BY co.created_at DESC`,
+    [userId],
+  );
+
+  // Map challenge details
+  const userChallenges = activeChallenges.rows.map((row) => {
+    const challenge = challenges.find((c) => c.id === row.challenge_id);
+    return {
+      id: row.id,
+      challenge_id: row.challenge_id,
+      challenge_name: row.challenge_name,
+      balance: challenge ? challenge.balance : 0,
+      status: row.status,
+      created_at: row.created_at,
+    };
+  });
+
+  return res.json({ user: user.rows[0], orders: orders.rows, challenges: userChallenges });
 });
 
 app.get("/api/payments/:userId", requireAuth, async (req, res) => {
@@ -940,6 +1035,29 @@ app.get("/api/payments/:userId/:paymentId", requireAuth, async (req, res) => {
     payment: paymentQuery.rows[0],
     providerStatus: null,
   });
+});
+
+// Get user balance
+app.get("/api/balance/:userId", requireAuth, async (req, res) => {
+  const userId = Number(req.params.userId);
+  if (!ensureAuthorizedUserId(req, res, userId)) {
+    return;
+  }
+  if (userId === 0 && req.authUserId === 0) {
+    return res.json({ balance: 0 });
+  }
+
+  try {
+    const result = await pool.query(
+      "SELECT balance FROM balances WHERE user_id = $1",
+      [userId],
+    );
+    const balance = result.rowCount ? Number(result.rows[0].balance) : 0;
+    return res.json({ balance });
+  } catch (error) {
+    console.error("[balance] failed", error);
+    return res.status(500).json({ message: "Failed to fetch balance." });
+  }
 });
 
 app.patch("/api/payments/:userId/:paymentId/status", requireAuth, async (req, res) => {
@@ -1032,6 +1150,18 @@ app.post("/api/payments/nowpayments/ipn", async (req, res) => {
          WHERE challenge_order_id = $1`,
         [order.id, normalizedStatus, providerInvoiceId, providerPaymentId, payAddress, payAmount, payCurrency, paymentUrl],
       );
+    }
+
+    // Credit balance if status is COMPLETED
+    if (normalizedStatus === PAYMENT_STATUS.COMPLETED) {
+      const challenge = challenges.find((c) => c.id === order.challenge_id);
+      if (challenge) {
+        try {
+          await creditBalanceForOrder(order.user_id, order.id, challenge);
+        } catch (balanceError) {
+          console.error("[nowpayments ipn] balance credit failed", balanceError);
+        }
+      }
     }
 
     return res.json({ ok: true });
