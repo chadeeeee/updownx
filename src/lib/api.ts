@@ -1,5 +1,19 @@
-const mode = import.meta.env.VITE_MODE || "local";
-const API_URL = mode === "host" ? "https://api.updownxpro.com" : "http://localhost:4000";
+// VITE_MODE: "server" | "local"
+//   "server" — frontend sends requests to the remote API (VITE_API_URL)
+//   "local"  — frontend sends requests to local backend (http://localhost:PORT)
+const mode = (import.meta.env.VITE_MODE || "local") as "server" | "local" | "host";
+const resolveApiUrl = (): string => {
+  // "local" → local dev backend (always localhost)
+  if (mode === "local") {
+    return `http://localhost:${import.meta.env.VITE_API_PORT || "4000"}`;
+  }
+
+  // "server" or legacy "host" → remote API (use VITE_API_URL or default)
+  const url = import.meta.env.VITE_API_URL;
+  return url ? url.replace(/\/+$/, "") : "https://api.updownxpro.com";
+};
+const API_URL = resolveApiUrl();
+console.log("[api] mode:", mode, "→", API_URL);
 
 export class ApiError extends Error {
   status?: number;
