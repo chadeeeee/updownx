@@ -129,9 +129,6 @@ const SYMBOL_TO_ICON: Record<string, string> = {
   ICX: "Icon",
   BAL: "Bancor", // Close enough fallback if Balancer is missing
   CHZ: "Chiliz",
-  STX: "Stacks",
-  LPT: "LivePeer",
-  ANKR: "Ankr",
   OCEAN: "Ocean",
   FLUX: "Flux",
   BUSD: "BinanceUsd",
@@ -140,6 +137,10 @@ const SYMBOL_TO_ICON: Record<string, string> = {
   AUDIO: "Audius",
   API3: "Api3",
   BAND: "Band",
+  NEO: "Neo",
+  IOTA: "Iota",
+  QNT: "Quant",
+  LUNA: "Terra",
 };
 
 // Safety list of all valid LogoNames from cryptocons to prevent rendering crashes
@@ -147,10 +148,54 @@ const VALID_ICONS = new Set([
   "Abbc", "AbbcBadge", "AcalaNetwork", "AcalaNetworkBadge", "Achain", "AchainBadge", "Adcoin", "AdcoinBadge", "AidosKuneen", "AidosKuneenBadge", "Aion", "AionBadge", "Akropolis", "AkropolisBadge", "Algorand", "AlgorandBadge", "AlphaWallet", "AlphaWalletBadge", "Alqo", "AlqoBadge", "Ampleforth", "AmpleforthBadge", "AnchorProtocol", "AnchorProtocolBadge", "Ankr", "AnkrBadge", "ApeNft", "ApeNftBadge", "ApolloCurrency", "ApolloCurrencyBadge", "AppCoins", "AppCoinsBadge", "Arweave", "ArweaveBadge", "Avalanche", "AvalancheBadge", "BLThreeP", "BLThreePBadge", "Bancor", "BancorBadge", "BanklessTimes", "BanklessTimesBadge", "BasicAttentionToken", "BasicAttentionTokenBadge", "Beam", "BeamBadge", "BeanCash", "BeanCashBadge", "Biconomy", "BiconomyBadge", "Binance", "BinanceBadge", "BinanceSmartChain", "BinanceSmartChainBadge", "BinanceUsd", "BinanceUsdBadge", "BitMart", "BitMartBadge", "Bitbank", "BitbankBadge", "Bitcoin", "BitcoinBadge", "BitcoinCash", "BitcoinCashBadge", "BitcoinPlus", "BitcoinPlusBadge", "BitcoinPrivate", "BitcoinPrivateBadge", "BitcoinWrapped", "BitcoinWrappedBadge", "Bitcore", "BitcoreBadge", "Bitfinex", "BitfinexBadge", "Bitflyer", "BitflyerBadge", "Bitglobal", "BitglobalBadge", "Bithumb", "BithumbBadge", "Bitpanda", "BitpandaBadge", "Bitrue", "BitrueBadge", "Bitstamp", "BitstampBadge", "Bittrex", "BittrexBadge", "Bitvavo", "BitvavoBadge", "Blackmoon", "BlackmoonBadge", "BlockFi", "BlockFiBadge", "Braintrust", "BraintrustBadge", "Brave", "BraveBadge", "Cardano", "CardanoBadge", "Casper", "CasperBadge", "Celo", "CeloBadge", "Celsius", "CelsiusBadge", "Centrifuge", "CentrifugeBadge", "CertusOne", "CertusOneBadge", "Cex", "CexBadge", "Chainlink", "ChainlinkBadge", "ChangellyPro", "ChangellyProBadge", "CoinDesk", "CoinDeskBadge", "CoinGecko", "CoinGeckoBadge", "CoinMarketCap", "CoinMarketCapBadge", "CoinTiger", "CoinTigerBadge", "Coinbase", "CoinbaseBadge", "Coinone", "CoinoneBadge", "Coinranking", "CoinrankingBadge", "Coinwink", "CoinwinkBadge", "Compound", "CompoundBadge", "Consensys", "ConsensysBadge", "ConsensysCodefi", "ConsensysCodefiBadge", "Convex", "ConvexBadge", "Core", "CoreBadge", "CoreToken", "CoreTokenBadge", "Cortex", "CortexBadge", "Cosmos", "CosmosBadge", "Coti", "CotiBadge", "Covalent", "CovalentBadge", "Cream", "CreamBadge", "CryptoCom", "CryptoComBadge", "CurrencyCom", "CurrencyComBadge", "Curve", "CurveBadge", "Dash", "DashBadge", "Decentraland", "DecentralandBadge", "Decred", "DecredBadge", "DefiCoins", "DefiCoinsBadge", "Digibyte", "DigibyteBadge", "Digifinex", "DigifinexBadge", "DigitalReserve", "DigitalReserveBadge", "Discord", "DiscordBadge", "DockDock", "DockDockBadge", "Dogecoin", "DogecoinBadge", "ECash", "ECashBadge", "Efinity", "EfinityBadge", "Ens", "EnsBadge", "Eosio", "EosioBadge", "Ethereum", "EthereumBadge", "EthereumClassic", "EthereumClassicBadge", "Etoro", "EtoroBadge", "Fei", "FeiBadge", "FileCoin", "FileCoinBadge", "Flow", "FlowBadge", "Flux", "FluxBadge", "Ftx", "FtxBadge", "Gala", "GalaBadge", "GateIo", "GateIoBadge", "Gemini", "GeminiBadge", "GitHub", "GitHubBadge", "Gitcoin", "GitcoinBadge", "Gnosis", "GnosisBadge", "Graph", "GraphBadge", "Harmony", "HarmonyBadge", "Hedera", "HederaBadge", "Hex", "HexBadge", "Hive", "HiveBadge", "Holo", "HoloBadge", "Horizen", "HorizenBadge", "HuobiGlobal", "HuobiGlobalBadge", "HushHush", "HushHushBadge", "ImmutableX", "ImmutableXBadge", "Indodax", "IndodaxBadge", "Infura", "InfuraBadge", "Injective", "InjectiveBadge", "Iota", "IotaBadge", "Iotex", "IotexBadge", "Iqeon", "IqeonBadge", "Iris", "IrisBadge", "Kadena", "KadenaBadge", "Kambria", "KambriaBadge", "Kava", "KavaBadge", "KeepNetwork", "KeepNetworkBadge", "KeeperDao", "KeeperDaoBadge", "Kraken", "KrakenBadge", "Ksm", "KsmBadge", "Kucoin", "KucoinBadge", "KusamaBadge", "LBank", "LBankBadge", "Ledger", "LedgerBadge", "Lido", "LidoBadge", "Liquid", "LiquidBadge", "Litecoin", "LitecoinBadge", "LivePeer", "LivePeerBadge", "Loopring", "LoopringBadge", "Luno", "LunoBadge", "MathWallet", "MathWalletBadge", "Medibloc", "MediblocBadge", "Meetone", "MeetoneBadge", "MetaMask", "MetaMaskBadge", "Mina", "MinaBadge", "Mint", "MintBadge", "Monero", "MoneroBadge", "Multiavatar", "MultiavatarBadge", "MyCrypto", "MyCryptoBadge", "NCash", "NCashBadge", "NGrave", "NGraveBadge", "Nav", "NavBadge", "Nebeus", "NebeusBadge", "Nem", "NemBadge", "Neo", "NeoBadge", "Nervos", "NervosBadge", "Nexo", "NexoBadge", "NftLaunchpad", "NftLaunchpadBadge", "Nftx", "NftxBadge", "Ngc", "NgcBadge", "Nym", "NymBadge", "Ocean", "OceanBadge", "OkCash", "OkCashBadge", "Okcoin", "OkcoinBadge", "Okex", "OkexBadge", "Okx", "OkxBadge", "Omg", "OmgBadge", "Omisego", "OmisegoBadge", "OneInch", "OneInchBadge", "OpenDao", "OpenDaoBadge", "Origin", "OriginBadge", "Pancakeswap", "PancakeswapBadge", "Parsiq", "ParsiqBadge", "Part", "PartBadge", "Paxos", "PaxosBadge", "Paybis", "PaybisBadge", "Phantom", "PhantomBadge", "Pillar", "PillarBadge", "Ping", "PingBadge", "Pinkcoin", "PinkcoinBadge", "Pivx", "PivxBadge", "Polkadot", "PolkadotBadge", "Poloniex", "PoloniexBadge", "Polygon", "PolygonBadge", "Polymath", "PolymathBadge", "Presearch", "PresearchBadge", "Pril", "PrilBadge", "Probit", "ProbitBadge", "ProjectGalaxy", "ProjectGalaxyBadge", "Qtum", "QtumBadge", "Quant", "QuantBadge", "QuantStamp", "QuantStampBadge", "Quorum", "QuorumBadge", "Ravencoin", "RavencoinBadge", "Reef", "ReefBadge", "Refereum", "RefereumBadge", "RenRen", "RenRenBadge", "Request", "RequestBadge", "Reserve", "ReserveBadge", "Revain", "RevainBadge", "Ripio", "RipioBadge", "Rise", "RiseBadge", "Secret", "SecretBadge", "Serum", "SerumBadge", "ShibaInu", "ShibaInuBadge", "SigmaPrime", "SigmaPrimeBadge", "Solana", "SolanaBadge", "Stacks", "StacksBadge", "Stakenet", "StakenetBadge", "Startcoin", "StartcoinBadge", "Status", "StatusBadge", "Steem", "SteemBadge", "Stellar", "StellarBadge", "SushiSwap", "SushiSwapBadge", "Suterusu", "SuterusuBadge", "SwarmCity", "SwarmCityBadge", "Symbol", "Synthetix", "SynthetixBadge", "Syscoin", "SyscoinBadge", "Tenx", "TenxBadge", "Terarium", "TerariumBadge", "Terra", "TerraBadge", "Tether", "TetherBadge", "TetherGold", "TetherGoldBadge", "Tezos", "TezosBadge", "Theta", "ThetaBadge", "ThetaFuel", "ThetaFuelBadge", "ThorChain", "ThorChainBadge", "Trezor", "TrezorBadge", "Tron", "TronBadge", "TrueUsd", "TrueUsdBadge", "Truffle", "TruffleBadge", "Uma", "UmaBadge", "Uniswap", "UniswapBadge", "UnstoppableDomains", "UnstoppableDomainsBadge", "Upbit", "UpbitBadge", "Uphold", "UpholdBadge", "Varen", "VarenBadge", "VeChain", "VeChainBadge", "Vega", "VegaBadge", "Velas", "VelasBadge", "VenusReward", "VenusRewardBadge", "Verasity", "VerasityBadge", "Verus", "VerusBadge", "Waves", "WavesBadge", "WazirX", "WazirXBadge", "XMark", "XMarkBadge", "Xensor", "XensorBadge", "Xmx", "XmxBadge", "Yearn", "YearnBadge", "ZCash", "ZCashBadge", "Zapper", "ZapperBadge", "Zb", "ZbBadge", "Zcoin", "ZcoinBadge", "ZebPay", "ZebPayBadge", "ZeroCollateralDai", "ZeroX", "Zilliqa"
 ]);
 
-/* ═══════════════════════ Helpers ═══════════════════════ */
+/* ═══════════════════════ Custom Icons Override ═══════════════════════ */
+// Insert your own custom image paths here for any coin. e.g. "XRP": "/images/icons/xrp.png"
+// This will override both the cryptocons library and the external CDN fallback.
+const CUSTOM_ICONS: Record<string, string> = {
+  TON: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/17980/large/photo_2024-09-10_17.09.00.jpeg?1725963446",
+  APT: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/26455/large/Aptos-Network-Symbol-Black-RGB-1x.png?1761789140&bg=white",
+  ARB: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/16547/large/arb.jpg?1721358242",
+  CRO: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/7310/large/cro_token_logo.png?1696507599",
+  NEAR: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/10365/large/near.jpg?1696510367",
+  MNT: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/30980/large/MNT_Token_Logo.png?1765516974",
+  OP: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/25244/large/Token.png?1774456081",
+  KAS: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/25751/large/kaspa-icon-exchanges.png?1696524837",
+  RNDR: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/11636/large/rndr.png?1696511529",
+  RPL: "https://images.weserv.nl/?url=raw.githubusercontent.com/Uniswap/assets/master/blockchains/ethereum/assets/0xD33526068D116cE69F19A9ee46F0bd304F21A51f/logo.png",
+  EGLD: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/12335/large/egld-token-logo.png?1696512162",
+  SEI: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/28205/large/Sei_Logo_-_Transparent.png?1696527207",
+  SUI: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/26375/large/sui-ocean-square.png?1727791290",
+  AXS: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/13029/large/axie_infinity_logo.png?1696512817",
+  HNT: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/4284/large/helium_logo_use.png?1748092589",
+  CFX: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/13079/large/3vuYMbjN.png?1696512867&bg=white",
+  ROSE: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/13162/large/200x200_%28Rounded%29.png?1743579893",
+  GMX: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/18323/large/arbit.png?1696517814",
+  DYDX: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/32594/large/dydx.png?1698673495",
+  TWT: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/11085/large/Trust.png?1696511026",
+  LUNC: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/8284/large/01_LunaClassic_color.png?1696508486",
+  RON: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/20009/large/photo_2024-04-06_22-52-24.jpg?1712415367",
+  WOO: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/12921/large/WOO_Logos_2023_Profile_Pic_WOO.png?1696512709",
+  FTM: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/4001/large/Fantom_round.png?1696504642",
+  AUDIO: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/12913/large/audio-token-asset_2x.png?1747243328",
+  API3: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/13256/large/Api3-Token.png?1742439807",
+  IOTA: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/692/large/IOTA_Thumbnail_%281%29.png?1743772896",
+  LUNA: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/25767/large/01_Luna_color.png?1696524851",
+  OCEAN: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/3687/large/ocean-protocol-logo.jpg?1696504363",
+  SOL: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/4128/large/solana.png?1718769756",
+  XLM: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/100/large/fmpFRHHQ_400x400.jpg?1735231350",
+  VET: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/1167/large/VET.png?1742383283",
+  ALGO: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/4380/large/download.png?1696504978",
+  QNT: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/3370/large/5ZOu7brX_400x400.jpg?1696504070",
+  DOT: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/12171/large/polkadot.jpg?1766533446",
+  INJ: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/12882/large/Other_200x200.png?1738782212",
+  THETA: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/2538/large/theta-token-logo.png?1696503349",
+  GALA: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/12493/large/GALA_token_image_-_200PNG.png?1709725869",
+  ONE: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/4344/large/Y88JAze.png?1696504947",
+  BAL: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/11683/large/Balancer.png&bg=white",
+  LPT: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/7137/large/badge-logo-circuit-green.png?1719357686"
+};
 
 /* ═══════════════════════ Helpers ═══════════════════════ */
-const iconUrl = (s: string) => `https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/${s.toLowerCase()}.svg`;
 const fmt = (n: number, d = 2) => n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
 const fmtDate = (t: number) => new Date(t).toLocaleString("en-GB", { timeZone: "Europe/Kiev", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 
@@ -169,23 +214,52 @@ const GradientBorderPanel = ({ children, width, className = "" }: { children: Re
   </div>
 );
 
-const CoinIcon = ({ symbol, size = 20 }: { symbol: string; color: string; size?: number }) => {
+const CoinIcon = ({ symbol, color, size = 20 }: { symbol: string; color?: string; size?: number }) => {
+  const [customError, setCustomError] = useState(false);
+  const [cdnError, setCdnError] = useState(false);
+  
+  if (CUSTOM_ICONS[symbol] && !customError) {
+    return (
+      <img
+        src={CUSTOM_ICONS[symbol]}
+        alt={symbol}
+        width={size}
+        height={size}
+        className="rounded-full shrink-0 object-contain"
+        onError={() => setCustomError(true)}
+      />
+    );
+  }
+
   const iconName = SYMBOL_TO_ICON[symbol];
 
-  if (!iconName || !VALID_ICONS.has(iconName)) {
+  if (iconName && VALID_ICONS.has(iconName)) {
     return (
-      <div 
-        className="rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0 bg-[#16212b] border border-white/5"
-        style={{ width: size, height: size }}
-      >
-        {symbol[0]}
+      <div style={{ width: size, height: size }} className="shrink-0 flex items-center justify-center opacity-90 transition-opacity">
+        <Cryptocon icon={iconName as any} size={size} />
       </div>
     );
   }
 
+  if (!cdnError) {
+    return (
+      <img
+        src={`https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/${symbol.toLowerCase()}.svg`}
+        alt={symbol}
+        width={size}
+        height={size}
+        className="rounded-full shrink-0"
+        onError={() => setCdnError(true)}
+      />
+    );
+  }
+
   return (
-    <div style={{ width: size, height: size }} className="shrink-0 flex items-center justify-center opacity-90 hover:opacity-100 transition-opacity">
-      <Cryptocon icon={iconName as any} size={size} />
+    <div 
+      className="rounded-full flex items-center justify-center font-bold text-white shrink-0 border border-white/10"
+      style={{ width: size, height: size, backgroundColor: color || "#16212b", fontSize: size * 0.5 }}
+    >
+      {symbol[0]}
     </div>
   );
 };
@@ -203,7 +277,7 @@ export const ControlPanel = (): JSX.Element => {
   const [orderType, setOrderType] = useState<"Limit"|"Market"|"Trigger">("Market");
   const [bottomTab, setBottomTab] = useState("positions");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [topNav, setTopNav] = useState("Trading");
+
   const [percent, setPercent] = useState(0);
   const [orderBookView, setOrderBookView] = useState<"both"|"bids"|"asks">("both");
   const [marginType, setMarginType] = useState<"CROSS"|"ISOLATED">("CROSS");
@@ -466,7 +540,7 @@ export const ControlPanel = (): JSX.Element => {
     return q ? COINS.filter(c => c.symbol.toLowerCase().includes(q) || c.name.toLowerCase().includes(q)) : COINS;
   }, [coinSearch]);
 
-  const topNavItems = ["Trading","Markets","Balance","Tournaments","History","Settings"];
+
 
   /* ═══════════════════════ Slider CSS (shared) ═══════════════════════ */
   const sliderStyles = `
@@ -742,8 +816,8 @@ export const ControlPanel = (): JSX.Element => {
                   <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-white font-mono">{fmt(pos.entryPrice)}</span>
                   <span className={`text-[7px] min-[375px]:text-[8px] md:text-[10px] font-mono ${up?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{fmt(mark)}</span>
                   <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-[#ff9500] font-mono">{fmt(pos.liqPrice)}</span>
-                  <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-white font-mono">${fmt(pos.margin)}</span>
-                  <span className={`text-[7px] min-[375px]:text-[8px] md:text-[10px] font-bold ${up?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{up?"+":""}{pnl.toFixed(2)}</span>
+                  <span className={`text-[7px] min-[375px]:text-[8px] md:text-[10px] text-white font-mono`}>${fmt(pos.margin)}</span>
+                  <span className={`text-[7px] min-[375px]:text-[8px] md:text-[10px] font-bold ${up?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{up?"+":""}{pnl.toFixed(2)} ({up?"+":""}{roe.toFixed(2)}%)</span>
                   <button onClick={() => closePosition(pos.id)} className="text-[6px] min-[375px]:text-[7px] font-bold text-gray-400 bg-[#1a2030] px-1 py-0.5 rounded border-none cursor-pointer w-fit">Close</button>
                 </div>;
               }) : <div className="flex flex-col items-center justify-center gap-2 py-6">
@@ -828,9 +902,7 @@ export const ControlPanel = (): JSX.Element => {
         <header className="flex items-center justify-between h-14 px-4 border-b border-white/5 bg-[#05070A]/80 backdrop-blur-md shrink-0 z-50">
           <div className="flex items-center gap-8">
             <Link to="/" className="flex items-center shrink-0"><img src="/images/logo.png" alt="UPDOWNX" className="h-7 w-auto" /></Link>
-            <nav className="flex items-center gap-1">{topNavItems.map(item => (
-              <button key={item} onClick={() => setTopNav(item)} className={`px-3 py-1.5 text-[13px] font-medium rounded-lg border-none cursor-pointer transition-colors ${topNav===item?"text-[#00ffa3]":"text-gray-400 hover:text-white bg-transparent"}`}>{item}</button>
-            ))}</nav>
+
           </div>
           <div className="flex items-center gap-4">
             <div className="flex flex-col items-end mr-2">
