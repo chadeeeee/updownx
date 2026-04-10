@@ -140,6 +140,28 @@ const MobileStep1 = ({
       </div>
     </div>
 
+    <div className={`${gradientCardClass} flex flex-col gap-4 md:gap-6 w-full p-4 md:p-6 lg:p-8`}>
+      <div className="flex flex-col gap-1">
+        <h3 className="[font-family:'Public_Sans',Helvetica] font-bold text-white text-lg md:text-xl tracking-tight m-0 p-0 text-left">
+          Apply Coupon Code
+        </h3>
+        <p className="[font-family:'Public_Sans',Helvetica] font-normal text-gray-500 text-xs md:text-sm m-0 p-0 text-left">
+          If you have a coupon code, please use it below.
+        </p>
+      </div>
+      <div className="flex items-center h-11 md:h-14 bg-[#0b0f14] rounded-xl border border-solid border-[#ffffff1a] px-4 md:px-5">
+        <input
+          placeholder="Coupon code"
+          className="bg-transparent border-none outline-none w-full [font-family:'Public_Sans',Helvetica] font-normal text-white text-xs md:text-sm tracking-[0] leading-6 placeholder:text-gray-600"
+        />
+      </div>
+      <Button
+        className="w-full h-12 md:h-14 bg-[#00ffa3] hover:bg-[#00ffa3]/90 rounded-2xl [font-family:'Public_Sans',Helvetica] font-bold text-black text-xs md:text-sm uppercase tracking-wider border-none"
+      >
+        APPLY COUPON CODE
+      </Button>
+    </div>
+
     <div className="flex items-center gap-3 md:gap-4 rounded-xl border border-[#1e3a42]/40 bg-[#050f15]/50 p-3 md:p-5 lg:p-6">
       <div className="flex h-9 w-9 md:h-12 md:w-12 items-center justify-center rounded-full bg-[#00FFA3]/10 flex-shrink-0">
         <img src="/svg/ssl-secure.svg" alt="" className="w-4 h-5 md:w-5 md:h-6" />

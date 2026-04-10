@@ -168,6 +168,28 @@ export const CheckoutDetailSection = ({
               </div>
             </div>
           </div>
+
+          <div className={`${gradientCardClass} flex flex-col gap-6 w-full p-[33px]`}>
+            <div className="flex flex-col gap-1">
+              <h3 className="[font-family:'Public_Sans',Helvetica] font-bold text-white text-[22px] tracking-tight m-0 p-0 text-left">
+                Apply Coupon Code
+              </h3>
+              <p className="[font-family:'Public_Sans',Helvetica] font-normal text-gray-500 text-[15px] m-0 p-0 mb-1 text-left">
+                If you have a coupon code, please use it below.
+              </p>
+            </div>
+            <div className="flex items-center h-[56px] px-5 bg-[#0b0f14] rounded-xl border border-solid border-[#ffffff1a] transition-all focus-within:border-[#00ffa3]/40">
+              <input
+                placeholder="Coupon code"
+                className="bg-transparent border-none outline-none w-full [font-family:'Public_Sans',Helvetica] font-normal text-white text-base tracking-wide leading-6 placeholder:text-gray-600"
+              />
+            </div>
+            <Button
+              className="w-full h-14 bg-[#00ffa3] hover:bg-[#00ffa3]/90 rounded-xl [font-family:'Public_Sans',Helvetica] font-bold text-black text-[15px] uppercase tracking-widest border-none mt-2"
+            >
+              APPLY COUPON CODE
+            </Button>
+          </div>
         </div>
 
         <div className={`${gradientCardClass} flex flex-col gap-8 w-[448px] p-[33px] flex-shrink-0`}>

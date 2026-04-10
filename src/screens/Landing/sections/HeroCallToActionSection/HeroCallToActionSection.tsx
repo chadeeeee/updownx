@@ -46,10 +46,10 @@ export const HeroCallToActionSection = (): JSX.Element => {
         </div>
 
         {/* Headline + subtitle + CTA */}
-        <div className="flex flex-col items-center gap-12 w-full max-w-[1216px]">
+        <div className="flex flex-col items-center gap-10 w-full max-w-[1216px]">
           {/* Headline + subtitle */}
-          <div className="flex w-full max-w-[896px] flex-col items-center gap-4">
-            <h1 className="[font-family:'Inter',Helvetica] px-1 text-center text-4xl font-black uppercase leading-[1.05] tracking-normal text-white sm:px-5 sm:text-5xl lg:text-7xl">
+          <div className="flex w-full max-w-[950px] flex-col items-center gap-6">
+            <h1 className="[font-family:'Inter',Helvetica] px-1 text-center text-4xl font-black uppercase leading-[1.0] tracking-tighter text-white sm:px-5 sm:text-5xl lg:text-6xl">
               TRADE PROFITABLY
               <br />
               WITHOUT <span className="text-[#00ffa3]">RISKING</span> YOUR
@@ -57,52 +57,51 @@ export const HeroCallToActionSection = (): JSX.Element => {
               CAPITAL
             </h1>
 
-            <div className="inline-flex items-center justify-center gap-2.5">
-              <p className="[font-family:'Inter',Helvetica] max-w-[760px] text-center text-base font-normal leading-6 tracking-[0] text-gray-400 sm:text-lg sm:leading-7 lg:text-xl">
-                Trade over 160+ crypto assets with up to 1:5 leverage. Prove your skills and manage up to $100,000 of our liquidity.
-              </p>
-            </div>
+            <p className="[font-family:'Inter',Helvetica] max-w-[760px] text-center text-base font-normal leading-relaxed tracking-tight text-gray-400 sm:text-lg lg:text-xl">
+              Trade over 160+ crypto assets with up to 1:5 leverage. Prove your skills and manage up to $100,000 of our liquidity.
+            </p>
           </div>
 
           {/* CTA buttons row */}
-          <div className="flex w-full flex-col items-stretch justify-center gap-4 sm:items-center sm:gap-6 lg:flex-row">
+          <div className="flex w-full flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center sm:gap-5">
             {/* Choose Your Account button */}
-            <Button className="inline-flex h-auto w-full flex-col items-center justify-center rounded-2xl border-0 bg-[#00ffa3] px-6 py-4 hover:bg-[#00ffa3]/90 sm:w-auto sm:px-10 sm:py-5">
-              <span className="font-black text-[#05070a] text-base leading-6 [font-family:'Inter',Helvetica] text-center tracking-[0] whitespace-nowrap sm:text-lg sm:leading-7">
+            <Button 
+              onClick={() => window.location.href = '/challenge'}
+              className="inline-flex h-[64px] w-full items-center justify-center rounded-2xl border border-white/5 bg-[#1a1d1f] px-10 hover:bg-[#23272a] sm:w-auto"
+            >
+              <span className="font-bold text-[#00ffa3] text-sm uppercase leading-6 [font-family:'Inter',Helvetica] text-center tracking-widest whitespace-nowrap">
                 CHOOSE YOUR ACCOUNT
               </span>
             </Button>
 
-            {/* Trustpilot widget */}
-            <div className="inline-flex h-[68px] w-full items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] py-3 pl-4 pr-6 backdrop-blur-md sm:w-auto">
-              <div className="flex -space-x-3 overflow-hidden">
-                <img
-                  className="inline-block h-10 w-10 rounded-full object-cover ring-2 ring-[#05070a]"
-                  src="/images/user-1.png"
-                  alt="user"
-                />
-                <img
-                  className="inline-block h-10 w-10 rounded-full object-cover ring-2 ring-[#05070a]"
-                  src="/images/user-2.png"
-                  alt="user"
-                />
-                <img
-                  className="inline-block h-10 w-10 rounded-full object-cover ring-2 ring-[#05070a]"
-                  src="/images/user-3.png"
-                  alt="user"
-                />
+            {/* Trade button */}
+            <Button 
+              onClick={() => window.location.href = '/trading'}
+              className="inline-flex h-[64px] w-full items-center justify-center rounded-2xl border-0 bg-[#00ffa3] px-16 hover:bg-[#00ffa3]/90 sm:w-auto"
+            >
+              <span className="font-bold text-[#05070a] text-sm uppercase leading-6 [font-family:'Inter',Helvetica] text-center tracking-widest whitespace-nowrap">
+                TRADE
+              </span>
+            </Button>
+          </div>
+
+          {/* Trustpilot widget */}
+          <div className="inline-flex h-[64px] items-center gap-5 rounded-2xl border border-white/[0.05] bg-white/[0.02] py-2 pl-4 pr-6 backdrop-blur-xl">
+            <div className="flex -space-x-3 overflow-hidden">
+               <img className="inline-block h-9 w-9 rounded-full object-cover ring-2 ring-[#05070a]" src="/images/user-1.png" alt="user" />
+               <img className="inline-block h-9 w-9 rounded-full object-cover ring-2 ring-[#05070a]" src="/images/user-2.png" alt="user" />
+               <img className="inline-block h-9 w-9 rounded-full object-cover ring-2 ring-[#05070a]" src="/images/user-3.png" alt="user" />
+            </div>
+            <div className="flex flex-col items-start gap-0.5">
+              <div className="flex gap-0.5">
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} width="14" height="14" viewBox="0 0 20 20" fill="#FFB800">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.367 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118l-3.367-2.448a1 1 0 00-1.175 0l-3.367 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.05 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69l1.286-3.957z" />
+                  </svg>
+                ))}
               </div>
-              <div className="flex flex-col items-start">
-                <div className="flex gap-0.5">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} width="16" height="16" viewBox="0 0 20 20" fill="#FFB800">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.367 2.448a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.54 1.118l-3.367-2.448a1 1 0 00-1.175 0l-3.367 2.448c-.784.57-1.838-.197-1.539-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.05 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69l1.286-3.957z" />
-                    </svg>
-                  ))}
-                </div>
-                <div className="text-xs font-normal text-[#89a4ad]">
-                  <span className="font-bold text-white">Trustpilot 4.9/5 </span> Rating
-                </div>
+              <div className="text-[11px] font-normal text-gray-500">
+                <span className="font-bold text-white/90">Trustpilot 4.9/5 </span> Rating
               </div>
             </div>
           </div>
