@@ -242,12 +242,7 @@ export const NewChallenge = (): JSX.Element => {
                       >
                         Crypto Payment
                       </Link>
-                      <Link
-                        to={`/checkout/${plan.id}?method=pix`}
-                        className="flex h-9 w-full items-center justify-center rounded-[10px] border border-[#1f2c34] bg-transparent px-2 text-[10px] font-bold uppercase tracking-[0.03em] text-white/90 transition-all hover:bg-white/5 min-[375px]:h-10 min-[375px]:px-3 min-[375px]:text-[11px] min-[375px]:tracking-[0.04em]"
-                      >
-                        PIX
-                      </Link>
+
                     </div>
                   </div>
                 </div>
@@ -358,12 +353,6 @@ export const NewChallenge = (): JSX.Element => {
                     className="group flex w-full items-center justify-center rounded-xl bg-[#00FFA3] py-3.5 text-[13px] font-black uppercase tracking-wider text-black transition-all hover:bg-[#00e895] hover:shadow-[0_0_15px_rgba(0,255,163,0.3)]"
                   >
                     Crypto Payment
-                  </Link>
-                  <Link
-                    to={`/checkout/${plan.id}?method=pix`}
-                    className="flex w-full items-center justify-center rounded-xl border border-[#1a242c] bg-[#0d141a] py-3.5 text-[13px] font-black uppercase tracking-wider text-[#8ea4ad] transition-all hover:bg-[#1a242c] hover:text-white"
-                  >
-                    PIX
                   </Link>
                 </div>
               </div>

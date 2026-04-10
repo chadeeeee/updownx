@@ -41,8 +41,8 @@ const sameUser = (left: AppUser | null | undefined, right: AppUser | null | unde
   left?.created_at === right?.created_at;
 
 /* ─── Challenge Card (Mobile) ─── */
-const ChallengeCardMobile = ({ challenge, navigate, tradingIdentity }: { challenge: ActiveChallenge; navigate: (path: string) => void; tradingIdentity: string }) => {
-  const accountSuffix = tradingIdentity.slice(-4);
+const ChallengeCardMobile = ({ challenge, navigate }: { challenge: ActiveChallenge; navigate: (path: string) => void }) => {
+  const accountSuffix = (3830 + challenge.id).toString().padStart(4, "0");
   return (
     <div className="relative rounded-2xl border border-white/5 bg-[linear-gradient(135deg,#0a2118_0%,#05110e_100%)] p-3 min-[375px]:p-4 md:p-6 lg:p-8 overflow-hidden flex flex-col">
       <img src="https://c.animaapp.com/mnh4g5xzo5XXIf/img/chatgpt-image-13------2026-----00-54-43-1.png" alt="" className="pointer-events-none absolute inset-0 w-full h-full object-cover opacity-30" />
@@ -124,8 +124,8 @@ const NoChallenges = ({ navigate }: { navigate: (path: string) => void }) => (
 );
 
 /* ─── Desktop Challenge Card ─── */
-const DesktopChallengeCard = ({ challenge, navigate, tradingIdentity }: { challenge: ActiveChallenge; navigate: (path: string) => void; tradingIdentity: string }) => {
-  const accountSuffix = tradingIdentity.slice(-4);
+const DesktopChallengeCard = ({ challenge, navigate }: { challenge: ActiveChallenge; navigate: (path: string) => void }) => {
+  const accountSuffix = (3830 + challenge.id).toString().padStart(4, "0");
   return (
     <div className="w-full relative rounded-2xl 2xl:rounded-3xl p-6 sm:p-8 2xl:p-10 flex flex-col xl:flex-row items-center justify-between gap-8 2xl:gap-12 border border-white/5 bg-[linear-gradient(90deg,#0a2118_0%,#05110e_100%)] overflow-hidden">
       <div className="flex flex-col md:flex-row items-center gap-10 2xl:gap-14 flex-1 w-full">
@@ -306,7 +306,7 @@ export const Accounts = () => {
           {challenges.length > 0 ? (
             <div className="flex flex-col gap-4">
               {challenges.map((ch) => (
-                <ChallengeCardMobile key={ch.id} challenge={ch} navigate={navigate} tradingIdentity={tradingIdentity} />
+                <ChallengeCardMobile key={ch.id} challenge={ch} navigate={navigate} />
               ))}
             </div>
           ) : (
@@ -331,7 +331,7 @@ export const Accounts = () => {
           <section className="pb-2 flex flex-col gap-6">
             {challenges.length > 0 ? (
               challenges.map((ch) => (
-                <DesktopChallengeCard key={ch.id} challenge={ch} navigate={navigate} tradingIdentity={tradingIdentity} />
+                <DesktopChallengeCard key={ch.id} challenge={ch} navigate={navigate} />
               ))
             ) : (
               <NoChallenges navigate={navigate} />

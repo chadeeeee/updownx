@@ -211,12 +211,7 @@ export const EventLive = (): JSX.Element => {
                       >
                         Crypto Payment
                       </Link>
-                      <Link
-                        to={`/checkout/${plan.id}?method=pix`}
-                        className="flex h-9 w-full items-center justify-center rounded-[10px] border border-[#1f2c34] bg-transparent px-2 text-[10px] font-bold uppercase text-white/90 transition-all hover:bg-white/5 min-[375px]:h-10 min-[375px]:text-[11px]"
-                      >
-                        PIX
-                      </Link>
+
                     </div>
                   </div>
                 </div>

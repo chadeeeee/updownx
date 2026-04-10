@@ -44,7 +44,7 @@ createRoot(document.getElementById("app") as HTMLElement).render(
           />
           <Route
             path="/withdrawals"
-            element={<PrivateRoute><Accounts /></PrivateRoute>}
+            element={<PrivateRoute><NotFound /></PrivateRoute>}
           />
           <Route
             path="/help"

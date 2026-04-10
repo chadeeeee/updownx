@@ -112,15 +112,6 @@ export const AccountPlanTierGridSection = ({
                     Crypto Payment
                   </span>
                 </button>
-
-                <button
-                  onClick={() => navigate(`/checkout/${plan.id}?method=pix`)}
-                  className="flex items-center justify-center px-0 py-2 self-stretch w-full rounded-lg border border-solid border-[#ffffff1a] bg-transparent hover:bg-white/5 transition-colors cursor-pointer"
-                >
-                  <span className="[font-family:'Public_Sans',Helvetica] font-bold text-white text-xs text-center tracking-[0] leading-4 whitespace-nowrap">
-                    PIX
-                  </span>
-                </button>
               </div>
             </div>
           </div>

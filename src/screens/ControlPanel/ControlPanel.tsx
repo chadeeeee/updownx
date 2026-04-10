@@ -4,6 +4,7 @@ import { AdvancedRealTimeChart } from "react-ts-tradingview-widgets";
 import { useAuth } from "../../lib/auth";
 import { api } from "../../lib/api";
 import { Globe, Search, X, ChevronDown, Menu } from "lucide-react";
+import { Cryptocon } from "cryptocons";
 
 /* ═══════════════════════ Types ═══════════════════════ */
 type Position = {
@@ -64,6 +65,90 @@ const RAW: [string,string,string][] = [
 const COINS: CoinDef[] = RAW.map(([s,n,c]) => ({ symbol:s, name:n, pair:`${s}USDT`, color:c }));
 const MM_RATE = 0.004; // 0.4% maintenance margin rate
 
+const SYMBOL_TO_ICON: Record<string, string> = {
+  BTC: "Bitcoin",
+  ETH: "Ethereum",
+  BNB: "Binance",
+  SOL: "Solana",
+  ADA: "Cardano",
+  DOGE: "Dogecoin",
+  DOT: "Polkadot",
+  MATIC: "Polygon",
+  AVAX: "Avalanche",
+  LINK: "Chainlink",
+  UNI: "Uniswap",
+  ATOM: "Cosmos",
+  LTC: "Litecoin",
+  ETC: "EthereumClassic",
+  ALGO: "Algorand",
+  XLM: "Stellar",
+  BCH: "BitcoinCash",
+  FIL: "FileCoin",
+  TRX: "Tron",
+  EOS: "Eosio",
+  XTZ: "Tezos",
+  AAVE: "Aave",
+  MKR: "Maker",
+  COMP: "Compound",
+  SNX: "Synthetix",
+  YFI: "Yearn",
+  SUSHI: "SushiSwap",
+  CRV: "Curve",
+  BAT: "BasicAttentionToken",
+  ZEC: "ZCash",
+  DASH: "Dash",
+  GRT: "Graph",
+  "1INCH": "OneInch",
+  SHIB: "ShibaInu",
+  MANA: "Decentraland",
+  GALA: "Gala",
+  HBAR: "Hedera",
+  FTM: "Fantom",
+  FLOW: "Flow",
+  VET: "VeChain",
+  THETA: "Theta",
+  KAVA: "Kava",
+  ZIL: "Zilliqa",
+  ONE: "Harmony",
+  CKB: "Nervos",
+  ANKR: "Ankr",
+  LPT: "LivePeer",
+  QTUM: "Qtum",
+  WAVES: "Waves",
+  RVN: "Ravencoin",
+  CELO: "Celo",
+  AR: "Arweave",
+  MINA: "Mina",
+  STX: "Stacks",
+  LRC: "Loopring",
+  CAKE: "Pancakeswap",
+  USDT: "Tether",
+  IMX: "ImmutableX",
+  INJ: "Injective",
+  RSR: "Reserve",
+  ICX: "Icon",
+  BAL: "Bancor", // Close enough fallback if Balancer is missing
+  CHZ: "Chiliz",
+  STX: "Stacks",
+  LPT: "LivePeer",
+  ANKR: "Ankr",
+  OCEAN: "Ocean",
+  FLUX: "Flux",
+  BUSD: "BinanceUsd",
+  DAI: "Dai",
+  MASK: "MetaMask",
+  AUDIO: "Audius",
+  API3: "Api3",
+  BAND: "Band",
+};
+
+// Safety list of all valid LogoNames from cryptocons to prevent rendering crashes
+const VALID_ICONS = new Set([
+  "Abbc", "AbbcBadge", "AcalaNetwork", "AcalaNetworkBadge", "Achain", "AchainBadge", "Adcoin", "AdcoinBadge", "AidosKuneen", "AidosKuneenBadge", "Aion", "AionBadge", "Akropolis", "AkropolisBadge", "Algorand", "AlgorandBadge", "AlphaWallet", "AlphaWalletBadge", "Alqo", "AlqoBadge", "Ampleforth", "AmpleforthBadge", "AnchorProtocol", "AnchorProtocolBadge", "Ankr", "AnkrBadge", "ApeNft", "ApeNftBadge", "ApolloCurrency", "ApolloCurrencyBadge", "AppCoins", "AppCoinsBadge", "Arweave", "ArweaveBadge", "Avalanche", "AvalancheBadge", "BLThreeP", "BLThreePBadge", "Bancor", "BancorBadge", "BanklessTimes", "BanklessTimesBadge", "BasicAttentionToken", "BasicAttentionTokenBadge", "Beam", "BeamBadge", "BeanCash", "BeanCashBadge", "Biconomy", "BiconomyBadge", "Binance", "BinanceBadge", "BinanceSmartChain", "BinanceSmartChainBadge", "BinanceUsd", "BinanceUsdBadge", "BitMart", "BitMartBadge", "Bitbank", "BitbankBadge", "Bitcoin", "BitcoinBadge", "BitcoinCash", "BitcoinCashBadge", "BitcoinPlus", "BitcoinPlusBadge", "BitcoinPrivate", "BitcoinPrivateBadge", "BitcoinWrapped", "BitcoinWrappedBadge", "Bitcore", "BitcoreBadge", "Bitfinex", "BitfinexBadge", "Bitflyer", "BitflyerBadge", "Bitglobal", "BitglobalBadge", "Bithumb", "BithumbBadge", "Bitpanda", "BitpandaBadge", "Bitrue", "BitrueBadge", "Bitstamp", "BitstampBadge", "Bittrex", "BittrexBadge", "Bitvavo", "BitvavoBadge", "Blackmoon", "BlackmoonBadge", "BlockFi", "BlockFiBadge", "Braintrust", "BraintrustBadge", "Brave", "BraveBadge", "Cardano", "CardanoBadge", "Casper", "CasperBadge", "Celo", "CeloBadge", "Celsius", "CelsiusBadge", "Centrifuge", "CentrifugeBadge", "CertusOne", "CertusOneBadge", "Cex", "CexBadge", "Chainlink", "ChainlinkBadge", "ChangellyPro", "ChangellyProBadge", "CoinDesk", "CoinDeskBadge", "CoinGecko", "CoinGeckoBadge", "CoinMarketCap", "CoinMarketCapBadge", "CoinTiger", "CoinTigerBadge", "Coinbase", "CoinbaseBadge", "Coinone", "CoinoneBadge", "Coinranking", "CoinrankingBadge", "Coinwink", "CoinwinkBadge", "Compound", "CompoundBadge", "Consensys", "ConsensysBadge", "ConsensysCodefi", "ConsensysCodefiBadge", "Convex", "ConvexBadge", "Core", "CoreBadge", "CoreToken", "CoreTokenBadge", "Cortex", "CortexBadge", "Cosmos", "CosmosBadge", "Coti", "CotiBadge", "Covalent", "CovalentBadge", "Cream", "CreamBadge", "CryptoCom", "CryptoComBadge", "CurrencyCom", "CurrencyComBadge", "Curve", "CurveBadge", "Dash", "DashBadge", "Decentraland", "DecentralandBadge", "Decred", "DecredBadge", "DefiCoins", "DefiCoinsBadge", "Digibyte", "DigibyteBadge", "Digifinex", "DigifinexBadge", "DigitalReserve", "DigitalReserveBadge", "Discord", "DiscordBadge", "DockDock", "DockDockBadge", "Dogecoin", "DogecoinBadge", "ECash", "ECashBadge", "Efinity", "EfinityBadge", "Ens", "EnsBadge", "Eosio", "EosioBadge", "Ethereum", "EthereumBadge", "EthereumClassic", "EthereumClassicBadge", "Etoro", "EtoroBadge", "Fei", "FeiBadge", "FileCoin", "FileCoinBadge", "Flow", "FlowBadge", "Flux", "FluxBadge", "Ftx", "FtxBadge", "Gala", "GalaBadge", "GateIo", "GateIoBadge", "Gemini", "GeminiBadge", "GitHub", "GitHubBadge", "Gitcoin", "GitcoinBadge", "Gnosis", "GnosisBadge", "Graph", "GraphBadge", "Harmony", "HarmonyBadge", "Hedera", "HederaBadge", "Hex", "HexBadge", "Hive", "HiveBadge", "Holo", "HoloBadge", "Horizen", "HorizenBadge", "HuobiGlobal", "HuobiGlobalBadge", "HushHush", "HushHushBadge", "ImmutableX", "ImmutableXBadge", "Indodax", "IndodaxBadge", "Infura", "InfuraBadge", "Injective", "InjectiveBadge", "Iota", "IotaBadge", "Iotex", "IotexBadge", "Iqeon", "IqeonBadge", "Iris", "IrisBadge", "Kadena", "KadenaBadge", "Kambria", "KambriaBadge", "Kava", "KavaBadge", "KeepNetwork", "KeepNetworkBadge", "KeeperDao", "KeeperDaoBadge", "Kraken", "KrakenBadge", "Ksm", "KsmBadge", "Kucoin", "KucoinBadge", "KusamaBadge", "LBank", "LBankBadge", "Ledger", "LedgerBadge", "Lido", "LidoBadge", "Liquid", "LiquidBadge", "Litecoin", "LitecoinBadge", "LivePeer", "LivePeerBadge", "Loopring", "LoopringBadge", "Luno", "LunoBadge", "MathWallet", "MathWalletBadge", "Medibloc", "MediblocBadge", "Meetone", "MeetoneBadge", "MetaMask", "MetaMaskBadge", "Mina", "MinaBadge", "Mint", "MintBadge", "Monero", "MoneroBadge", "Multiavatar", "MultiavatarBadge", "MyCrypto", "MyCryptoBadge", "NCash", "NCashBadge", "NGrave", "NGraveBadge", "Nav", "NavBadge", "Nebeus", "NebeusBadge", "Nem", "NemBadge", "Neo", "NeoBadge", "Nervos", "NervosBadge", "Nexo", "NexoBadge", "NftLaunchpad", "NftLaunchpadBadge", "Nftx", "NftxBadge", "Ngc", "NgcBadge", "Nym", "NymBadge", "Ocean", "OceanBadge", "OkCash", "OkCashBadge", "Okcoin", "OkcoinBadge", "Okex", "OkexBadge", "Okx", "OkxBadge", "Omg", "OmgBadge", "Omisego", "OmisegoBadge", "OneInch", "OneInchBadge", "OpenDao", "OpenDaoBadge", "Origin", "OriginBadge", "Pancakeswap", "PancakeswapBadge", "Parsiq", "ParsiqBadge", "Part", "PartBadge", "Paxos", "PaxosBadge", "Paybis", "PaybisBadge", "Phantom", "PhantomBadge", "Pillar", "PillarBadge", "Ping", "PingBadge", "Pinkcoin", "PinkcoinBadge", "Pivx", "PivxBadge", "Polkadot", "PolkadotBadge", "Poloniex", "PoloniexBadge", "Polygon", "PolygonBadge", "Polymath", "PolymathBadge", "Presearch", "PresearchBadge", "Pril", "PrilBadge", "Probit", "ProbitBadge", "ProjectGalaxy", "ProjectGalaxyBadge", "Qtum", "QtumBadge", "Quant", "QuantBadge", "QuantStamp", "QuantStampBadge", "Quorum", "QuorumBadge", "Ravencoin", "RavencoinBadge", "Reef", "ReefBadge", "Refereum", "RefereumBadge", "RenRen", "RenRenBadge", "Request", "RequestBadge", "Reserve", "ReserveBadge", "Revain", "RevainBadge", "Ripio", "RipioBadge", "Rise", "RiseBadge", "Secret", "SecretBadge", "Serum", "SerumBadge", "ShibaInu", "ShibaInuBadge", "SigmaPrime", "SigmaPrimeBadge", "Solana", "SolanaBadge", "Stacks", "StacksBadge", "Stakenet", "StakenetBadge", "Startcoin", "StartcoinBadge", "Status", "StatusBadge", "Steem", "SteemBadge", "Stellar", "StellarBadge", "SushiSwap", "SushiSwapBadge", "Suterusu", "SuterusuBadge", "SwarmCity", "SwarmCityBadge", "Symbol", "Synthetix", "SynthetixBadge", "Syscoin", "SyscoinBadge", "Tenx", "TenxBadge", "Terarium", "TerariumBadge", "Terra", "TerraBadge", "Tether", "TetherBadge", "TetherGold", "TetherGoldBadge", "Tezos", "TezosBadge", "Theta", "ThetaBadge", "ThetaFuel", "ThetaFuelBadge", "ThorChain", "ThorChainBadge", "Trezor", "TrezorBadge", "Tron", "TronBadge", "TrueUsd", "TrueUsdBadge", "Truffle", "TruffleBadge", "Uma", "UmaBadge", "Uniswap", "UniswapBadge", "UnstoppableDomains", "UnstoppableDomainsBadge", "Upbit", "UpbitBadge", "Uphold", "UpholdBadge", "Varen", "VarenBadge", "VeChain", "VeChainBadge", "Vega", "VegaBadge", "Velas", "VelasBadge", "VenusReward", "VenusRewardBadge", "Verasity", "VerasityBadge", "Verus", "VerusBadge", "Waves", "WavesBadge", "WazirX", "WazirXBadge", "XMark", "XMarkBadge", "Xensor", "XensorBadge", "Xmx", "XmxBadge", "Yearn", "YearnBadge", "ZCash", "ZCashBadge", "Zapper", "ZapperBadge", "Zb", "ZbBadge", "Zcoin", "ZcoinBadge", "ZebPay", "ZebPayBadge", "ZeroCollateralDai", "ZeroX", "Zilliqa"
+]);
+
+/* ═══════════════════════ Helpers ═══════════════════════ */
+
 /* ═══════════════════════ Helpers ═══════════════════════ */
 const iconUrl = (s: string) => `https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/${s.toLowerCase()}.svg`;
 const fmt = (n: number, d = 2) => n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -84,10 +169,25 @@ const GradientBorderPanel = ({ children, width, className = "" }: { children: Re
   </div>
 );
 
-const CoinIcon = ({ symbol, color, size = 20 }: { symbol: string; color: string; size?: number }) => {
-  const [err, setErr] = useState(false);
-  if (err) return <div className="rounded-full flex items-center justify-center text-[8px] font-bold text-white shrink-0" style={{ width:size, height:size, backgroundColor:color }}>{symbol[0]}</div>;
-  return <img src={iconUrl(symbol)} alt={symbol} style={{ width:size, height:size }} className="shrink-0 rounded-full" onError={() => setErr(true)} />;
+const CoinIcon = ({ symbol, size = 20 }: { symbol: string; color: string; size?: number }) => {
+  const iconName = SYMBOL_TO_ICON[symbol];
+
+  if (!iconName || !VALID_ICONS.has(iconName)) {
+    return (
+      <div 
+        className="rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0 bg-[#16212b] border border-white/5"
+        style={{ width: size, height: size }}
+      >
+        {symbol[0]}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ width: size, height: size }} className="shrink-0 flex items-center justify-center opacity-90 hover:opacity-100 transition-opacity">
+      <Cryptocon icon={iconName as any} size={size} />
+    </div>
+  );
 };
 
 const scrollbarCls = "[&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 hover:[&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full";
