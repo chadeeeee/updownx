@@ -199,13 +199,15 @@ export const api = {
   // ─── Trading API ───
   tradingData: (userId: number) =>
     request<{
-      positions: Array<{id:number;side:string;symbol:string;pair:string;entryPrice:number;sizeUsdt:number;leverage:number;margin:number;liqPrice:number;openTime:number}>;
+      positions: Array<{id:number;side:string;symbol:string;pair:string;entryPrice:number;sizeUsdt:number;leverage:number;margin:number;liqPrice:number;takeProfit:number|null;stopLoss:number|null;openTime:number}>;
       pendingOrders: Array<{id:number;type:string;side:string;symbol:string;pair:string;price:number;triggerPrice?:number;execType?:string;triggerDirection?:string;sizeUsdt:number;leverage:number;margin:number;createdAt:number}>;
       orderHistory: Array<{id:number;type:string;side:string;symbol:string;price:number;sizeUsdt:number;leverage:number;status:string;createdAt:number;filledAt?:number}>;
       tradeHistory: Array<{id:number;side:string;symbol:string;entryPrice:number;exitPrice:number;sizeUsdt:number;leverage:number;pnl:number;openedAt:number;closedAt:number}>;
     }>(`/api/trading/${userId}`),
-  savePosition: (userId: number, pos: {side:string;symbol:string;pair:string;entryPrice:number;sizeUsdt:number;leverage:number;margin:number;liqPrice:number;openTime:number}) =>
+  savePosition: (userId: number, pos: {side:string;symbol:string;pair:string;entryPrice:number;sizeUsdt:number;leverage:number;margin:number;liqPrice:number;takeProfit?:number|null;stopLoss?:number|null;openTime:number}) =>
     request<{id:number}>(`/api/trading/${userId}/positions`, { method: "POST", body: JSON.stringify(pos) }),
+  updatePositionTpSl: (userId: number, posId: number, payload: { takeProfit: number | null; stopLoss: number | null }) =>
+    request<{id:number;takeProfit:number|null;stopLoss:number|null}>(`/api/trading/${userId}/positions/${posId}/tpsl`, { method: "PATCH", body: JSON.stringify(payload) }),
   deletePosition: (userId: number, posId: number) =>
     request<{ok:boolean}>(`/api/trading/${userId}/positions/${posId}`, { method: "DELETE" }),
   savePendingOrder: (userId: number, order: {type:string;side:string;symbol:string;pair:string;price:number;triggerPrice?:number;execType?:string;triggerDirection?:string;sizeUsdt:number;leverage:number;margin:number;createdAt:number}) =>

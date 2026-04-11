@@ -16,7 +16,7 @@ const mobileNavTabs = [
 const accountTabs = [
   { value: "trader", label: "Trader" },
   { value: "challenge", label: "Challenge" },
-  { value: "will-be-actived", label: "Will be actived" },
+  { value: "will-be-activated", label: "Will be activated" },
   { value: "failed", label: "Failed" },
 ];
 
@@ -123,6 +123,55 @@ const NoChallenges = ({ navigate }: { navigate: (path: string) => void }) => (
   </div>
 );
 
+const WillBeActivatedState = () => (
+  <section className="relative z-10 mx-auto flex w-full max-w-[620px] flex-col items-center px-5 text-center">
+    <div className="mb-4 flex h-[120px] w-[180px] items-end justify-center gap-1.5 rounded-2xl bg-gradient-to-b from-[#0e3d43]/80 to-[#082a30]/60 p-5 shadow-[0_8px_32px_rgba(0,255,163,0.08)]">
+      <div className="h-[50px] w-[14px] rounded-sm bg-[#00ffa3]/70" />
+      <div className="h-[70px] w-[14px] rounded-sm bg-[#00ffa3]" />
+      <div className="h-[40px] w-[14px] rounded-sm bg-[#ff4d4d]/80" />
+      <div className="h-[55px] w-[14px] rounded-sm bg-[#ff4d4d]" />
+      <div className="h-[65px] w-[14px] rounded-sm bg-[#00ffa3]" />
+      <div className="h-[30px] w-[14px] rounded-sm bg-[#00ffa3]/60" />
+    </div>
+
+    <svg
+      className="mb-6 text-[#00ffa3]"
+      width="40"
+      height="28"
+      viewBox="0 0 40 28"
+      fill="none"
+    >
+      <path
+        d="M2 22L12 12L18 18L28 6M28 6H22M28 6V12"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="34" cy="20" r="5" stroke="currentColor" strokeWidth="2" />
+      <path d="M37 23L39 25" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+
+    <h1 className="text-[42px] font-bold leading-tight tracking-tight">
+      Sorry, this page is available
+      <br />
+      only to traders.
+    </h1>
+
+    <p className="mt-4 max-w-[460px] text-base leading-relaxed text-[#6e8188]">
+      Traders are individuals who have successfully completed the Evaluation
+      Process and manage a Hash Updown trading account.
+    </p>
+
+    <Link
+      to="/challenge"
+      className="mt-10 inline-block rounded-xl bg-[#00FFA3] px-10 py-3.5 text-lg font-bold text-black transition-all hover:bg-[#00e895] hover:shadow-[0_0_20px_rgba(0,255,163,0.3)]"
+    >
+      New challenge
+    </Link>
+  </section>
+);
+
 /* ─── Desktop Challenge Card ─── */
 const DesktopChallengeCard = ({ challenge, navigate }: { challenge: ActiveChallenge; navigate: (path: string) => void }) => {
   const accountSuffix = (3830 + challenge.id).toString().padStart(4, "0");
@@ -226,6 +275,47 @@ export const Accounts = () => {
 
   const isMobileTabActive = (route: string) =>
     location.pathname.startsWith(route);
+  const isWillBeActivatedTab = activeTab === "will-be-activated";
+
+  const renderMobileTabContent = () => {
+    if (activeTab === "will-be-activated") {
+      return (
+        <div className="flex min-h-[calc(100vh-230px)] items-center justify-center py-4">
+          <WillBeActivatedState />
+        </div>
+      );
+    }
+
+    if (challenges.length > 0) {
+      return (
+        <div className="flex flex-col gap-4">
+          {challenges.map((ch) => (
+            <ChallengeCardMobile key={ch.id} challenge={ch} navigate={navigate} />
+          ))}
+        </div>
+      );
+    }
+
+    return <NoChallenges navigate={navigate} />;
+  };
+
+  const renderDesktopTabContent = () => {
+    if (activeTab === "will-be-activated") {
+      return (
+        <div className="flex min-h-[calc(100vh-280px)] items-center justify-center py-6">
+          <WillBeActivatedState />
+        </div>
+      );
+    }
+
+    if (challenges.length > 0) {
+      return challenges.map((ch) => (
+        <DesktopChallengeCard key={ch.id} challenge={ch} navigate={navigate} />
+      ));
+    }
+
+    return <NoChallenges navigate={navigate} />;
+  };
 
   return (<>
     {/* ═══ MOBILE LAYOUT (< xl) ═══ */}
@@ -296,24 +386,18 @@ export const Accounts = () => {
         <div className="relative z-10 px-3 py-4 min-[375px]:px-4 md:px-6 md:py-6 lg:px-10 lg:py-8 flex-1 flex flex-col gap-3 md:gap-5 lg:gap-6">
 
           {/* Trading Identity */}
-          <div className="flex flex-col gap-1 md:gap-1.5 lg:gap-2 pb-3 min-[375px]:pb-4 md:pb-5 lg:pb-6 border-b border-white/5">
-            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-gray-500 min-[375px]:text-[10px] md:text-[11px] lg:text-[13px]">Trading Identity</span>
-            <h1 className="text-[22px] font-bold text-white tracking-tight min-[375px]:text-[26px] md:text-[32px] lg:text-[40px]">ID: {tradingIdentity}</h1>
-            <p className="text-[10px] text-gray-400 min-[375px]:text-[11px] md:text-sm lg:text-base">Institutional Prop Account • Multi-Asset Environment</p>
-          </div>
-
-          {/* Challenge Cards */}
-          {challenges.length > 0 ? (
-            <div className="flex flex-col gap-4">
-              {challenges.map((ch) => (
-                <ChallengeCardMobile key={ch.id} challenge={ch} navigate={navigate} />
-              ))}
+          {!isWillBeActivatedTab && (
+            <div className="flex flex-col gap-1 md:gap-1.5 lg:gap-2 pb-3 min-[375px]:pb-4 md:pb-5 lg:pb-6 border-b border-white/5">
+              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-gray-500 min-[375px]:text-[10px] md:text-[11px] lg:text-[13px]">Trading Identity</span>
+              <h1 className="text-[22px] font-bold text-white tracking-tight min-[375px]:text-[26px] md:text-[32px] lg:text-[40px]">ID: {tradingIdentity}</h1>
+              <p className="text-[10px] text-gray-400 min-[375px]:text-[11px] md:text-sm lg:text-base">Institutional Prop Account • Multi-Asset Environment</p>
             </div>
-          ) : (
-            <NoChallenges navigate={navigate} />
           )}
 
-          <NeedAssistance />
+          {/* Tab content */}
+          {renderMobileTabContent()}
+
+          {!isWillBeActivatedTab && <NeedAssistance />}
         </div>
       </div>
     </div>
@@ -322,20 +406,16 @@ export const Accounts = () => {
     <div className="hidden xl:block">
       <DashboardLayout>
         <div className="flex flex-col gap-6 2xl:gap-10">
-          <NavAccountsSubsection />
-          <div className="flex flex-col gap-1.5 2xl:gap-2.5">
-            <header className="font-bold text-gray-400 text-[10px] 2xl:text-[13px] tracking-[2px] uppercase">Trading Identity</header>
-            <h1 className="text-white text-4xl 2xl:text-5xl tracking-tight">ID: {tradingIdentity}</h1>
-            <p className="text-gray-400 text-sm 2xl:text-base">Institutional Prop Account • Multi-Asset Environment</p>
-          </div>
+          <NavAccountsSubsection activeTab={activeTab} onTabChange={setActiveTab} />
+          {!isWillBeActivatedTab && (
+            <div className="flex flex-col gap-1.5 2xl:gap-2.5">
+              <header className="font-bold text-gray-400 text-[10px] 2xl:text-[13px] tracking-[2px] uppercase">Trading Identity</header>
+              <h1 className="text-white text-4xl 2xl:text-5xl tracking-tight">ID: {tradingIdentity}</h1>
+              <p className="text-gray-400 text-sm 2xl:text-base">Institutional Prop Account • Multi-Asset Environment</p>
+            </div>
+          )}
           <section className="pb-2 flex flex-col gap-6">
-            {challenges.length > 0 ? (
-              challenges.map((ch) => (
-                <DesktopChallengeCard key={ch.id} challenge={ch} navigate={navigate} />
-              ))
-            ) : (
-              <NoChallenges navigate={navigate} />
-            )}
+            {renderDesktopTabContent()}
           </section>
         </div>
       </DashboardLayout>

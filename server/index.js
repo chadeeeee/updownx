@@ -591,6 +591,26 @@ const creditBalanceForOrder = async (userId, orderId, challenge, db = pool) => {
   console.log(`[balance] credited ${challenge.balance} to user ${userId} for order ${orderId} (${challenge.name})`);
 };
 
+const syncChallengeCreditsForUser = async (userId, db = pool) => {
+  const completedOrders = await db.query(
+    `SELECT co.id, co.challenge_id
+     FROM challenge_orders co
+     WHERE co.user_id = $1
+       AND co.status = $2
+     ORDER BY co.created_at ASC`,
+    [userId, PAYMENT_STATUS.COMPLETED],
+  );
+
+  for (const order of completedOrders.rows) {
+    const challenge = challenges.find((item) => item.id === order.challenge_id);
+    if (!challenge) {
+      continue;
+    }
+
+    await creditBalanceForOrder(userId, order.id, challenge, db);
+  }
+};
+
 const generateNumericAccountId = () =>
   Array.from({ length: 12 }, () => Math.floor(Math.random() * 10)).join("");
 
@@ -772,9 +792,20 @@ const ensureSchema = async () => {
       leverage NUMERIC NOT NULL,
       margin NUMERIC NOT NULL,
       liq_price NUMERIC NOT NULL,
+      take_profit NUMERIC,
+      stop_loss NUMERIC,
       open_time BIGINT NOT NULL,
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
+  `);
+
+  await pool.query(`
+    ALTER TABLE trading_positions
+    ADD COLUMN IF NOT EXISTS take_profit NUMERIC
+  `);
+  await pool.query(`
+    ALTER TABLE trading_positions
+    ADD COLUMN IF NOT EXISTS stop_loss NUMERIC
   `);
 
   await pool.query(`
@@ -1016,6 +1047,7 @@ app.get("/api/accounts/:userId", requireAuth, async (req, res) => {
   }
 
   await syncPaymentsTableForUser(user.rows[0].id, user.rows[0].account_id);
+  await syncChallengeCreditsForUser(userId);
   const paymentsTableIdentifier = getPaymentsTableIdentifier(user.rows[0].account_id);
   await ensurePaymentsTable(user.rows[0].account_id);
   const orders = await pool.query(
@@ -1133,6 +1165,7 @@ app.get("/api/balance/:userId", requireAuth, async (req, res) => {
   }
 
   try {
+    await syncChallengeCreditsForUser(userId);
     const result = await pool.query(
       "SELECT balance FROM balances WHERE user_id = $1",
       [userId],
@@ -1523,7 +1556,10 @@ app.get("/api/trading/:userId", requireAuth, async (req, res) => {
       id: r.id, side: r.side, symbol: r.symbol, pair: r.pair,
       entryPrice: Number(r.entry_price), sizeUsdt: Number(r.size_usdt),
       leverage: Number(r.leverage), margin: Number(r.margin),
-      liqPrice: Number(r.liq_price), openTime: Number(r.open_time),
+      liqPrice: Number(r.liq_price),
+      takeProfit: r.take_profit === null ? null : Number(r.take_profit),
+      stopLoss: r.stop_loss === null ? null : Number(r.stop_loss),
+      openTime: Number(r.open_time),
     });
     const mapOrder = (r) => ({
       id: r.id, type: r.type, side: r.side, symbol: r.symbol, pair: r.pair,
@@ -1567,6 +1603,23 @@ app.post("/api/trading/:userId/positions", requireAuth, async (req, res) => {
     return res.status(400).json({ message: "Missing position fields." });
   }
 
+  const parseOptionalBound = (value) => {
+    if (value === undefined) return undefined;
+    if (value === null || value === "") return null;
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed <= 0) return Number.NaN;
+    return parsed;
+  };
+
+  const hasTakeProfit = Object.prototype.hasOwnProperty.call(req.body, "takeProfit");
+  const hasStopLoss = Object.prototype.hasOwnProperty.call(req.body, "stopLoss");
+  const takeProfit = parseOptionalBound(req.body?.takeProfit);
+  const stopLoss = parseOptionalBound(req.body?.stopLoss);
+
+  if (Number.isNaN(takeProfit) || Number.isNaN(stopLoss)) {
+    return res.status(400).json({ message: "TP/SL values must be positive numbers or null." });
+  }
+
   try {
     // Check if position for this symbol+side already exists
     const existing = await pool.query(
@@ -1577,15 +1630,24 @@ app.post("/api/trading/:userId/positions", requireAuth, async (req, res) => {
     let result;
     if (existing.rowCount) {
       result = await pool.query(
-        `UPDATE trading_positions SET entry_price = $1, size_usdt = $2, leverage = $3, margin = $4, liq_price = $5, open_time = $6
-         WHERE id = $7 RETURNING *`,
-        [entryPrice, sizeUsdt, leverage, margin, liqPrice, openTime, existing.rows[0].id]
+        `UPDATE trading_positions
+         SET entry_price = $1,
+             size_usdt = $2,
+             leverage = $3,
+             margin = $4,
+             liq_price = $5,
+             open_time = $6,
+             take_profit = CASE WHEN $7 THEN $8 ELSE take_profit END,
+             stop_loss = CASE WHEN $9 THEN $10 ELSE stop_loss END
+         WHERE id = $11
+         RETURNING *`,
+        [entryPrice, sizeUsdt, leverage, margin, liqPrice, openTime, hasTakeProfit, takeProfit ?? null, hasStopLoss, stopLoss ?? null, existing.rows[0].id]
       );
     } else {
       result = await pool.query(
-        `INSERT INTO trading_positions(user_id, side, symbol, pair, entry_price, size_usdt, leverage, margin, liq_price, open_time)
-         VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
-        [userId, side, symbol, pair, entryPrice, sizeUsdt, leverage, margin, liqPrice, openTime]
+        `INSERT INTO trading_positions(user_id, side, symbol, pair, entry_price, size_usdt, leverage, margin, liq_price, take_profit, stop_loss, open_time)
+         VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
+        [userId, side, symbol, pair, entryPrice, sizeUsdt, leverage, margin, liqPrice, takeProfit ?? null, stopLoss ?? null, openTime]
       );
     }
 
@@ -1608,6 +1670,55 @@ app.delete("/api/trading/:userId/positions/:posId", requireAuth, async (req, res
   } catch (error) {
     console.error("[trading] DELETE position failed", error);
     return res.status(500).json({ message: "Failed to delete position." });
+  }
+});
+
+// Update TP/SL for an existing position
+app.patch("/api/trading/:userId/positions/:posId/tpsl", requireAuth, async (req, res) => {
+  const userId = Number(req.params.userId);
+  if (!ensureAuthorizedUserId(req, res, userId)) return;
+
+  const posId = Number(req.params.posId);
+  const normalizeValue = (value) => {
+    if (value === null || value === undefined || value === "") {
+      return null;
+    }
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      return NaN;
+    }
+    return parsed;
+  };
+
+  const takeProfit = normalizeValue(req.body?.takeProfit);
+  const stopLoss = normalizeValue(req.body?.stopLoss);
+
+  if (Number.isNaN(takeProfit) || Number.isNaN(stopLoss)) {
+    return res.status(400).json({ message: "TP/SL values must be positive numbers or null." });
+  }
+
+  try {
+    const result = await pool.query(
+      `UPDATE trading_positions
+       SET take_profit = $1,
+           stop_loss = $2
+       WHERE id = $3 AND user_id = $4
+       RETURNING id, take_profit, stop_loss`,
+      [takeProfit, stopLoss, posId, userId],
+    );
+
+    if (!result.rowCount) {
+      return res.status(404).json({ message: "Position not found." });
+    }
+
+    return res.json({
+      id: result.rows[0].id,
+      takeProfit: result.rows[0].take_profit === null ? null : Number(result.rows[0].take_profit),
+      stopLoss: result.rows[0].stop_loss === null ? null : Number(result.rows[0].stop_loss),
+    });
+  } catch (error) {
+    console.error("[trading] PATCH tpsl failed", error);
+    return res.status(500).json({ message: "Failed to update TP/SL." });
   }
 });
 

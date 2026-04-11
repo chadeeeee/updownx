@@ -10,7 +10,7 @@ export const DashboardLayout = ({ children }: PropsWithChildren): JSX.Element =>
   return (
     <main className="min-h-screen bg-[#05070A] font-['Inter',sans-serif] text-white">
       {/* ═══ Top header bar ═══ */}
-      <header className="sticky top-0 z-50 flex h-16 2xl:h-20 items-center justify-between border-b border-[#2cf6c3] bg-[#05070A]/95 px-4 sm:px-6 2xl:px-10 backdrop-blur-md">
+      <header data-top-menu className="sticky top-0 z-50 flex h-16 2xl:h-20 items-center justify-between border-b border-[#2cf6c3] bg-[#05070A]/95 px-4 sm:px-6 2xl:px-10 backdrop-blur-md">
         {/* Left: hamburger + Logo */}
         <div className="flex items-center gap-3">
           <button
@@ -53,5 +53,4 @@ export const DashboardLayout = ({ children }: PropsWithChildren): JSX.Element =>
     </main>
   );
 };
-
 

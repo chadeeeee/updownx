@@ -10,6 +10,7 @@ import { Checkout } from "./screens/Checkout";
 import { EventLive } from "./screens/EventLive";
 import { Trading } from "./screens/Trading";
 import { ControlPanel } from "./screens/ControlPanel";
+import { Withdrawals } from "./screens/Withdrawals";
 import { AuthProvider, useAuth } from "./lib/auth";
 
 const PrivateRoute = ({ children }: { children: JSX.Element }): JSX.Element => {
@@ -44,7 +45,7 @@ createRoot(document.getElementById("app") as HTMLElement).render(
           />
           <Route
             path="/withdrawals"
-            element={<PrivateRoute><NotFound /></PrivateRoute>}
+            element={<PrivateRoute><Withdrawals /></PrivateRoute>}
           />
           <Route
             path="/help"

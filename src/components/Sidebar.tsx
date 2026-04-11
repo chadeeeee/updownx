@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 
@@ -42,6 +43,38 @@ interface SidebarProps {
 export const Sidebar = ({ mobileOpen, onClose }: SidebarProps): JSX.Element => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [desktopPinned, setDesktopPinned] = useState(false);
+
+  useEffect(() => {
+    const syncDesktopPinned = () => {
+      if (window.innerWidth < 1024) {
+        setDesktopPinned(false);
+        return;
+      }
+
+      const visibleTopMenu = Array.from(document.querySelectorAll<HTMLElement>("[data-top-menu]"))
+        .filter((element) => {
+          const styles = window.getComputedStyle(element);
+          const rect = element.getBoundingClientRect();
+          return styles.display !== "none" && styles.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
+        })
+        .find((element) => {
+          const rect = element.getBoundingClientRect();
+          return rect.bottom > 0 && rect.top < window.innerHeight;
+        });
+
+      setDesktopPinned(!visibleTopMenu);
+    };
+
+    syncDesktopPinned();
+    window.addEventListener("scroll", syncDesktopPinned, { passive: true });
+    window.addEventListener("resize", syncDesktopPinned);
+
+    return () => {
+      window.removeEventListener("scroll", syncDesktopPinned);
+      window.removeEventListener("resize", syncDesktopPinned);
+    };
+  }, [location.pathname]);
 
   return (
     <>
@@ -50,50 +83,52 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps): JSX.Element => {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 lg:hidden" onClick={onClose} />
       )}
 
-      <aside className={`flex flex-col w-[269px] min-h-full self-stretch items-start justify-between px-6 py-[43px] bg-[#05070a] transition-transform duration-300 z-40 fixed lg:sticky top-0 left-0 lg:left-auto lg:h-auto lg:min-h-[calc(100vh-64px)] lg:border-r lg:border-[#0b1016] ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
-        <div className="flex flex-col w-[210px] items-start gap-[5px]">
-          {navItems.map((item) => {
-            const isActive = location.pathname.startsWith(item.route) || (item.route === "/challenge" && location.pathname === "/event-live") || (item.route === "/accounts" && location.pathname === "/control-panel");
-            const isHelp = item.label === "Help";
-            return (
-              <button
-                key={item.label}
-                onClick={() => {
-                  navigate(item.route);
-                  if (onClose) onClose();
-                }}
-                className={`flex w-[210px] items-center gap-1.5 py-2 flex-[0_0_auto] rounded-xl border-none outline-none cursor-pointer transition-all duration-200 px-4 ${
-                  isActive ? "bg-[#01ffa3]" : "bg-transparent hover:bg-white/5"
-                }`}
-              >
-                {isHelp ? (
-                  <div className="w-[20px] h-[20px] flex items-center justify-center flex-shrink-0 relative">
+      <div className="relative w-0 lg:w-[269px] lg:shrink-0">
+        <aside className={`flex flex-col w-[269px] items-start justify-between px-6 py-[43px] bg-[#05070a] transition-transform duration-300 z-40 fixed top-0 left-0 h-full lg:border-r lg:border-[#0b1016] ${desktopPinned ? "lg:fixed lg:top-0 lg:h-screen" : "lg:absolute lg:top-0 lg:h-auto"} ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
+          <div className="flex flex-col w-[210px] items-start gap-[5px]">
+            {navItems.map((item) => {
+              const isActive = location.pathname.startsWith(item.route) || (item.route === "/challenge" && location.pathname === "/event-live") || (item.route === "/accounts" && location.pathname === "/control-panel");
+              const isHelp = item.label === "Help";
+              return (
+                <button
+                  key={item.label}
+                  onClick={() => {
+                    navigate(item.route);
+                    if (onClose) onClose();
+                  }}
+                  className={`flex w-[210px] items-center gap-1.5 py-2 flex-[0_0_auto] rounded-xl border-none outline-none cursor-pointer transition-all duration-200 px-4 ${
+                    isActive ? "bg-[#01ffa3]" : "bg-transparent hover:bg-white/5"
+                  }`}
+                >
+                  {isHelp ? (
+                    <div className="w-[20px] h-[20px] flex items-center justify-center flex-shrink-0 relative">
+                      <img
+                        className={`w-[26px] h-[26px] max-w-none absolute ${isActive ? "brightness-0" : ""}`}
+                        alt={item.alt}
+                        src={item.icon}
+                      />
+                    </div>
+                  ) : (
                     <img
-                      className={`w-[26px] h-[26px] max-w-none absolute ${isActive ? "brightness-0" : ""}`}
+                      className={`w-[20px] h-[20px] flex-shrink-0 ${isActive ? "brightness-0" : ""}`}
                       alt={item.alt}
                       src={item.icon}
                     />
-                  </div>
-                ) : (
-                  <img
-                    className={`w-[20px] h-[20px] flex-shrink-0 ${isActive ? "brightness-0" : ""}`}
-                    alt={item.alt}
-                    src={item.icon}
-                  />
-                )}
-                <span
-                  className={`[font-family:'Inter',Helvetica] text-[13.2px] tracking-[0] leading-5 whitespace-nowrap transition-colors ${
-                    isActive ? "font-semibold text-[#05070a]" : "font-normal text-gray-300"
-                  }`}
-                >
-                  {item.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+                  )}
+                  <span
+                    className={`[font-family:'Inter',Helvetica] text-[13.2px] tracking-[0] leading-5 whitespace-nowrap transition-colors ${
+                      isActive ? "font-semibold text-[#05070a]" : "font-normal text-gray-300"
+                    }`}
+                  >
+                    {item.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
 
-      </aside>
+        </aside>
+      </div>
 
       {/* Need assistance — fixed to viewport bottom-left, aligned with sidebar */}
       <div className="fixed bottom-[30px] left-[30px] w-[210px] z-50 hidden lg:block">
