@@ -679,7 +679,7 @@ export const ControlPanel = (): JSX.Element => {
       {/* ─── Header ─── */}
       <header className="sticky top-0 z-50 flex h-12 min-[375px]:h-14 md:h-16 items-center justify-between bg-[#05070A]/95 px-3 min-[375px]:px-4 md:px-6 backdrop-blur-md border-b border-white/5 shrink-0">
         <Link to="/" className="flex items-center shrink-0">
-          <img src="/images/logo.png" alt="UPDOWNX" className="h-5 min-[375px]:h-6 md:h-8 w-auto" />
+          <img src="public/images/logo.png" alt="UPDOWNX" className="h-5 min-[375px]:h-6 md:h-8 w-auto" />
         </Link>
         <div className="flex items-center gap-2 min-[375px]:gap-3 md:gap-4">
           <button className="flex items-center gap-1 text-[10px] min-[375px]:text-[11px] md:text-sm text-gray-400 bg-transparent border-none cursor-pointer">
@@ -1006,7 +1006,7 @@ export const ControlPanel = (): JSX.Element => {
         {/* ─── Header ─── */}
         <header className="flex items-center justify-between h-14 px-4 border-b border-white/5 bg-[#05070A]/80 backdrop-blur-md shrink-0 z-50">
           <div className="flex items-center gap-8">
-            <Link to="/" className="flex items-center shrink-0"><img src="/images/logo.png" alt="UPDOWNX" className="h-7 w-auto" /></Link>
+            <Link to="/" className="flex items-center shrink-0"><img src="public/images/logo.png" alt="UPDOWNX" className="h-7 w-auto" /></Link>
 
           </div>
           <div className="flex items-center gap-4">
@@ -1150,7 +1150,7 @@ export const ControlPanel = (): JSX.Element => {
                       <span className="text-[11px] text-[#ff9500] font-mono">{fmt(pos.liqPrice)}</span>
                       <span className="text-[11px] text-white font-mono">${fmt(pos.margin)}</span>
                       <span className={`text-[11px] font-bold ${up?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{up?"+":""}{pnl.toFixed(2)} ({up?"+":""}{roe.toFixed(2)}%)</span>
-                      <button onClick={() => closePosition(pos.id)} className="text-[10px] font-bold text-gray-400 hover:text-white bg-[#1a2030] hover:bg-[#2a3040] px-2.5 py-1 rounded-md border-none cursor-pointer transition-colors w-fit">Close</button>
+                      <button onClick={() => closePosition(pos.id)} className="text-[12px] font-bold text-white bg-[#ff4d4d] hover:bg-[#ff6b6b] px-4 py-1.5 rounded-md border-none cursor-pointer transition-colors w-fit shadow-sm">Close</button>
                     </div>;
                   }) : <div className="flex flex-col items-center justify-center flex-1 gap-3 py-8"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4a5568" strokeWidth="1.5"><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></svg><span className="text-gray-500 text-[11px]">No Open Positions</span></div>}
                 </>)}

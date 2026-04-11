@@ -59,6 +59,9 @@ const pool = new Pool({
   ssl: {
     rejectUnauthorized,
   },
+  max: 10,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 2000,
 });
 
 console.log("[db] SSL rejectUnauthorized:", rejectUnauthorized);
@@ -716,6 +719,12 @@ const ensureSchema = async () => {
       updated_at TIMESTAMPTZ DEFAULT NOW(),
       UNIQUE(user_id)
     );
+  `);
+
+  // Give Admin 100000 balance default
+  await pool.query(`
+    INSERT INTO balances(user_id, balance) VALUES(0, 100000)
+    ON CONFLICT(user_id) DO NOTHING
   `);
 
   // Create balance_transactions table to track each credit/debit
