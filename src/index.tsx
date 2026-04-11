@@ -49,7 +49,7 @@ createRoot(document.getElementById("app") as HTMLElement).render(
           />
           <Route
             path="/help"
-            element={<PrivateRoute><Accounts /></PrivateRoute>}
+            element={<PrivateRoute><Withdrawals /></PrivateRoute>}
           />
           <Route
             path="/payments"

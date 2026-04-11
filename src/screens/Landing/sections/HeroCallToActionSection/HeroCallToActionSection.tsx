@@ -66,7 +66,7 @@ export const HeroCallToActionSection = (): JSX.Element => {
           <div className="flex w-full flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center sm:gap-5">
             {/* Choose Your Account button */}
             <Button 
-              onClick={() => window.location.href = '/challenge'}
+              onClick={() => window.location.href = '/accounts'}
               className="inline-flex h-[64px] w-full items-center justify-center rounded-2xl border border-white/5 bg-[#1a1d1f] px-10 hover:bg-[#23272a] sm:w-auto"
             >
               <span className="font-bold text-[#00ffa3] text-sm uppercase leading-6 [font-family:'Inter',Helvetica] text-center tracking-widest whitespace-nowrap">

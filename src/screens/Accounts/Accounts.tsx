@@ -246,6 +246,7 @@ export const Accounts = () => {
   const [activeTab, setActiveTab] = useState("challenge");
   const [liveUser, setLiveUser] = useState<AppUser | null>(null);
   const [challenges, setChallenges] = useState<ActiveChallenge[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, setUser } = useAuth();
@@ -256,6 +257,7 @@ export const Accounts = () => {
       return;
     }
 
+    setIsLoading(true);
     api.accounts(user.id)
       .then((response) => {
         if (response.user) {
@@ -270,6 +272,9 @@ export const Accounts = () => {
       })
       .catch((error) => {
         console.error("[accounts] failed to refresh user", error instanceof ApiError ? error.message : error);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   }, [setUser, user?.id]);
 
@@ -282,6 +287,17 @@ export const Accounts = () => {
       return (
         <div className="flex min-h-[calc(100vh-230px)] items-center justify-center py-4">
           <WillBeActivatedState />
+        </div>
+      );
+    }
+
+    if (isLoading) {
+      return (
+        <div className="flex min-h-[200px] items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#12313a] border-t-[#00ffa3]"></div>
+            <span className="text-[#00ffa3] font-bold text-sm tracking-widest animate-pulse uppercase">Loading</span>
+          </div>
         </div>
       );
     }
@@ -304,6 +320,17 @@ export const Accounts = () => {
       return (
         <div className="flex min-h-[calc(100vh-280px)] items-center justify-center py-6">
           <WillBeActivatedState />
+        </div>
+      );
+    }
+
+    if (isLoading) {
+      return (
+        <div className="flex min-h-[300px] items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#12313a] border-t-[#00ffa3]"></div>
+            <span className="text-[#00ffa3] font-bold tracking-widest animate-pulse uppercase">Loading</span>
+          </div>
         </div>
       );
     }

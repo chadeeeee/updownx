@@ -28,7 +28,7 @@ export const TopBar = ({
             <img
               className="h-[36px] sm:h-[40.29px] w-auto max-w-[160px] sm:max-w-[225px] object-contain"
               alt="Logo"
-              src={logoSrc}
+              src="images/logo.png"
             />
           </Link>
         </div>

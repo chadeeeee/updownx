@@ -196,8 +196,22 @@ const CUSTOM_ICONS: Record<string, string> = {
   LPT: "https://images.weserv.nl/?url=coin-images.coingecko.com/coins/images/7137/large/badge-logo-circuit-green.png?1719357686"
 };
 
+const FEE_MARKET = 0.0080; // 0.80%
+const FEE_LIMIT  = 0.010;  // 1.00%
+
 /* ═══════════════════════ Helpers ═══════════════════════ */
 const fmt = (n: number, d = 2) => n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+const fmtPrice = (n: number) => {
+  // Auto-detect decimal places based on price magnitude (like Binance)
+  const abs = Math.abs(n);
+  let d: number;
+  if (abs >= 1000) d = 2;
+  else if (abs >= 1) d = 4;
+  else if (abs >= 0.01) d = 5;
+  else if (abs >= 0.0001) d = 6;
+  else d = 8;
+  return n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+};
 const fmtDate = (t: number) => new Date(t).toLocaleString("en-GB", { timeZone: "Europe/Kiev", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 
 const calcLiqPrice = (entry: number, leverage: number, side: "long"|"short") =>
@@ -314,7 +328,10 @@ export const ControlPanel = (): JSX.Element => {
   const [slInput, setSlInput] = useState("");
   const [tpslSaving, setTpslSaving] = useState(false);
   const [tpslError, setTpslError] = useState<string | null>(null);
+  const [tpslClosing, setTpslClosing] = useState(false);
   const nextId = useRef(1);
+  const closingPosIds = useRef<Set<number>>(new Set()); // prevent double TP/SL close
+  const positionsRef = useRef<Position[]>([]);
   const [tradingLoaded, setTradingLoaded] = useState(false);
 
   const [currentPrice, setCurrentPrice] = useState("...");
@@ -333,7 +350,9 @@ export const ControlPanel = (): JSX.Element => {
     api.balance(user.id).then(d => setUserBalance(d.balance)).catch(() => {});
     // Load all trading data (positions, orders, histories)
     api.tradingData(user.id).then(data => {
-      setPositions(data.positions.map(p => ({ ...p, side: p.side as "long"|"short" })));
+      const posData = data.positions.map(p => ({ ...p, side: p.side as "long"|"short" }));
+      setPositions(posData);
+      positionsRef.current = posData;
       setPendingOrders(data.pendingOrders.map(o => ({ ...o, type: o.type as "limit"|"trigger", side: o.side as "long"|"short", execType: o.execType as "limit"|"market"|undefined, triggerDirection: o.triggerDirection as "up"|"down"|undefined })));
       setOrderHistory(data.orderHistory.map(o => ({ ...o, type: o.type as "limit"|"trigger"|"market", side: o.side as "long"|"short", status: o.status as "filled"|"cancelled" })));
       setTradeHistory(data.tradeHistory.map(t => ({ ...t, side: t.side as "long"|"short" })));
@@ -372,7 +391,7 @@ export const ControlPanel = (): JSX.Element => {
       if (d.c) {
         const p = parseFloat(d.c);
         setPriceNumeric(p);
-        setCurrentPrice(fmt(p));
+        setCurrentPrice(fmtPrice(p));
         setPriceChangePercent(parseFloat(d.P).toFixed(2));
         setIsPositive(parseFloat(d.P) >= 0);
         // Do not force priceInput here so the user sees live price for Market
@@ -384,9 +403,9 @@ export const ControlPanel = (): JSX.Element => {
       const d = JSON.parse(e.data);
       if (d.bids && d.asks) {
         let ct = 0;
-        setBids(d.bids.slice(0,20).map((b: string[]) => { const pr=parseFloat(b[0]),sz=parseFloat(b[1]); ct+=sz; return {price:fmt(pr),size:sz.toFixed(3),total:ct.toFixed(3)}; }));
+        setBids(d.bids.slice(0,20).map((b: string[]) => { const pr=parseFloat(b[0]),sz=parseFloat(b[1]); ct+=sz; return {price:fmtPrice(pr),size:sz.toFixed(3),total:ct.toFixed(3)}; }));
         ct = 0;
-        setAsks(d.asks.slice(0,20).map((a: string[]) => { const pr=parseFloat(a[0]),sz=parseFloat(a[1]); ct+=sz; return {price:fmt(pr),size:sz.toFixed(3),total:ct.toFixed(3)}; }).reverse());
+        setAsks(d.asks.slice(0,20).map((a: string[]) => { const pr=parseFloat(a[0]),sz=parseFloat(a[1]); ct+=sz; return {price:fmtPrice(pr),size:sz.toFixed(3),total:ct.toFixed(3)}; }).reverse());
       }
     };
     return () => { t.close(); ob.close(); };
@@ -476,11 +495,15 @@ export const ControlPanel = (): JSX.Element => {
   }, []);
 
   const closeTpSlModal = useCallback(() => {
-    setTpslModalPosId(null);
-    setTpInput("");
-    setSlInput("");
-    setTpslSaving(false);
-    setTpslError(null);
+    setTpslClosing(true);
+    setTimeout(() => {
+      setTpslModalPosId(null);
+      setTpInput("");
+      setSlInput("");
+      setTpslSaving(false);
+      setTpslError(null);
+      setTpslClosing(false);
+    }, 250);
   }, []);
 
   const saveTpSl = useCallback(async () => {
@@ -508,21 +531,21 @@ export const ControlPanel = (): JSX.Element => {
     }
 
     if (modalPosition.side === "long") {
-      if (takeProfit != null && takeProfit <= modalPosition.entryPrice) {
-        setTpslError("For Long, Take Profit should be above entry price.");
+      if (takeProfit != null && takeProfit <= modalMarkPrice) {
+        setTpslError("For Long, Take Profit should be above current Mark Price.");
         return;
       }
-      if (stopLoss != null && stopLoss >= modalPosition.entryPrice) {
-        setTpslError("For Long, Stop Loss should be below entry price.");
+      if (stopLoss != null && stopLoss >= modalMarkPrice) {
+        setTpslError("For Long, Stop Loss should be below current Mark Price.");
         return;
       }
     } else {
-      if (takeProfit != null && takeProfit >= modalPosition.entryPrice) {
-        setTpslError("For Short, Take Profit should be below entry price.");
+      if (takeProfit != null && takeProfit >= modalMarkPrice) {
+        setTpslError("For Short, Take Profit should be below current Mark Price.");
         return;
       }
-      if (stopLoss != null && stopLoss <= modalPosition.entryPrice) {
-        setTpslError("For Short, Stop Loss should be above entry price.");
+      if (stopLoss != null && stopLoss <= modalMarkPrice) {
+        setTpslError("For Short, Stop Loss should be above current Mark Price.");
         return;
       }
     }
@@ -549,35 +572,46 @@ export const ControlPanel = (): JSX.Element => {
   }, [closeTpSlModal, modalPosition, slInput, tpInput, user?.id]);
 
   const addOrAveragePosition = useCallback((side: "long"|"short", entry: number, size: number, lev: number) => {
-    setPositions(prev => {
-      const existing = prev.find(p => p.symbol === selectedCoin.symbol && p.side === side);
-      if (existing) {
-        const newSize = existing.sizeUsdt + size;
-        const newEntry = (existing.sizeUsdt * existing.entryPrice + size * entry) / newSize;
-        const newMargin = existing.margin + size / lev;
-        const effLev = newSize / newMargin;
-        const updatedPos = {
-          ...existing, entryPrice: newEntry, sizeUsdt: newSize, margin: newMargin, leverage: effLev,
-          liqPrice: calcLiqPrice(newEntry, effLev, side),
-        };
-        // Persist to DB
-        if (user?.id != null) {
-          api.savePosition(user.id, { side: updatedPos.side, symbol: updatedPos.symbol, pair: updatedPos.pair, entryPrice: updatedPos.entryPrice, sizeUsdt: updatedPos.sizeUsdt, leverage: updatedPos.leverage, margin: updatedPos.margin, liqPrice: updatedPos.liqPrice, takeProfit: updatedPos.takeProfit ?? null, stopLoss: updatedPos.stopLoss ?? null, openTime: updatedPos.openTime }).catch(e => console.error("[trading] save pos", e));
-        }
-        return prev.map(p => p.id === existing.id ? updatedPos : p);
+    const existing = positionsRef.current.find(p => p.symbol === selectedCoin.symbol && p.side === side);
+    if (existing) {
+      const newSize = existing.sizeUsdt + size;
+      const newEntry = (existing.sizeUsdt * existing.entryPrice + size * entry) / newSize;
+      const newMargin = existing.margin + size / lev;
+      const effLev = newSize / newMargin;
+      const updatedPos = {
+        ...existing, entryPrice: newEntry, sizeUsdt: newSize, margin: newMargin, leverage: effLev,
+        liqPrice: calcLiqPrice(newEntry, effLev, side),
+      };
+      
+      // Persist to DB
+      if (user?.id != null) {
+        api.savePosition(user.id, { side: updatedPos.side, symbol: updatedPos.symbol, pair: updatedPos.pair, entryPrice: updatedPos.entryPrice, sizeUsdt: updatedPos.sizeUsdt, leverage: updatedPos.leverage, margin: updatedPos.margin, liqPrice: updatedPos.liqPrice, takeProfit: updatedPos.takeProfit ?? null, stopLoss: updatedPos.stopLoss ?? null, openTime: updatedPos.openTime }).catch(e => console.error("[trading] save pos", e));
       }
+      
+      const newArray = positionsRef.current.map(p => p.id === existing.id ? updatedPos : p);
+      positionsRef.current = newArray;
+      setPositions(newArray);
+    } else {
       const newPos: Position = { id: nextId.current++, side, symbol: selectedCoin.symbol, pair: selectedCoin.pair,
         entryPrice: entry, sizeUsdt: size, leverage: lev, margin: size/lev,
         liqPrice: calcLiqPrice(entry, lev, side), openTime: Date.now() };
+      
       // Persist to DB
       if (user?.id != null) {
         api.savePosition(user.id, { side: newPos.side, symbol: newPos.symbol, pair: newPos.pair, entryPrice: newPos.entryPrice, sizeUsdt: newPos.sizeUsdt, leverage: newPos.leverage, margin: newPos.margin, liqPrice: newPos.liqPrice, takeProfit: newPos.takeProfit ?? null, stopLoss: newPos.stopLoss ?? null, openTime: newPos.openTime }).then(r => {
           // Update the local id to the db id
-          setPositions(ps => ps.map(p => p.id === newPos.id ? { ...p, id: r.id } : p));
+          setPositions(ps => {
+            const next = ps.map(p => p.id === newPos.id ? { ...p, id: r.id } : p);
+            positionsRef.current = next;
+            return next;
+          });
         }).catch(e => console.error("[trading] save pos", e));
       }
-      return [newPos, ...prev];
-    });
+      
+      const newArray = [newPos, ...positionsRef.current];
+      positionsRef.current = newArray;
+      setPositions(newArray);
+    }
   }, [selectedCoin, user?.id]);
 
   const executeOrder = useCallback((order: PendingOrder, fillPrice: number) => {
@@ -594,29 +628,38 @@ export const ControlPanel = (): JSX.Element => {
       }).catch(e => console.error("[trading] save OH", e));
     }
     // Add/average position
-    setPositions(prev => {
-      const existing = prev.find(p => p.symbol === order.symbol && p.side === order.side);
-      if (existing) {
-        const newSize = existing.sizeUsdt + order.sizeUsdt;
-        const newEntry = (existing.sizeUsdt * existing.entryPrice + order.sizeUsdt * fillPrice) / newSize;
-        const newMargin = existing.margin + order.margin;
-        const effLev = newSize / newMargin;
-        const updated = { ...existing, entryPrice: newEntry, sizeUsdt: newSize, margin: newMargin, leverage: effLev, liqPrice: calcLiqPrice(newEntry, effLev, order.side) };
-        if (user?.id != null) {
-          api.savePosition(user.id, { side: updated.side, symbol: updated.symbol, pair: updated.pair, entryPrice: updated.entryPrice, sizeUsdt: updated.sizeUsdt, leverage: updated.leverage, margin: updated.margin, liqPrice: updated.liqPrice, takeProfit: updated.takeProfit ?? null, stopLoss: updated.stopLoss ?? null, openTime: updated.openTime }).catch(e => console.error("[trading] save pos", e));
-        }
-        return prev.map(p => p.id === existing.id ? updated : p);
+    const existing = positionsRef.current.find(p => p.symbol === order.symbol && p.side === order.side);
+    if (existing) {
+      const newSize = existing.sizeUsdt + order.sizeUsdt;
+      const newEntry = (existing.sizeUsdt * existing.entryPrice + order.sizeUsdt * fillPrice) / newSize;
+      const newMargin = existing.margin + order.margin;
+      const effLev = newSize / newMargin;
+      const updated = { ...existing, entryPrice: newEntry, sizeUsdt: newSize, margin: newMargin, leverage: effLev, liqPrice: calcLiqPrice(newEntry, effLev, order.side) };
+      
+      if (user?.id != null) {
+        api.savePosition(user.id, { side: updated.side, symbol: updated.symbol, pair: updated.pair, entryPrice: updated.entryPrice, sizeUsdt: updated.sizeUsdt, leverage: updated.leverage, margin: updated.margin, liqPrice: updated.liqPrice, takeProfit: updated.takeProfit ?? null, stopLoss: updated.stopLoss ?? null, openTime: updated.openTime }).catch(e => console.error("[trading] save pos", e));
       }
+      const newArray = positionsRef.current.map(p => p.id === existing.id ? updated : p);
+      positionsRef.current = newArray;
+      setPositions(newArray);
+    } else {
       const newPos: Position = { id: nextId.current++, side: order.side, symbol: order.symbol, pair: order.pair,
         entryPrice: fillPrice, sizeUsdt: order.sizeUsdt, leverage: order.leverage, margin: order.margin,
         liqPrice: calcLiqPrice(fillPrice, order.leverage, order.side), openTime: Date.now() };
+      
       if (user?.id != null) {
         api.savePosition(user.id, { side: newPos.side, symbol: newPos.symbol, pair: newPos.pair, entryPrice: newPos.entryPrice, sizeUsdt: newPos.sizeUsdt, leverage: newPos.leverage, margin: newPos.margin, liqPrice: newPos.liqPrice, takeProfit: newPos.takeProfit ?? null, stopLoss: newPos.stopLoss ?? null, openTime: newPos.openTime }).then(r => {
-          setPositions(ps => ps.map(p => p.id === newPos.id ? { ...p, id: r.id } : p));
+          setPositions(ps => {
+            const next = ps.map(p => p.id === newPos.id ? { ...p, id: r.id } : p);
+            positionsRef.current = next;
+            return next;
+          });
         }).catch(e => console.error("[trading] save pos", e));
       }
-      return [newPos, ...prev];
-    });
+      const newArray = [newPos, ...positionsRef.current];
+      positionsRef.current = newArray;
+      setPositions(newArray);
+    }
   }, [user?.id]);
 
   const openTrade = useCallback((side: "long"|"short") => {
@@ -635,6 +678,12 @@ export const ControlPanel = (): JSX.Element => {
     const now = Date.now();
     if (orderType === "Market") {
       addOrAveragePosition(side, priceNumeric, size, leverage);
+      // Deduct market fee from balance
+      const fee = size * FEE_MARKET;
+      setUserBalance(b => b - fee);
+      if (user?.id != null) {
+        api.updateTradingBalance(user.id, -fee).catch(e => console.error("[trading] fee", e));
+      }
       const ohEntry = { type: "market" as const, side, symbol: selectedCoin.symbol,
         price: priceNumeric, sizeUsdt: size, leverage, status: "filled" as const, createdAt: now, filledAt: now };
       const ohId = nextId.current++;
@@ -695,7 +744,11 @@ export const ControlPanel = (): JSX.Element => {
         createdAt: now };
       const ohId2 = nextId.current++;
       setOrderHistory(prev => [{ id: ohId2, ...ohEntry2 }, ...prev]);
+      // Deduct limit/trigger fee from balance
+      const fee = size * FEE_LIMIT;
+      setUserBalance(b => b - fee);
       if (user?.id != null) {
+        api.updateTradingBalance(user.id, -fee).catch(e => console.error("[trading] fee", e));
         api.saveOrderHistory(user.id, ohEntry2).then(r => {
           setOrderHistory(h => h.map(o => o.id === ohId2 ? { ...o, id: r.id } : o));
         }).catch(e => console.error("[trading] save OH", e));
@@ -705,31 +758,37 @@ export const ControlPanel = (): JSX.Element => {
   }, [sizeInput, priceNumeric, leverage, availableBalance, orderType, priceInput, selectedCoin, addOrAveragePosition, user?.id]);
 
   const closePosition = useCallback((posId: number) => {
-    setPositions(prev => {
-      const pos = prev.find(p => p.id === posId);
-      if (pos) {
-        const mark = priceMap[pos.pair] || pos.entryPrice;
-        const pnl = calcPnl(pos, mark);
-        const closedAt = Date.now();
-        const thEntry = { side: pos.side, symbol: pos.symbol,
-          entryPrice: pos.entryPrice, exitPrice: mark, sizeUsdt: pos.sizeUsdt, leverage: pos.leverage,
-          pnl, openedAt: pos.openTime, closedAt };
-        const thId = nextId.current++;
-        setTradeHistory(h => [{ id: thId, ...thEntry }, ...h]);
-        setUserBalance(b => b + pnl);
-        // Persist to DB
-        if (user?.id != null) {
-          api.deletePosition(user.id, posId).catch(e => console.error("[trading] del pos", e));
-          api.saveTradeHistory(user.id, thEntry).then(r => {
-            setTradeHistory(th => th.map(t => t.id === thId ? { ...t, id: r.id } : t));
-          }).catch(e => console.error("[trading] save TH", e));
-          api.updateTradingBalance(user.id, pnl).then(r => {
-            setUserBalance(r.balance);
-          }).catch(e => console.error("[trading] update balance", e));
-        }
-      }
-      return prev.filter(p => p.id !== posId);
-    });
+    const pos = positionsRef.current.find(p => p.id === posId);
+    if (!pos) {
+      closingPosIds.current.delete(posId);
+      return; // already removed or invalid
+    }
+    
+    const mark = priceMap[pos.pair] || pos.entryPrice;
+    const pnl = calcPnl(pos, mark);
+    const closedAt = Date.now();
+    const thEntry = { side: pos.side, symbol: pos.symbol,
+      entryPrice: pos.entryPrice, exitPrice: mark, sizeUsdt: pos.sizeUsdt, leverage: pos.leverage,
+      pnl, openedAt: pos.openTime, closedAt };
+    const thId = nextId.current++;
+    setTradeHistory(h => [{ id: thId, ...thEntry }, ...h]);
+    setUserBalance(b => b + pnl);
+    
+    // Persist to DB
+    if (user?.id != null) {
+      api.deletePosition(user.id, posId).catch(e => console.error("[trading] del pos", e));
+      api.saveTradeHistory(user.id, thEntry).then(r => {
+        setTradeHistory(th => th.map(t => t.id === thId ? { ...t, id: r.id } : t));
+      }).catch(e => console.error("[trading] save TH", e));
+      api.updateTradingBalance(user.id, pnl).then(r => {
+        setUserBalance(r.balance);
+      }).catch(e => console.error("[trading] update balance", e));
+    }
+    
+    closingPosIds.current.delete(posId);
+    const newArray = positionsRef.current.filter(p => p.id !== posId);
+    positionsRef.current = newArray;
+    setPositions(newArray);
   }, [priceMap, user?.id]);
 
   const cancelOrder = useCallback((orderId: number) => {
@@ -761,6 +820,8 @@ export const ControlPanel = (): JSX.Element => {
 
     if (!triggered.length) return;
     for (const id of [...new Set(triggered)]) {
+      if (closingPosIds.current.has(id)) continue; // skip if already being closed
+      closingPosIds.current.add(id);
       closePosition(id);
     }
   }, [closePosition, positions, priceMap]);
@@ -1095,9 +1156,13 @@ export const ControlPanel = (): JSX.Element => {
               tradeHistory.length ? <div className="px-3 min-[375px]:px-4 md:px-6 py-2">
                 {tradeHistory.map(t => {
                   const up=t.pnl>=0;
+                  const fee = t.sizeUsdt * FEE_MARKET;
                   return <div key={t.id} className="flex items-center justify-between py-1.5 border-b border-white/5">
                     <span className={`text-[8px] min-[375px]:text-[9px] font-bold ${t.side==="long"?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{t.symbol} {t.side==="long"?"Long":"Short"}</span>
-                    <span className={`text-[8px] font-bold ${up?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{up?"+":""}{t.pnl.toFixed(2)}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[7px] text-[#ff9500]">fee: -${fee.toFixed(2)}</span>
+                      <span className={`text-[8px] font-bold ${up?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{up?"+":""}{t.pnl.toFixed(2)}</span>
+                    </div>
                   </div>;
                 })}
               </div> : <div className="flex items-center justify-center py-6 text-gray-500 text-[8px] min-[375px]:text-[9px]">No Trade History</div>
@@ -1153,7 +1218,7 @@ export const ControlPanel = (): JSX.Element => {
               <span className="text-[9px] text-gray-500 font-semibold tracking-wider uppercase">Balance</span>
               <span className="text-sm font-bold text-white">{fmt(userBalance)} <span className="text-gray-400 text-xs">USDT</span></span>
             </div>
-            <button className="bg-[#00ffa3] hover:bg-[#00e693] text-[#05070a] font-bold text-[11px] px-5 py-2.5 rounded-full border-none cursor-pointer transition-colors">DEPOSIT</button>
+            <button onClick={() => navigate('/challenges')} className="bg-[#00ffa3] hover:bg-[#00e693] text-[#05070a] font-bold text-[11px] px-5 py-2.5 rounded-full border-none cursor-pointer transition-colors">DEPOSIT</button>
             <button className="inline-flex items-center gap-1 bg-transparent border-none p-0 cursor-pointer transition-opacity hover:opacity-80">
               <Globe className="h-[14px] w-[14px] text-gray-300" /><span className="font-bold text-gray-300 text-xs">EN</span><img className="w-4 h-4" alt="" src="/svg/arrow.svg" />
             </button>
@@ -1350,17 +1415,19 @@ export const ControlPanel = (): JSX.Element => {
                 </>)}
 
                 {bottomTab === "trade-history" && (<>
-                  <div className="grid grid-cols-8 gap-2 px-6 py-2 border-b border-white/5">
-                    {["SYMBOL","SIDE","ENTRY","EXIT","SIZE","PNL","OPENED","CLOSED"].map(c => <span key={c} className="text-[10px] text-[#A6B2C8] font-semibold tracking-[0.5px] uppercase">{c}</span>)}
+                  <div className="grid grid-cols-9 gap-2 px-6 py-2 border-b border-white/5">
+                    {["SYMBOL","SIDE","ENTRY","EXIT","SIZE","FEE","PNL","OPENED","CLOSED"].map(c => <span key={c} className="text-[10px] text-[#A6B2C8] font-semibold tracking-[0.5px] uppercase">{c}</span>)}
                   </div>
                   {tradeHistory.length ? tradeHistory.map(t => {
                     const up = t.pnl >= 0;
-                    return <div key={t.id} className="grid grid-cols-8 gap-2 py-2.5 px-6 border-b border-white/5 items-center">
+                    const fee = t.sizeUsdt * FEE_MARKET;
+                    return <div key={t.id} className="grid grid-cols-9 gap-2 py-2.5 px-6 border-b border-white/5 items-center">
                       <span className="text-[11px] font-bold text-white">{t.symbol}</span>
                       <span className={`text-[11px] font-bold ${t.side==="long"?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{t.side==="long"?"Long":"Short"}</span>
-                      <span className="text-[11px] text-white font-mono">{fmt(t.entryPrice)}</span>
-                      <span className="text-[11px] text-white font-mono">{fmt(t.exitPrice)}</span>
+                      <span className="text-[11px] text-white font-mono">{fmtPrice(t.entryPrice)}</span>
+                      <span className="text-[11px] text-white font-mono">{fmtPrice(t.exitPrice)}</span>
                       <span className="text-[11px] text-white font-mono">${fmt(t.sizeUsdt)}</span>
+                      <span className="text-[11px] text-[#ff9500] font-mono">-${fee.toFixed(2)}</span>
                       <span className={`text-[11px] font-bold ${up?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{up?"+":""}{t.pnl.toFixed(2)}</span>
                       <span className="text-[11px] text-gray-400">{fmtDate(t.openedAt)}</span>
                       <span className="text-[11px] text-gray-400">{fmtDate(t.closedAt)}</span>
@@ -1374,7 +1441,7 @@ export const ControlPanel = (): JSX.Element => {
               <div className="flex items-center justify-between px-6 py-2 border-t border-white/5 bg-[#05070A] shrink-0">
                 <div className="flex items-center gap-5">
                   <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-[#00ffa3] shadow-[0_0_5px_#00ffa3]" /><span className="text-[10.5px] text-[#afc0c9]">Connection: Secure</span></div>
-                  <span className="text-[10.5px] text-[#89a4ad]">Server Time: {kyivTime} (Kyiv)</span>
+                  <span className="text-[10.5px] text-[#89a4ad]">Server Time: {kyivTime}</span>
                 </div>
                 <span className="text-[10px] text-[#A6B2C8] font-bold tracking-widest">UPDOWN PROTOCOL V2.4.1</span>
               </div>
@@ -1507,56 +1574,78 @@ export const ControlPanel = (): JSX.Element => {
       </div>
     </div>
 
-    {modalPosition && (
+    {modalPosition && (<>
+      <style>{`
+        @keyframes tpslOverlayIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes tpslOverlayOut { from { opacity: 1; } to { opacity: 0; } }
+        @keyframes tpslModalIn { from { opacity: 0; transform: scale(0.92) translateY(16px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes tpslModalOut { from { opacity: 1; transform: scale(1) translateY(0); } to { opacity: 0; transform: scale(0.95) translateY(10px); } }
+        .tpsl-overlay { animation: tpslOverlayIn 0.25s ease-out both; }
+        .tpsl-overlay.closing { animation: tpslOverlayOut 0.25s ease-in both; }
+        .tpsl-modal { animation: tpslModalIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .tpsl-modal.closing { animation: tpslModalOut 0.25s ease-in both; }
+      `}</style>
       <div
-        className="fixed inset-0 z-[120] flex items-center justify-center bg-black/70 backdrop-blur-sm p-3 min-[375px]:p-4"
+        className={`tpsl-overlay fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-md p-3 min-[375px]:p-4 ${tpslClosing ? "closing" : ""}`}
         onClick={closeTpSlModal}
       >
         <div
-          className="w-full max-w-[620px] rounded-2xl border border-[#1f2730] bg-[#0B0F14] shadow-[0_25px_80px_rgba(0,0,0,0.6)]"
+          className={`tpsl-modal w-full max-w-[620px] rounded-[20px] border border-[#00ffa3]/15 bg-gradient-to-b from-[#0d1520] to-[#080c12] shadow-[0_30px_100px_rgba(0,0,0,0.7),0_0_40px_rgba(0,255,163,0.04)] overflow-hidden ${tpslClosing ? "closing" : ""}`}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between border-b border-white/5 px-4 min-[375px]:px-5 py-3 min-[375px]:py-4">
-            <div className="flex items-center gap-2">
-              <div className="h-7 w-7 min-[375px]:h-8 min-[375px]:w-8 rounded-lg bg-[#102f25] border border-[#00ffa3]/35 text-[#00ffa3] flex items-center justify-center">
-                <Plus className="w-4 h-4" />
+          {/* Header with accent glow line */}
+          <div className="relative px-5 min-[375px]:px-6 py-4 min-[375px]:py-5">
+            <div className="absolute top-0 left-[10%] right-[10%] h-[1px] bg-gradient-to-r from-transparent via-[#00ffa3]/40 to-transparent" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[#00ffa3]/20 to-[#00ffa3]/5 border border-[#00ffa3]/25 text-[#00ffa3] flex items-center justify-center shadow-[0_0_12px_rgba(0,255,163,0.1)]">
+                  <Plus className="w-4.5 h-4.5" />
+                </div>
+                <div>
+                  <h3 className="text-[17px] min-[375px]:text-[19px] font-bold text-white tracking-tight">Add TP/SL</h3>
+                  <span className="text-[10px] text-gray-500 font-medium">{modalPosition.symbol} • {modalPosition.side === "long" ? "Long" : "Short"} {modalPosition.leverage.toFixed(1)}x</span>
+                </div>
               </div>
-              <h3 className="text-[16px] min-[375px]:text-[18px] font-semibold text-white">Add TP/SL</h3>
+              <button
+                type="button"
+                onClick={closeTpSlModal}
+                className="text-gray-500 hover:text-white bg-white/5 hover:bg-white/10 border-none cursor-pointer p-2 rounded-lg transition-all"
+                aria-label="Close TP/SL modal"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={closeTpSlModal}
-              className="text-gray-400 hover:text-white bg-transparent border-none cursor-pointer p-1"
-              aria-label="Close TP/SL modal"
-            >
-              <X className="w-5 h-5" />
-            </button>
           </div>
 
-          <div className="px-4 min-[375px]:px-5 py-4 min-[375px]:py-5">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="rounded-lg border border-white/8 bg-[#101722] px-3 py-2">
-                <div className="text-[10px] uppercase tracking-wide text-gray-500">Entry Price</div>
-                <div className="text-[14px] font-semibold text-white">{fmt(modalPosition.entryPrice)}</div>
+          <div className="px-5 min-[375px]:px-6 pb-5 min-[375px]:pb-6">
+            {/* Info cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <div className="rounded-xl bg-[#0a1018] border border-white/[0.06] px-3 py-2.5">
+                <div className="text-[9px] uppercase tracking-[0.1em] text-gray-500 font-semibold">Entry Price</div>
+                <div className="text-[14px] font-bold text-white mt-0.5">{fmt(modalPosition.entryPrice)}</div>
               </div>
-              <div className="rounded-lg border border-white/8 bg-[#101722] px-3 py-2">
-                <div className="text-[10px] uppercase tracking-wide text-gray-500">Size</div>
-                <div className="text-[14px] font-semibold text-white">${fmt(modalPosition.sizeUsdt)}</div>
+              <div className="rounded-xl bg-[#0a1018] border border-white/[0.06] px-3 py-2.5">
+                <div className="text-[9px] uppercase tracking-[0.1em] text-gray-500 font-semibold">Size</div>
+                <div className="text-[14px] font-bold text-white mt-0.5">${fmt(modalPosition.sizeUsdt)}</div>
               </div>
-              <div className="rounded-lg border border-white/8 bg-[#101722] px-3 py-2">
-                <div className="text-[10px] uppercase tracking-wide text-gray-500">Mark Price</div>
-                <div className="text-[14px] font-semibold text-white">{fmt(modalMarkPrice)}</div>
+              <div className="rounded-xl bg-[#0a1018] border border-white/[0.06] px-3 py-2.5">
+                <div className="text-[9px] uppercase tracking-[0.1em] text-gray-500 font-semibold">Mark Price</div>
+                <div className="text-[14px] font-bold text-white mt-0.5">{fmt(modalMarkPrice)}</div>
               </div>
-              <div className="rounded-lg border border-white/8 bg-[#101722] px-3 py-2">
-                <div className="text-[10px] uppercase tracking-wide text-gray-500">Liq. Price</div>
-                <div className="text-[14px] font-semibold text-[#ff9500]">{fmt(modalPosition.liqPrice)}</div>
+              <div className="rounded-xl bg-[#0a1018] border border-white/[0.06] px-3 py-2.5">
+                <div className="text-[9px] uppercase tracking-[0.1em] text-gray-500 font-semibold">Liq. Price</div>
+                <div className="text-[14px] font-bold text-[#ff9500] mt-0.5">{fmt(modalPosition.liqPrice)}</div>
               </div>
             </div>
 
-            <div className="mt-4 rounded-xl border border-[#1a2835] bg-[#0f141d] p-3 min-[375px]:p-4">
-              <div className="mb-1 text-[12px] font-semibold text-white">Take Profit (TP)</div>
-              <div className="text-[10px] text-gray-500 mb-2">
-                {modalPosition.side === "long" ? "For Long: TP should be above entry." : "For Short: TP should be below entry."}
+            {/* Take Profit */}
+            <div className="mt-4 rounded-xl border border-[#00ffa3]/10 bg-[#00ffa3]/[0.02] p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#00ffa3] shadow-[0_0_6px_#00ffa3]" />
+                <span className="text-[12px] font-bold text-[#00ffa3]">Take Profit (TP)</span>
+              </div>
+              <div className="text-[10px] text-gray-500 mb-2.5">
+                {modalPosition.side === "long" ? "For Long: TP should be above Mark Price." : "For Short: TP should be below Mark Price."}
               </div>
               <div className="relative">
                 <input
@@ -1564,22 +1653,29 @@ export const ControlPanel = (): JSX.Element => {
                   value={tpInput}
                   onChange={(e) => setTpInput(e.target.value)}
                   placeholder="Trigger price"
-                  className="w-full rounded-lg border border-white/10 bg-[#151d29] px-3 py-2.5 pr-12 text-[14px] text-white outline-none focus:border-[#00ffa3]/60 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-full rounded-lg border border-white/[0.08] bg-[#080d14] px-3.5 py-2.5 pr-14 text-[14px] text-white outline-none focus:border-[#00ffa3]/40 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-gray-600"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] font-semibold text-gray-400">USDT</span>
+                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-gray-500">USDT</span>
               </div>
-              {Number.isFinite(modalTpValue) && (
-                <div className={`mt-2 text-[11px] font-semibold ${calcRoiFromPrice(modalPosition, modalTpValue) >= 0 ? "text-[#00ffa3]" : "text-[#ff4d4d]"}`}>
-                  Estimated ROE: {calcRoiFromPrice(modalPosition, modalTpValue) >= 0 ? "+" : ""}
-                  {calcRoiFromPrice(modalPosition, modalTpValue).toFixed(2)}%
-                </div>
-              )}
+              {Number.isFinite(modalTpValue) && (() => {
+                const pnlDiff = calcPnl(modalPosition, modalTpValue) - calcPnl(modalPosition, modalMarkPrice);
+                const isPos = pnlDiff >= 0;
+                return (
+                  <div className={`mt-2 text-[11px] font-semibold ${isPos ? "text-[#00ffa3]" : "text-[#ff4d4d]"}`}>
+                    Estimated PNL: {isPos ? "+$" : "-$"}{Math.abs(pnlDiff).toFixed(2)}
+                  </div>
+                );
+              })()}
             </div>
 
-            <div className="mt-3 rounded-xl border border-[#1a2835] bg-[#0f141d] p-3 min-[375px]:p-4">
-              <div className="mb-1 text-[12px] font-semibold text-white">Stop Loss (SL)</div>
-              <div className="text-[10px] text-gray-500 mb-2">
-                {modalPosition.side === "long" ? "For Long: SL should be below entry." : "For Short: SL should be above entry."}
+            {/* Stop Loss */}
+            <div className="mt-3 rounded-xl border border-[#ff4d4d]/10 bg-[#ff4d4d]/[0.02] p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#ff4d4d] shadow-[0_0_6px_#ff4d4d]" />
+                <span className="text-[12px] font-bold text-[#ff4d4d]">Stop Loss (SL)</span>
+              </div>
+              <div className="text-[10px] text-gray-500 mb-2.5">
+                {modalPosition.side === "long" ? "For Long: SL should be below Mark Price." : "For Short: SL should be above Mark Price."}
               </div>
               <div className="relative">
                 <input
@@ -1587,30 +1683,34 @@ export const ControlPanel = (): JSX.Element => {
                   value={slInput}
                   onChange={(e) => setSlInput(e.target.value)}
                   placeholder="Trigger price"
-                  className="w-full rounded-lg border border-white/10 bg-[#151d29] px-3 py-2.5 pr-12 text-[14px] text-white outline-none focus:border-[#00ffa3]/60 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-full rounded-lg border border-white/[0.08] bg-[#080d14] px-3.5 py-2.5 pr-14 text-[14px] text-white outline-none focus:border-[#ff4d4d]/40 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-gray-600"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] font-semibold text-gray-400">USDT</span>
+                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-gray-500">USDT</span>
               </div>
-              {Number.isFinite(modalSlValue) && (
-                <div className={`mt-2 text-[11px] font-semibold ${calcRoiFromPrice(modalPosition, modalSlValue) >= 0 ? "text-[#00ffa3]" : "text-[#ff4d4d]"}`}>
-                  Estimated ROE: {calcRoiFromPrice(modalPosition, modalSlValue) >= 0 ? "+" : ""}
-                  {calcRoiFromPrice(modalPosition, modalSlValue).toFixed(2)}%
-                </div>
-              )}
+              {Number.isFinite(modalSlValue) && (() => {
+                const pnlDiff = calcPnl(modalPosition, modalSlValue) - calcPnl(modalPosition, modalMarkPrice);
+                const isPos = pnlDiff >= 0;
+                return (
+                  <div className={`mt-2 text-[11px] font-semibold ${isPos ? "text-[#00ffa3]" : "text-[#ff4d4d]"}`}>
+                    Estimated PNL: {isPos ? "+$" : "-$"}{Math.abs(pnlDiff).toFixed(2)}
+                  </div>
+                );
+              })()}
             </div>
 
             {tpslError && (
-              <div className="mt-3 rounded-lg border border-[#ff4d4d]/35 bg-[#2a1318] px-3 py-2 text-[12px] text-[#ff8e8e]">
+              <div className="mt-3 rounded-lg border border-[#ff4d4d]/25 bg-[#ff4d4d]/[0.06] px-4 py-2.5 text-[12px] text-[#ff8e8e] flex items-center gap-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
                 {tpslError}
               </div>
             )}
 
-            <div className="mt-4 flex flex-col min-[375px]:flex-row gap-2">
+            <div className="mt-5 flex flex-col min-[375px]:flex-row gap-2.5">
               <button
                 type="button"
                 onClick={saveTpSl}
                 disabled={tpslSaving}
-                className="flex-1 rounded-xl bg-[#00ffa3] px-4 py-2.5 text-[13px] font-bold text-[#04140f] border-none cursor-pointer hover:bg-[#00e693] disabled:opacity-65 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 rounded-xl bg-gradient-to-b from-[#00ffa3] to-[#00cc82] px-4 py-3 text-[13px] font-bold text-[#04140f] border-none cursor-pointer hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_4px_16px_rgba(0,255,163,0.2)]"
               >
                 {tpslSaving ? "Saving..." : "Confirm"}
               </button>
@@ -1618,7 +1718,7 @@ export const ControlPanel = (): JSX.Element => {
                 type="button"
                 onClick={closeTpSlModal}
                 disabled={tpslSaving}
-                className="flex-1 rounded-xl border border-white/15 bg-transparent px-4 py-2.5 text-[13px] font-semibold text-white cursor-pointer hover:bg-white/5 disabled:opacity-65 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-[13px] font-semibold text-gray-300 cursor-pointer hover:bg-white/[0.06] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 Cancel
               </button>
@@ -1626,6 +1726,6 @@ export const ControlPanel = (): JSX.Element => {
           </div>
         </div>
       </div>
-    )}
+    </>)}
   </>);
 };
