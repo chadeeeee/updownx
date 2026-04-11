@@ -195,4 +195,27 @@ export const api = {
     request<PaymentRecord[]>(`/api/payments/${userId}`),
   payment: (userId: number, paymentId: number) =>
     request<{ payment: PaymentRecord; providerStatus: string | null }>(`/api/payments/${userId}/${paymentId}`),
+
+  // ─── Trading API ───
+  tradingData: (userId: number) =>
+    request<{
+      positions: Array<{id:number;side:string;symbol:string;pair:string;entryPrice:number;sizeUsdt:number;leverage:number;margin:number;liqPrice:number;openTime:number}>;
+      pendingOrders: Array<{id:number;type:string;side:string;symbol:string;pair:string;price:number;triggerPrice?:number;execType?:string;triggerDirection?:string;sizeUsdt:number;leverage:number;margin:number;createdAt:number}>;
+      orderHistory: Array<{id:number;type:string;side:string;symbol:string;price:number;sizeUsdt:number;leverage:number;status:string;createdAt:number;filledAt?:number}>;
+      tradeHistory: Array<{id:number;side:string;symbol:string;entryPrice:number;exitPrice:number;sizeUsdt:number;leverage:number;pnl:number;openedAt:number;closedAt:number}>;
+    }>(`/api/trading/${userId}`),
+  savePosition: (userId: number, pos: {side:string;symbol:string;pair:string;entryPrice:number;sizeUsdt:number;leverage:number;margin:number;liqPrice:number;openTime:number}) =>
+    request<{id:number}>(`/api/trading/${userId}/positions`, { method: "POST", body: JSON.stringify(pos) }),
+  deletePosition: (userId: number, posId: number) =>
+    request<{ok:boolean}>(`/api/trading/${userId}/positions/${posId}`, { method: "DELETE" }),
+  savePendingOrder: (userId: number, order: {type:string;side:string;symbol:string;pair:string;price:number;triggerPrice?:number;execType?:string;triggerDirection?:string;sizeUsdt:number;leverage:number;margin:number;createdAt:number}) =>
+    request<{id:number}>(`/api/trading/${userId}/orders`, { method: "POST", body: JSON.stringify(order) }),
+  deletePendingOrder: (userId: number, orderId: number) =>
+    request<{ok:boolean}>(`/api/trading/${userId}/orders/${orderId}`, { method: "DELETE" }),
+  saveOrderHistory: (userId: number, entry: {type:string;side:string;symbol:string;price:number;sizeUsdt:number;leverage:number;status:string;createdAt:number;filledAt?:number}) =>
+    request<{id:number}>(`/api/trading/${userId}/order-history`, { method: "POST", body: JSON.stringify(entry) }),
+  saveTradeHistory: (userId: number, entry: {side:string;symbol:string;entryPrice:number;exitPrice:number;sizeUsdt:number;leverage:number;pnl:number;openedAt:number;closedAt:number}) =>
+    request<{id:number}>(`/api/trading/${userId}/trade-history`, { method: "POST", body: JSON.stringify(entry) }),
+  updateTradingBalance: (userId: number, delta: number) =>
+    request<{balance:number}>(`/api/trading/${userId}/balance`, { method: "PATCH", body: JSON.stringify({ delta }) }),
 };

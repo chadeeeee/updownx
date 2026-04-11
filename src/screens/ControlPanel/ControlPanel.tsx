@@ -302,6 +302,7 @@ export const ControlPanel = (): JSX.Element => {
   const [orderHistory, setOrderHistory] = useState<OrderHist[]>([]);
   const [tradeHistory, setTradeHistory] = useState<TradeHist[]>([]);
   const nextId = useRef(1);
+  const [tradingLoaded, setTradingLoaded] = useState(false);
 
   const [currentPrice, setCurrentPrice] = useState("...");
   const [priceNumeric, setPriceNumeric] = useState(0);
@@ -312,8 +313,23 @@ export const ControlPanel = (): JSX.Element => {
   const [priceMap, setPriceMap] = useState<Record<string,number>>({});
   const [kyivTime, setKyivTime] = useState("");
 
-  /* ─── Balance ─── */
-  useEffect(() => { if (user?.id != null) api.balance(user.id).then(d => setUserBalance(d.balance)).catch(() => {}); }, [user?.id]);
+  /* ─── Load balance + trading data from DB ─── */
+  useEffect(() => {
+    if (user?.id == null) return;
+    // Load balance
+    api.balance(user.id).then(d => setUserBalance(d.balance)).catch(() => {});
+    // Load all trading data (positions, orders, histories)
+    api.tradingData(user.id).then(data => {
+      setPositions(data.positions.map(p => ({ ...p, side: p.side as "long"|"short" })));
+      setPendingOrders(data.pendingOrders.map(o => ({ ...o, type: o.type as "limit"|"trigger", side: o.side as "long"|"short", execType: o.execType as "limit"|"market"|undefined, triggerDirection: o.triggerDirection as "up"|"down"|undefined })));
+      setOrderHistory(data.orderHistory.map(o => ({ ...o, type: o.type as "limit"|"trigger"|"market", side: o.side as "long"|"short", status: o.status as "filled"|"cancelled" })));
+      setTradeHistory(data.tradeHistory.map(t => ({ ...t, side: t.side as "long"|"short" })));
+      // Set nextId to be above any loaded IDs
+      const allIds = [...data.positions.map(p=>p.id), ...data.pendingOrders.map(o=>o.id), ...data.orderHistory.map(o=>o.id), ...data.tradeHistory.map(t=>t.id)];
+      if (allIds.length) nextId.current = Math.max(...allIds) + 1;
+      setTradingLoaded(true);
+    }).catch(err => { console.error("[trading] load failed", err); setTradingLoaded(true); });
+  }, [user?.id]);
 
   /* ─── Kyiv Clock ─── */
   useEffect(() => {
@@ -393,12 +409,27 @@ export const ControlPanel = (): JSX.Element => {
           if (order.execType === "market") {
             executeOrder(order, price);
           } else {
-            setPendingOrders(prev => [{ ...order, id: nextId.current++, type: "limit", triggerDirection: order.side === "long" ? "down" : "up" }, ...prev]);
+            const newOrder: PendingOrder = { ...order, id: nextId.current++, type: "limit", triggerDirection: order.side === "long" ? "down" : "up" };
+            setPendingOrders(prev => [newOrder, ...prev]);
+            // Persist the new limit order to DB
+            if (user?.id != null) {
+              api.savePendingOrder(user.id, { type: newOrder.type, side: newOrder.side, symbol: newOrder.symbol, pair: newOrder.pair, price: newOrder.price, triggerPrice: newOrder.triggerPrice, execType: newOrder.execType, triggerDirection: newOrder.triggerDirection, sizeUsdt: newOrder.sizeUsdt, leverage: newOrder.leverage, margin: newOrder.margin, createdAt: newOrder.createdAt }).then(r => {
+                setPendingOrders(oo => oo.map(o => o.id === newOrder.id ? { ...o, id: r.id } : o));
+              }).catch(e => console.error("[trading] save PO", e));
+            }
           }
         }
       }
     }
-    if (toFill.length) setPendingOrders(prev => prev.filter(o => !toFill.includes(o.id)));
+    if (toFill.length) {
+      setPendingOrders(prev => prev.filter(o => !toFill.includes(o.id)));
+      // Delete filled orders from DB
+      if (user?.id != null) {
+        for (const id of toFill) {
+          api.deletePendingOrder(user.id, id).catch(e => console.error("[trading] del filled order", e));
+        }
+      }
+    }
   }, [priceMap]);
 
   /* ─── Computed ─── */
@@ -425,21 +456,43 @@ export const ControlPanel = (): JSX.Element => {
         const newEntry = (existing.sizeUsdt * existing.entryPrice + size * entry) / newSize;
         const newMargin = existing.margin + size / lev;
         const effLev = newSize / newMargin;
-        return prev.map(p => p.id === existing.id ? {
-          ...p, entryPrice: newEntry, sizeUsdt: newSize, margin: newMargin, leverage: effLev,
+        const updatedPos = {
+          ...existing, entryPrice: newEntry, sizeUsdt: newSize, margin: newMargin, leverage: effLev,
           liqPrice: calcLiqPrice(newEntry, effLev, side),
-        } : p);
+        };
+        // Persist to DB
+        if (user?.id != null) {
+          api.savePosition(user.id, { side: updatedPos.side, symbol: updatedPos.symbol, pair: updatedPos.pair, entryPrice: updatedPos.entryPrice, sizeUsdt: updatedPos.sizeUsdt, leverage: updatedPos.leverage, margin: updatedPos.margin, liqPrice: updatedPos.liqPrice, openTime: updatedPos.openTime }).catch(e => console.error("[trading] save pos", e));
+        }
+        return prev.map(p => p.id === existing.id ? updatedPos : p);
       }
-      return [{ id: nextId.current++, side, symbol: selectedCoin.symbol, pair: selectedCoin.pair,
+      const newPos: Position = { id: nextId.current++, side, symbol: selectedCoin.symbol, pair: selectedCoin.pair,
         entryPrice: entry, sizeUsdt: size, leverage: lev, margin: size/lev,
-        liqPrice: calcLiqPrice(entry, lev, side), openTime: Date.now() }, ...prev];
+        liqPrice: calcLiqPrice(entry, lev, side), openTime: Date.now() };
+      // Persist to DB
+      if (user?.id != null) {
+        api.savePosition(user.id, { side: newPos.side, symbol: newPos.symbol, pair: newPos.pair, entryPrice: newPos.entryPrice, sizeUsdt: newPos.sizeUsdt, leverage: newPos.leverage, margin: newPos.margin, liqPrice: newPos.liqPrice, openTime: newPos.openTime }).then(r => {
+          // Update the local id to the db id
+          setPositions(ps => ps.map(p => p.id === newPos.id ? { ...p, id: r.id } : p));
+        }).catch(e => console.error("[trading] save pos", e));
+      }
+      return [newPos, ...prev];
     });
-  }, [selectedCoin]);
+  }, [selectedCoin, user?.id]);
 
   const executeOrder = useCallback((order: PendingOrder, fillPrice: number) => {
-    setOrderHistory(prev => [{ id: nextId.current++, type: order.type, side: order.side, symbol: order.symbol,
-      price: order.price, sizeUsdt: order.sizeUsdt, leverage: order.leverage, status: "filled",
-      createdAt: order.createdAt, filledAt: Date.now() }, ...prev]);
+    const filledAt = Date.now();
+    const ohEntry = { type: order.type, side: order.side, symbol: order.symbol,
+      price: order.price, sizeUsdt: order.sizeUsdt, leverage: order.leverage, status: "filled" as const,
+      createdAt: order.createdAt, filledAt };
+    const ohId = nextId.current++;
+    setOrderHistory(prev => [{ id: ohId, ...ohEntry }, ...prev]);
+    // Persist order history
+    if (user?.id != null) {
+      api.saveOrderHistory(user.id, ohEntry).then(r => {
+        setOrderHistory(h => h.map(o => o.id === ohId ? { ...o, id: r.id } : o));
+      }).catch(e => console.error("[trading] save OH", e));
+    }
     // Add/average position
     setPositions(prev => {
       const existing = prev.find(p => p.symbol === order.symbol && p.side === order.side);
@@ -448,13 +501,23 @@ export const ControlPanel = (): JSX.Element => {
         const newEntry = (existing.sizeUsdt * existing.entryPrice + order.sizeUsdt * fillPrice) / newSize;
         const newMargin = existing.margin + order.margin;
         const effLev = newSize / newMargin;
-        return prev.map(p => p.id === existing.id ? { ...p, entryPrice: newEntry, sizeUsdt: newSize, margin: newMargin, leverage: effLev, liqPrice: calcLiqPrice(newEntry, effLev, order.side) } : p);
+        const updated = { ...existing, entryPrice: newEntry, sizeUsdt: newSize, margin: newMargin, leverage: effLev, liqPrice: calcLiqPrice(newEntry, effLev, order.side) };
+        if (user?.id != null) {
+          api.savePosition(user.id, { side: updated.side, symbol: updated.symbol, pair: updated.pair, entryPrice: updated.entryPrice, sizeUsdt: updated.sizeUsdt, leverage: updated.leverage, margin: updated.margin, liqPrice: updated.liqPrice, openTime: updated.openTime }).catch(e => console.error("[trading] save pos", e));
+        }
+        return prev.map(p => p.id === existing.id ? updated : p);
       }
-      return [{ id: nextId.current++, side: order.side, symbol: order.symbol, pair: order.pair,
+      const newPos: Position = { id: nextId.current++, side: order.side, symbol: order.symbol, pair: order.pair,
         entryPrice: fillPrice, sizeUsdt: order.sizeUsdt, leverage: order.leverage, margin: order.margin,
-        liqPrice: calcLiqPrice(fillPrice, order.leverage, order.side), openTime: Date.now() }, ...prev];
+        liqPrice: calcLiqPrice(fillPrice, order.leverage, order.side), openTime: Date.now() };
+      if (user?.id != null) {
+        api.savePosition(user.id, { side: newPos.side, symbol: newPos.symbol, pair: newPos.pair, entryPrice: newPos.entryPrice, sizeUsdt: newPos.sizeUsdt, leverage: newPos.leverage, margin: newPos.margin, liqPrice: newPos.liqPrice, openTime: newPos.openTime }).then(r => {
+          setPositions(ps => ps.map(p => p.id === newPos.id ? { ...p, id: r.id } : p));
+        }).catch(e => console.error("[trading] save pos", e));
+      }
+      return [newPos, ...prev];
     });
-  }, []);
+  }, [user?.id]);
 
   const openTrade = useCallback((side: "long"|"short") => {
     const sizeStr = sizeInput.replace(/,/g, '.').replace(/\s/g, '');
@@ -469,10 +532,19 @@ export const ControlPanel = (): JSX.Element => {
       alert(`Insufficient balance! Need ${margin.toFixed(2)} USDT but only have ${availableBalance.toFixed(2)} USDT.`);
       return;
     }
+    const now = Date.now();
     if (orderType === "Market") {
       addOrAveragePosition(side, priceNumeric, size, leverage);
-      setOrderHistory(prev => [{ id: nextId.current++, type: "market", side, symbol: selectedCoin.symbol,
-        price: priceNumeric, sizeUsdt: size, leverage, status: "filled", createdAt: Date.now(), filledAt: Date.now() }, ...prev]);
+      const ohEntry = { type: "market" as const, side, symbol: selectedCoin.symbol,
+        price: priceNumeric, sizeUsdt: size, leverage, status: "filled" as const, createdAt: now, filledAt: now };
+      const ohId = nextId.current++;
+      setOrderHistory(prev => [{ id: ohId, ...ohEntry }, ...prev]);
+      // Persist order history
+      if (user?.id != null) {
+        api.saveOrderHistory(user.id, ohEntry).then(r => {
+          setOrderHistory(h => h.map(o => o.id === ohId ? { ...o, id: r.id } : o));
+        }).catch(e => console.error("[trading] save OH", e));
+      }
     } else {
       let targetPrice = parseFloat(priceInput.replace(/,/g, '.').replace(/\s/g, ''));
       let trigPrice: number | undefined = undefined;
@@ -505,16 +577,32 @@ export const ControlPanel = (): JSX.Element => {
         }
       }
 
-      setPendingOrders(prev => [{ id: nextId.current++, type: orderType === "Limit" ? "limit" : "trigger",
+      const pendingOrderData = { type: (orderType === "Limit" ? "limit" : "trigger") as "limit"|"trigger",
         side, symbol: selectedCoin.symbol, pair: selectedCoin.pair,
-        price: targetPrice, triggerPrice: trigPrice, execType: orderType === "Trigger" ? (triggerExecType === "Limit" ? "limit" : "market") : undefined,
-        triggerDirection: trigDir, sizeUsdt: size, leverage, margin, createdAt: Date.now() }, ...prev]);
-      setOrderHistory(prev => [{ id: nextId.current++, type: orderType === "Limit" ? "limit" : "trigger", side,
-        symbol: selectedCoin.symbol, price: targetPrice, sizeUsdt: size, leverage, status: "filled",
-        createdAt: Date.now() }, ...prev]);
+        price: targetPrice, triggerPrice: trigPrice, execType: orderType === "Trigger" ? (triggerExecType === "Limit" ? "limit" : "market") as "limit"|"market" : undefined,
+        triggerDirection: trigDir, sizeUsdt: size, leverage, margin, createdAt: now };
+      const poId = nextId.current++;
+      setPendingOrders(prev => [{ id: poId, ...pendingOrderData }, ...prev]);
+      // Persist pending order
+      if (user?.id != null) {
+        api.savePendingOrder(user.id, pendingOrderData).then(r => {
+          setPendingOrders(oo => oo.map(o => o.id === poId ? { ...o, id: r.id } : o));
+        }).catch(e => console.error("[trading] save PO", e));
+      }
+      // Also record in order history
+      const ohEntry2 = { type: pendingOrderData.type, side,
+        symbol: selectedCoin.symbol, price: targetPrice, sizeUsdt: size, leverage, status: "filled" as const,
+        createdAt: now };
+      const ohId2 = nextId.current++;
+      setOrderHistory(prev => [{ id: ohId2, ...ohEntry2 }, ...prev]);
+      if (user?.id != null) {
+        api.saveOrderHistory(user.id, ohEntry2).then(r => {
+          setOrderHistory(h => h.map(o => o.id === ohId2 ? { ...o, id: r.id } : o));
+        }).catch(e => console.error("[trading] save OH", e));
+      }
     }
     setSizeInput(""); setPercent(0);
-  }, [sizeInput, priceNumeric, leverage, availableBalance, orderType, priceInput, selectedCoin, addOrAveragePosition]);
+  }, [sizeInput, priceNumeric, leverage, availableBalance, orderType, priceInput, selectedCoin, addOrAveragePosition, user?.id]);
 
   const closePosition = useCallback((posId: number) => {
     setPositions(prev => {
@@ -522,18 +610,35 @@ export const ControlPanel = (): JSX.Element => {
       if (pos) {
         const mark = priceMap[pos.pair] || pos.entryPrice;
         const pnl = calcPnl(pos, mark);
-        setTradeHistory(h => [{ id: nextId.current++, side: pos.side, symbol: pos.symbol,
+        const closedAt = Date.now();
+        const thEntry = { side: pos.side, symbol: pos.symbol,
           entryPrice: pos.entryPrice, exitPrice: mark, sizeUsdt: pos.sizeUsdt, leverage: pos.leverage,
-          pnl, openedAt: pos.openTime, closedAt: Date.now() }, ...h]);
+          pnl, openedAt: pos.openTime, closedAt };
+        const thId = nextId.current++;
+        setTradeHistory(h => [{ id: thId, ...thEntry }, ...h]);
         setUserBalance(b => b + pnl);
+        // Persist to DB
+        if (user?.id != null) {
+          api.deletePosition(user.id, posId).catch(e => console.error("[trading] del pos", e));
+          api.saveTradeHistory(user.id, thEntry).then(r => {
+            setTradeHistory(th => th.map(t => t.id === thId ? { ...t, id: r.id } : t));
+          }).catch(e => console.error("[trading] save TH", e));
+          api.updateTradingBalance(user.id, pnl).then(r => {
+            setUserBalance(r.balance);
+          }).catch(e => console.error("[trading] update balance", e));
+        }
       }
       return prev.filter(p => p.id !== posId);
     });
-  }, [priceMap]);
+  }, [priceMap, user?.id]);
 
   const cancelOrder = useCallback((orderId: number) => {
     setPendingOrders(prev => prev.filter(o => o.id !== orderId));
-  }, []);
+    // Persist to DB
+    if (user?.id != null) {
+      api.deletePendingOrder(user.id, orderId).catch(e => console.error("[trading] del order", e));
+    }
+  }, [user?.id]);
 
   const filteredCoins = useMemo(() => {
     const q = coinSearch.toLowerCase();
@@ -869,12 +974,12 @@ export const ControlPanel = (): JSX.Element => {
             <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-[#00ffa3] shadow-[0_0_5px_#00ffa3]" /><span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-[#afc0c9]">Connection: Secure</span></div>
             <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-[#89a4ad]">Server Time: {kyivTime} (UTC)</span>
           </div>
-          <span className="text-[6px] min-[375px]:text-[7px] md:text-[9px] text-[#A6B2C8] font-bold tracking-widest">HEDGE PROTOCOL V2.4.1</span>
+          <span className="text-[6px] min-[375px]:text-[7px] md:text-[9px] text-[#A6B2C8] font-bold tracking-widest">UPDOWN PROTOCOL V2.4.1</span>
         </div>
       </div>
 
       {/* ─── Fixed Bottom Navigation ─── */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around bg-[#05070A]/95 backdrop-blur-md border-t border-white/5 py-1.5 min-[375px]:py-2 md:py-3 xl:hidden">
+      {/* <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around bg-[#05070A]/95 backdrop-blur-md border-t border-white/5 py-1.5 min-[375px]:py-2 md:py-3 xl:hidden">
         {[
           {label:"Trading",icon:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>,active:true},
           {label:"Balance",icon:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg>},
@@ -887,7 +992,7 @@ export const ControlPanel = (): JSX.Element => {
             <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] font-semibold">{item.label}</span>
           </button>
         ))}
-      </nav>
+      </nav> */}
     </div>
 
     {/* ═══ DESKTOP LAYOUT (≥ xl) ═══ */}
@@ -1116,7 +1221,7 @@ export const ControlPanel = (): JSX.Element => {
                   <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-[#00ffa3] shadow-[0_0_5px_#00ffa3]" /><span className="text-[10.5px] text-[#afc0c9]">Connection: Secure</span></div>
                   <span className="text-[10.5px] text-[#89a4ad]">Server Time: {kyivTime} (Kyiv)</span>
                 </div>
-                <span className="text-[10px] text-[#A6B2C8] font-bold tracking-widest">HEDGE PROTOCOL V2.4.1</span>
+                <span className="text-[10px] text-[#A6B2C8] font-bold tracking-widest">UPDOWN PROTOCOL V2.4.1</span>
               </div>
             </GradientBorderPanel>
           </div>

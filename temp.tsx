@@ -233,7 +233,7 @@ export const ControlPanel = (): JSX.Element => {
                 </div>
                 <span className="text-[10.5px] text-[#89a4ad]">Server Time: 14:22:15 (UTC)</span>
               </div>
-              <span className="text-[10px] text-gray-500 font-bold tracking-widest">HEDGE PROTOCOL V2.4.1</span>
+              <span className="text-[10px] text-gray-500 font-bold tracking-widest">UPDOWN PROTOCOL V2.4.1</span>
             </div>
           </div>
         </div>

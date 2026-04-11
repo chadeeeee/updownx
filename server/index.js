@@ -657,6 +657,13 @@ const ensureSchema = async () => {
   await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS app_users_account_id_key ON app_users(account_id)`);
   await pool.query(`ALTER TABLE app_users ALTER COLUMN account_id SET NOT NULL`);
 
+  // Ensure Admin user (ID=0) exists so trading history foreign keys don't fail
+  await pool.query(`
+    INSERT INTO app_users (id, name, surname, account_id, email, password, invitation_code)
+    VALUES (0, 'Admin', '', '000000000000', 'admin', 'admin', '')
+    ON CONFLICT (id) DO NOTHING
+  `);
+
   await pool.query(`
     CREATE TABLE IF NOT EXISTS challenge_orders (
       id SERIAL PRIMARY KEY,
@@ -742,6 +749,78 @@ const ensureSchema = async () => {
       await creditBalanceForOrder(order.user_id, order.id, challenge);
     }
   }
+
+  // ─── Trading Tables ───
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS trading_positions (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+      side TEXT NOT NULL CHECK (side IN ('long','short')),
+      symbol TEXT NOT NULL,
+      pair TEXT NOT NULL,
+      entry_price NUMERIC NOT NULL,
+      size_usdt NUMERIC NOT NULL,
+      leverage NUMERIC NOT NULL,
+      margin NUMERIC NOT NULL,
+      liq_price NUMERIC NOT NULL,
+      open_time BIGINT NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS trading_pending_orders (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+      type TEXT NOT NULL CHECK (type IN ('limit','trigger')),
+      side TEXT NOT NULL CHECK (side IN ('long','short')),
+      symbol TEXT NOT NULL,
+      pair TEXT NOT NULL,
+      price NUMERIC NOT NULL,
+      trigger_price NUMERIC,
+      exec_type TEXT CHECK (exec_type IN ('limit','market')),
+      trigger_direction TEXT CHECK (trigger_direction IN ('up','down')),
+      size_usdt NUMERIC NOT NULL,
+      leverage NUMERIC NOT NULL,
+      margin NUMERIC NOT NULL,
+      created_at_ms BIGINT NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS trading_order_history (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+      type TEXT NOT NULL,
+      side TEXT NOT NULL CHECK (side IN ('long','short')),
+      symbol TEXT NOT NULL,
+      price NUMERIC NOT NULL,
+      size_usdt NUMERIC NOT NULL,
+      leverage NUMERIC NOT NULL,
+      status TEXT NOT NULL DEFAULT 'filled',
+      created_at_ms BIGINT NOT NULL,
+      filled_at_ms BIGINT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS trading_trade_history (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+      side TEXT NOT NULL CHECK (side IN ('long','short')),
+      symbol TEXT NOT NULL,
+      entry_price NUMERIC NOT NULL,
+      exit_price NUMERIC NOT NULL,
+      size_usdt NUMERIC NOT NULL,
+      leverage NUMERIC NOT NULL,
+      pnl NUMERIC NOT NULL,
+      opened_at BIGINT NOT NULL,
+      closed_at BIGINT NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+  `);
 
   const users = await pool.query("SELECT id, account_id FROM app_users ORDER BY id ASC");
   for (const user of users.rows) {
@@ -918,9 +997,6 @@ app.get("/api/accounts/:userId", requireAuth, async (req, res) => {
   const userId = Number(req.params.userId);
   if (!ensureAuthorizedUserId(req, res, userId)) {
     return;
-  }
-  if (userId === 0 && req.authUserId === 0) {
-    return res.json({ user: buildAdminUser(), orders: [] });
   }
   const user = await pool.query(
     "SELECT id, name, surname, account_id, email, created_at FROM app_users WHERE id = $1",
@@ -1416,6 +1492,224 @@ app.post("/api/orders", requireAuth, async (req, res) => {
       paymentRecordId: paymentRow?.id ?? null,
       demoMode,
     });
+  }
+});
+
+// ─────────────────── Trading API ───────────────────
+
+// GET all trading data for a user (positions, pending orders, order history, trade history)
+app.get("/api/trading/:userId", requireAuth, async (req, res) => {
+  const userId = Number(req.params.userId);
+  if (!ensureAuthorizedUserId(req, res, userId)) return;
+
+  try {
+    const [posRes, ordRes, ohRes, thRes] = await Promise.all([
+      pool.query("SELECT * FROM trading_positions WHERE user_id = $1 ORDER BY open_time DESC", [userId]),
+      pool.query("SELECT * FROM trading_pending_orders WHERE user_id = $1 ORDER BY created_at_ms DESC", [userId]),
+      pool.query("SELECT * FROM trading_order_history WHERE user_id = $1 ORDER BY created_at_ms DESC LIMIT 200", [userId]),
+      pool.query("SELECT * FROM trading_trade_history WHERE user_id = $1 ORDER BY closed_at DESC LIMIT 200", [userId]),
+    ]);
+
+    const mapPosition = (r) => ({
+      id: r.id, side: r.side, symbol: r.symbol, pair: r.pair,
+      entryPrice: Number(r.entry_price), sizeUsdt: Number(r.size_usdt),
+      leverage: Number(r.leverage), margin: Number(r.margin),
+      liqPrice: Number(r.liq_price), openTime: Number(r.open_time),
+    });
+    const mapOrder = (r) => ({
+      id: r.id, type: r.type, side: r.side, symbol: r.symbol, pair: r.pair,
+      price: Number(r.price), triggerPrice: r.trigger_price ? Number(r.trigger_price) : undefined,
+      execType: r.exec_type || undefined, triggerDirection: r.trigger_direction || undefined,
+      sizeUsdt: Number(r.size_usdt), leverage: Number(r.leverage),
+      margin: Number(r.margin), createdAt: Number(r.created_at_ms),
+    });
+    const mapOH = (r) => ({
+      id: r.id, type: r.type, side: r.side, symbol: r.symbol,
+      price: Number(r.price), sizeUsdt: Number(r.size_usdt),
+      leverage: Number(r.leverage), status: r.status,
+      createdAt: Number(r.created_at_ms), filledAt: r.filled_at_ms ? Number(r.filled_at_ms) : undefined,
+    });
+    const mapTH = (r) => ({
+      id: r.id, side: r.side, symbol: r.symbol,
+      entryPrice: Number(r.entry_price), exitPrice: Number(r.exit_price),
+      sizeUsdt: Number(r.size_usdt), leverage: Number(r.leverage),
+      pnl: Number(r.pnl), openedAt: Number(r.opened_at), closedAt: Number(r.closed_at),
+    });
+
+    return res.json({
+      positions: posRes.rows.map(mapPosition),
+      pendingOrders: ordRes.rows.map(mapOrder),
+      orderHistory: ohRes.rows.map(mapOH),
+      tradeHistory: thRes.rows.map(mapTH),
+    });
+  } catch (error) {
+    console.error("[trading] GET failed", error);
+    return res.status(500).json({ message: "Failed to load trading data." });
+  }
+});
+
+// Save a position (upsert by symbol+side)
+app.post("/api/trading/:userId/positions", requireAuth, async (req, res) => {
+  const userId = Number(req.params.userId);
+  if (!ensureAuthorizedUserId(req, res, userId)) return;
+
+  const { side, symbol, pair, entryPrice, sizeUsdt, leverage, margin, liqPrice, openTime } = req.body;
+  if (!side || !symbol || !pair || !entryPrice || !sizeUsdt || !leverage || !margin || !liqPrice || !openTime) {
+    return res.status(400).json({ message: "Missing position fields." });
+  }
+
+  try {
+    // Check if position for this symbol+side already exists
+    const existing = await pool.query(
+      "SELECT id FROM trading_positions WHERE user_id = $1 AND symbol = $2 AND side = $3",
+      [userId, symbol, side]
+    );
+
+    let result;
+    if (existing.rowCount) {
+      result = await pool.query(
+        `UPDATE trading_positions SET entry_price = $1, size_usdt = $2, leverage = $3, margin = $4, liq_price = $5, open_time = $6
+         WHERE id = $7 RETURNING *`,
+        [entryPrice, sizeUsdt, leverage, margin, liqPrice, openTime, existing.rows[0].id]
+      );
+    } else {
+      result = await pool.query(
+        `INSERT INTO trading_positions(user_id, side, symbol, pair, entry_price, size_usdt, leverage, margin, liq_price, open_time)
+         VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+        [userId, side, symbol, pair, entryPrice, sizeUsdt, leverage, margin, liqPrice, openTime]
+      );
+    }
+
+    return res.json({ id: result.rows[0].id });
+  } catch (error) {
+    console.error("[trading] POST position failed", error);
+    return res.status(500).json({ message: "Failed to save position." });
+  }
+});
+
+// Close/delete a position
+app.delete("/api/trading/:userId/positions/:posId", requireAuth, async (req, res) => {
+  const userId = Number(req.params.userId);
+  if (!ensureAuthorizedUserId(req, res, userId)) return;
+  const posId = Number(req.params.posId);
+
+  try {
+    await pool.query("DELETE FROM trading_positions WHERE id = $1 AND user_id = $2", [posId, userId]);
+    return res.json({ ok: true });
+  } catch (error) {
+    console.error("[trading] DELETE position failed", error);
+    return res.status(500).json({ message: "Failed to delete position." });
+  }
+});
+
+// Create pending order
+app.post("/api/trading/:userId/orders", requireAuth, async (req, res) => {
+  const userId = Number(req.params.userId);
+  if (!ensureAuthorizedUserId(req, res, userId)) return;
+
+  const { type, side, symbol, pair, price, triggerPrice, execType, triggerDirection, sizeUsdt, leverage, margin, createdAt } = req.body;
+  if (!type || !side || !symbol || !pair || !price || !sizeUsdt || !leverage || !margin || !createdAt) {
+    return res.status(400).json({ message: "Missing order fields." });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO trading_pending_orders(user_id, type, side, symbol, pair, price, trigger_price, exec_type, trigger_direction, size_usdt, leverage, margin, created_at_ms)
+       VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`,
+      [userId, type, side, symbol, pair, price, triggerPrice || null, execType || null, triggerDirection || null, sizeUsdt, leverage, margin, createdAt]
+    );
+    return res.json({ id: result.rows[0].id });
+  } catch (error) {
+    console.error("[trading] POST order failed", error);
+    return res.status(500).json({ message: "Failed to save order." });
+  }
+});
+
+// Cancel/delete a pending order
+app.delete("/api/trading/:userId/orders/:orderId", requireAuth, async (req, res) => {
+  const userId = Number(req.params.userId);
+  if (!ensureAuthorizedUserId(req, res, userId)) return;
+  const orderId = Number(req.params.orderId);
+
+  try {
+    await pool.query("DELETE FROM trading_pending_orders WHERE id = $1 AND user_id = $2", [orderId, userId]);
+    return res.json({ ok: true });
+  } catch (error) {
+    console.error("[trading] DELETE order failed", error);
+    return res.status(500).json({ message: "Failed to cancel order." });
+  }
+});
+
+// Add order history entry
+app.post("/api/trading/:userId/order-history", requireAuth, async (req, res) => {
+  const userId = Number(req.params.userId);
+  if (!ensureAuthorizedUserId(req, res, userId)) return;
+
+  const { type, side, symbol, price, sizeUsdt, leverage, status, createdAt, filledAt } = req.body;
+  if (!type || !side || !symbol || !price || !sizeUsdt || !leverage || !status || !createdAt) {
+    return res.status(400).json({ message: "Missing order history fields." });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO trading_order_history(user_id, type, side, symbol, price, size_usdt, leverage, status, created_at_ms, filled_at_ms)
+       VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+      [userId, type, side, symbol, price, sizeUsdt, leverage, status, createdAt, filledAt || null]
+    );
+    return res.json({ id: result.rows[0].id });
+  } catch (error) {
+    console.error("[trading] POST order-history failed", error);
+    return res.status(500).json({ message: "Failed to save order history." });
+  }
+});
+
+// Add trade history entry
+app.post("/api/trading/:userId/trade-history", requireAuth, async (req, res) => {
+  const userId = Number(req.params.userId);
+  if (!ensureAuthorizedUserId(req, res, userId)) return;
+
+  const { side, symbol, entryPrice, exitPrice, sizeUsdt, leverage, pnl, openedAt, closedAt } = req.body;
+  if (!side || !symbol || entryPrice == null || exitPrice == null || !sizeUsdt || !leverage || pnl == null || !openedAt || !closedAt) {
+    return res.status(400).json({ message: "Missing trade history fields." });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO trading_trade_history(user_id, side, symbol, entry_price, exit_price, size_usdt, leverage, pnl, opened_at, closed_at)
+       VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+      [userId, side, symbol, entryPrice, exitPrice, sizeUsdt, leverage, pnl, openedAt, closedAt]
+    );
+    return res.json({ id: result.rows[0].id });
+  } catch (error) {
+    console.error("[trading] POST trade-history failed", error);
+    return res.status(500).json({ message: "Failed to save trade history." });
+  }
+});
+
+// Update user balance (for PnL adjustments)
+app.patch("/api/trading/:userId/balance", requireAuth, async (req, res) => {
+  const userId = Number(req.params.userId);
+  if (!ensureAuthorizedUserId(req, res, userId)) return;
+
+  const { delta } = req.body;
+  if (delta == null || typeof delta !== "number") {
+    return res.status(400).json({ message: "Missing balance delta." });
+  }
+
+  try {
+    await pool.query(
+      `INSERT INTO balances(user_id, balance, updated_at)
+       VALUES($1, $2, NOW())
+       ON CONFLICT(user_id) DO UPDATE SET
+         balance = balances.balance + $2,
+         updated_at = NOW()`,
+      [userId, delta]
+    );
+    const updated = await pool.query("SELECT balance FROM balances WHERE user_id = $1", [userId]);
+    return res.json({ balance: updated.rowCount ? Number(updated.rows[0].balance) : 0 });
+  } catch (error) {
+    console.error("[trading] PATCH balance failed", error);
+    return res.status(500).json({ message: "Failed to update balance." });
   }
 });
 

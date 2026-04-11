@@ -58,7 +58,7 @@ export const NotFound = (): JSX.Element => {
 
         <p className="mt-4 max-w-[460px] text-base leading-relaxed text-[#6e8188]">
           Traders are individuals who have successfully completed the Evaluation
-          Process and manage a Hash Hedge trading account.
+          Process and manage a Hash Updown trading account.
         </p>
 
         <Link
