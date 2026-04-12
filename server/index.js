@@ -41,6 +41,11 @@ const PAYMENT_STATUS = {
   PENDING: "PENDING",
   CANCELLED: "CANCELLED",
 };
+const TRADING_FEE_RATE = {
+  market: 0.008,
+  limit: 0.01,
+  trigger: 0.01,
+};
 
 const challenges = [
   { id: "starter", name: "Starter", balance: 799, fee: 49 },
@@ -609,6 +614,207 @@ const syncChallengeCreditsForUser = async (userId, db = pool) => {
 
     await creditBalanceForOrder(userId, order.id, challenge, db);
   }
+};
+
+const roundMoney = (value) => Math.round((Number(value) + Number.EPSILON) * 100) / 100;
+
+const startOfUtcDay = (timestamp) => {
+  const date = new Date(timestamp);
+  date.setUTCHours(0, 0, 0, 0);
+  return date.getTime();
+};
+
+const addUtcDays = (timestamp, days) => {
+  const date = new Date(timestamp);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.getTime();
+};
+
+const normalizeTransactionAmount = (amount, type) => {
+  const numericAmount = Number(amount);
+  if (!Number.isFinite(numericAmount) || numericAmount === 0) {
+    return 0;
+  }
+
+  if (numericAmount < 0) {
+    return numericAmount;
+  }
+
+  const normalizedType = String(type || "credit").toLowerCase();
+  const isDebitType =
+    normalizedType.includes("debit") ||
+    normalizedType.includes("withdraw") ||
+    normalizedType.includes("fee") ||
+    normalizedType.includes("loss");
+
+  return isDebitType ? -numericAmount : numericAmount;
+};
+
+const buildTradingPerformance = async (userId, range = "7D", db = pool) => {
+  await syncChallengeCreditsForUser(userId, db);
+
+  const [balanceRes, txRes, orderHistoryRes, tradeHistoryRes] = await Promise.all([
+    db.query("SELECT balance FROM balances WHERE user_id = $1", [userId]),
+    db.query(
+      `SELECT amount, type, created_at
+       FROM balance_transactions
+       WHERE user_id = $1
+       ORDER BY created_at ASC, id ASC`,
+      [userId],
+    ),
+    db.query(
+      `SELECT type, size_usdt, created_at_ms, filled_at_ms
+       FROM trading_order_history
+       WHERE user_id = $1
+       ORDER BY created_at_ms ASC, id ASC`,
+      [userId],
+    ),
+    db.query(
+      `SELECT pnl, closed_at
+       FROM trading_trade_history
+       WHERE user_id = $1
+       ORDER BY closed_at ASC, id ASC`,
+      [userId],
+    ),
+  ]);
+
+  const currentBalance = balanceRes.rowCount ? Number(balanceRes.rows[0].balance) : 0;
+
+  const balanceEvents = txRes.rows
+    .map((row) => ({
+      ts: new Date(row.created_at).getTime(),
+      delta: roundMoney(normalizeTransactionAmount(row.amount, row.type)),
+      kind: "balance",
+    }))
+    .filter((event) => Number.isFinite(event.ts) && Number.isFinite(event.delta) && event.delta !== 0);
+
+  const feeEvents = orderHistoryRes.rows
+    .map((row) => {
+      const type = String(row.type || "").toLowerCase();
+      const sizeUsdt = Number(row.size_usdt);
+      const timestamp = Number(row.created_at_ms);
+
+      if (!Number.isFinite(sizeUsdt) || sizeUsdt <= 0 || !Number.isFinite(timestamp) || timestamp <= 0) {
+        return null;
+      }
+
+      if (type === "market") {
+        return {
+          ts: timestamp,
+          delta: roundMoney(-sizeUsdt * TRADING_FEE_RATE.market),
+          kind: "fee",
+        };
+      }
+
+      if ((type === "limit" || type === "trigger") && !row.filled_at_ms) {
+        return {
+          ts: timestamp,
+          delta: roundMoney(-sizeUsdt * TRADING_FEE_RATE[type]),
+          kind: "fee",
+        };
+      }
+
+      return null;
+    })
+    .filter(Boolean);
+
+  const pnlEvents = tradeHistoryRes.rows
+    .map((row) => ({
+      ts: Number(row.closed_at),
+      delta: roundMoney(Number(row.pnl)),
+      kind: "pnl",
+    }))
+    .filter((event) => Number.isFinite(event.ts) && event.ts > 0 && Number.isFinite(event.delta) && event.delta !== 0);
+
+  const events = [...balanceEvents, ...feeEvents, ...pnlEvents].sort((left, right) => {
+    if (left.ts !== right.ts) {
+      return left.ts - right.ts;
+    }
+    return left.kind.localeCompare(right.kind);
+  });
+
+  const totalCredits = roundMoney(
+    balanceEvents.reduce((sum, event) => sum + (event.delta > 0 ? event.delta : 0), 0),
+  );
+  const totalFees = roundMoney(
+    feeEvents.reduce((sum, event) => sum + Math.abs(event.delta), 0),
+  );
+  const realizedProfit = roundMoney(
+    pnlEvents.reduce((sum, event) => sum + event.delta, 0),
+  );
+
+  const totalEventDelta = roundMoney(events.reduce((sum, event) => sum + event.delta, 0));
+  let startingBalance = roundMoney(currentBalance - totalEventDelta);
+  if (Math.abs(startingBalance) < 0.01) {
+    startingBalance = 0;
+  }
+
+  const now = Date.now();
+  const earliestEventTs = events.length ? events[0].ts : now;
+  let rangeStart = startOfUtcDay(addUtcDays(now, -6));
+
+  if (range === "1M") {
+    rangeStart = startOfUtcDay(addUtcDays(now, -29));
+  } else if (range === "ALL") {
+    rangeStart = startOfUtcDay(earliestEventTs);
+  }
+
+  const balanceAtRangeStart = roundMoney(
+    startingBalance +
+      events
+        .filter((event) => event.ts < rangeStart)
+        .reduce((sum, event) => sum + event.delta, 0),
+  );
+
+  const series = [{ ts: rangeStart, balance: balanceAtRangeStart }];
+  let runningBalance = balanceAtRangeStart;
+  let eventIndex = events.findIndex((event) => event.ts >= rangeStart);
+  if (eventIndex === -1) {
+    eventIndex = events.length;
+  }
+
+  const todayStart = startOfUtcDay(now);
+  for (let bucketStart = rangeStart; bucketStart < todayStart; bucketStart = addUtcDays(bucketStart, 1)) {
+    const bucketEnd = addUtcDays(bucketStart, 1) - 1;
+    while (eventIndex < events.length && events[eventIndex].ts <= bucketEnd) {
+      runningBalance = roundMoney(runningBalance + events[eventIndex].delta);
+      eventIndex += 1;
+    }
+    series.push({ ts: bucketEnd, balance: runningBalance });
+  }
+
+  while (eventIndex < events.length && events[eventIndex].ts <= now) {
+    runningBalance = roundMoney(runningBalance + events[eventIndex].delta);
+    eventIndex += 1;
+  }
+
+  const finalBalance = roundMoney(currentBalance);
+  if (!series.length || series[series.length - 1].ts !== now) {
+    series.push({ ts: now, balance: finalBalance });
+  } else {
+    series[series.length - 1].balance = finalBalance;
+  }
+
+  const changeAmount = roundMoney(finalBalance - balanceAtRangeStart);
+  const changePercent = balanceAtRangeStart === 0
+    ? 0
+    : roundMoney((changeAmount / balanceAtRangeStart) * 100);
+  const peakBalance = series.reduce((max, point) => Math.max(max, point.balance), finalBalance);
+  const equityHealth = peakBalance > 0
+    ? roundMoney(Math.max(0, Math.min(100, (finalBalance / peakBalance) * 100)))
+    : 100;
+
+  return {
+    currentBalance: finalBalance,
+    changeAmount,
+    changePercent,
+    realizedProfit,
+    totalCredits,
+    totalFees,
+    startingBalance,
+    equityHealth,
+    series,
+  };
 };
 
 const generateNumericAccountId = () =>
@@ -1538,6 +1744,39 @@ app.post("/api/orders", requireAuth, async (req, res) => {
 });
 
 // ─────────────────── Trading API ───────────────────
+
+app.get("/api/trading/:userId/performance", requireAuth, async (req, res) => {
+  const userId = Number(req.params.userId);
+  if (!ensureAuthorizedUserId(req, res, userId)) return;
+
+  if (userId === 0 && req.authUserId === 0) {
+    return res.json({
+      currentBalance: 0,
+      changeAmount: 0,
+      changePercent: 0,
+      realizedProfit: 0,
+      totalCredits: 0,
+      totalFees: 0,
+      startingBalance: 0,
+      equityHealth: 100,
+      series: [
+        { ts: Date.now() - 1, balance: 0 },
+        { ts: Date.now(), balance: 0 },
+      ],
+    });
+  }
+
+  const rawRange = typeof req.query.range === "string" ? req.query.range.toUpperCase() : "7D";
+  const range = rawRange === "1M" || rawRange === "ALL" ? rawRange : "7D";
+
+  try {
+    const performance = await buildTradingPerformance(userId, range);
+    return res.json(performance);
+  } catch (error) {
+    console.error("[trading] GET performance failed", error);
+    return res.status(500).json({ message: "Failed to load trading performance." });
+  }
+});
 
 // GET all trading data for a user (positions, pending orders, order history, trade history)
 app.get("/api/trading/:userId", requireAuth, async (req, res) => {

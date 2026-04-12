@@ -126,6 +126,23 @@ export type ActiveChallenge = {
   created_at: string;
 };
 
+export type TradingPerformancePoint = {
+  ts: number;
+  balance: number;
+};
+
+export type TradingPerformanceResponse = {
+  currentBalance: number;
+  changeAmount: number;
+  changePercent: number;
+  realizedProfit: number;
+  totalCredits: number;
+  totalFees: number;
+  startingBalance: number;
+  equityHealth: number;
+  series: TradingPerformancePoint[];
+};
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const token = localStorage.getItem("updownx-token");
   let response: Response;
@@ -197,6 +214,8 @@ export const api = {
     request<{ payment: PaymentRecord; providerStatus: string | null }>(`/api/payments/${userId}/${paymentId}`),
 
   // ─── Trading API ───
+  tradingPerformance: (userId: number, range: "7D" | "1M" | "ALL") =>
+    request<TradingPerformanceResponse>(`/api/trading/${userId}/performance?range=${range}`),
   tradingData: (userId: number) =>
     request<{
       positions: Array<{id:number;side:string;symbol:string;pair:string;entryPrice:number;sizeUsdt:number;leverage:number;margin:number;liqPrice:number;takeProfit:number|null;stopLoss:number|null;openTime:number}>;
