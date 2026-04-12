@@ -61,10 +61,10 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps): JSX.Element => {
       )}
 
       <div className="relative w-0 lg:w-[269px] lg:shrink-0">
-        <aside className={`flex flex-col w-[269px] items-start justify-between px-6 py-[43px] bg-[#05070a] transition-transform duration-300 z-40 fixed top-0 left-0 h-full lg:border-r lg:border-[#0b1016] ${desktopPinned ? "lg:fixed lg:top-0 lg:h-screen" : "lg:absolute lg:top-0 lg:h-auto"} ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
+        <aside className={`flex flex-col w-[269px] items-start justify-between px-6 py-[43px] bg-[#05070a] transition-transform duration-300 z-40 fixed top-0 left-0 h-full lg:border-r lg:border-[#0b1016] ${desktopPinned ? "lg:fixed lg:top-0 lg:h-screen" : "lg:absolute lg:top-0 lg:h-full lg:min-h-[calc(100vh-64px)]"} ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
           <div className="flex flex-col w-[210px] items-start gap-[5px]">
             {navItems.map((item) => {
-              const isActive = location.pathname.startsWith(item.route) || (item.route === "/challenge" && location.pathname === "/event-live") || (item.route === "/accounts" && location.pathname === "/control-panel");
+              const isActive = location.pathname.startsWith(item.route) || (item.route === "/challenge" && location.pathname === "/event-live") || (item.route === "/accounts" && location.pathname === "/control-panel") || (item.route === "/challenge" && location.pathname.startsWith("/checkout"));
               const isHelp = item.labelKey === "sidebar.help";
               return (
                 <button

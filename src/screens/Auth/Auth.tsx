@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ApiError, api } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
 import { useTranslation } from "../../lib/i18n";
+import { LanguageSwitcher } from "../../components/LanguageSwitcher";
 
 type AuthForm = {
   firstName: string;
@@ -170,7 +171,16 @@ export const Auth = (): JSX.Element => {
   if (isRegister) {
     return (
       <main className="min-h-screen bg-[#05070A] font-['Inter',sans-serif] text-white">
-        <div className="flex min-h-screen w-full">
+        {/* Top Navigation Bar */}
+        <nav className="sticky top-0 z-40 w-full border-b border-[#2cf6c3] bg-[#0b0f14]/95 backdrop-blur">
+          <div className="mx-auto flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-[30px]">
+            <Link to="/" className="flex items-center">
+              <img className="h-8 w-auto object-contain sm:h-[40.29px]" alt="Logo" src="/images/logo.png" />
+            </Link>
+            <LanguageSwitcher />
+          </div>
+        </nav>
+        <div className="flex min-h-screen w-full" style={{ minHeight: "calc(100vh - 64px)" }}>
           {/* ── left hero image ────────────────────────────────────── */}
           <section className="relative hidden flex-1 overflow-hidden lg:block">
             <img
@@ -392,7 +402,16 @@ export const Auth = (): JSX.Element => {
   /* ── Login layout (matches screenshot 1:1) ──────────────────────── */
   return (
     <main className="min-h-screen bg-[#05070A] font-['Inter',sans-serif] text-white">
-      <div className="flex min-h-screen w-full">
+      {/* Top Navigation Bar */}
+      <nav className="sticky top-0 z-40 w-full border-b border-[#2cf6c3] bg-[#0b0f14]/95 backdrop-blur">
+        <div className="mx-auto flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-[30px]">
+          <Link to="/" className="flex items-center">
+            <img className="h-8 w-auto object-contain sm:h-[40.29px]" alt="Logo" src="/images/logo.png" />
+          </Link>
+          <LanguageSwitcher />
+        </div>
+      </nav>
+      <div className="flex min-h-screen w-full" style={{ minHeight: "calc(100vh - 64px)" }}>
         {/* ── left hero image ────────────────────────────────────── */}
         <section className="relative hidden flex-1 overflow-hidden lg:block">
           <img

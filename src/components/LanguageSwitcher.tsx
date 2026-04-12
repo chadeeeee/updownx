@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { useTranslation, LANGUAGES } from "../lib/i18n";
+import { useTranslation, LANGUAGES, Lang } from "../lib/i18n";
+import Flag from "react-world-flags";
 
 interface Props {
   /** Extra classes on the outer wrapper */
@@ -7,6 +8,14 @@ interface Props {
   /** Size variant */
   size?: "sm" | "md";
 }
+
+const COUNTRY_CODES: Record<Lang, string> = {
+  en: "gb",
+  uk: "ua",
+  ru: "ru",
+  hi: "in",
+  kk: "kz",
+};
 
 export const LanguageSwitcher = ({ className = "", size = "md" }: Props) => {
   const { lang, setLang } = useTranslation();
@@ -22,16 +31,17 @@ export const LanguageSwitcher = ({ className = "", size = "md" }: Props) => {
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
-  const flag = LANGUAGES.find((l) => l.code === lang)?.flag ?? "🇬🇧";
   const textCls = size === "sm" ? "text-[10px] min-[375px]:text-[11px] md:text-sm" : "text-xs";
 
   return (
     <div className={`relative ${className}`} ref={ref}>
       <button
-        className={`flex items-center gap-1 bg-transparent border-none p-0 cursor-pointer transition-opacity hover:opacity-80 text-gray-400 ${textCls}`}
+        className={`flex items-center gap-1.5 bg-transparent border-none p-0 cursor-pointer transition-opacity hover:opacity-80 text-gray-400 ${textCls}`}
         onClick={() => setOpen((o) => !o)}
       >
-        <span>{flag}</span>
+        <div className="overflow-hidden rounded-sm flex-shrink-0 w-5 h-4 flex items-center justify-center">
+          <Flag code={COUNTRY_CODES[lang]} width={20} height={15} />
+        </div>
         <span className="font-bold">{lang.toUpperCase()}</span>
         <svg className={`w-2.5 h-2.5 md:w-3 md:h-3 transition-transform ${open ? "rotate-180" : ""}`} viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
       </button>
@@ -43,7 +53,9 @@ export const LanguageSwitcher = ({ className = "", size = "md" }: Props) => {
               onClick={() => { setLang(l.code); setOpen(false); }}
               className={`flex items-center gap-2 w-full px-3 py-2 text-left bg-transparent border-none cursor-pointer transition-colors hover:bg-white/5 ${lang === l.code ? "text-[#00ffa3]" : "text-gray-300"}`}
             >
-              <span className="text-sm">{l.flag}</span>
+              <div className="overflow-hidden rounded-sm flex-shrink-0 w-5 h-4 flex items-center justify-center">
+                <Flag code={COUNTRY_CODES[l.code]} width={18} height={13} />
+              </div>
               <span className="text-xs font-semibold">{l.label}</span>
             </button>
           ))}

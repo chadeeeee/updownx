@@ -49,7 +49,7 @@ export const TopNavigationSection = (): JSX.Element => {
 
   return (
     <nav className="sticky top-0 z-40 w-full border-b border-[#2cf6c3] bg-[#0b0f14]/95 backdrop-blur">
-      <div className="mx-auto flex h-16 w-full max-w-screen-2xl items-center justify-between px-4 sm:px-6 lg:px-[30px]">
+      <div className="relative mx-auto flex h-16 w-full max-w-screen-2xl items-center justify-between px-4 sm:px-6 lg:px-[30px]">
         <Link to="/" className="flex items-center p-1 sm:p-2">
           <img
             className="h-8 w-auto object-contain sm:h-[40.29px]"
@@ -58,7 +58,7 @@ export const TopNavigationSection = (): JSX.Element => {
           />
         </Link>
 
-        <div className="hidden flex-1 items-center justify-center gap-8 lg:flex">
+        <div className="hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-8 lg:flex">
           {navLinkKeys.map((link) => (
             <a
               key={link.key}

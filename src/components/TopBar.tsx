@@ -34,7 +34,9 @@ export const TopBar = ({
         </div>
 
         {/* Right controls */}
-        <HeaderUserControls />
+        <div className="flex items-center gap-3">
+          <HeaderUserControls />
+        </div>
       </div>
     </header>
   );

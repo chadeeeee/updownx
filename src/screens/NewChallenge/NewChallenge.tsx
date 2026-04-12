@@ -4,6 +4,7 @@ import { DashboardLayout } from "../../components/DashboardLayout";
 import { api, type Challenge } from "../../lib/api";
 import { useTranslation } from "../../lib/i18n";
 import { ArrowRight, CheckCircle2, ChevronDown, Menu, X } from "lucide-react";
+import { LanguageSwitcher } from "../../components/LanguageSwitcher";
 
 /* ── Shared constants ── */
 const mobileNavTabs = [

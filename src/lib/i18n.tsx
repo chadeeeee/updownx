@@ -2,12 +2,12 @@ import { createContext, useContext, useState, useCallback, type ReactNode } from
 
 export type Lang = "en" | "uk" | "ru" | "hi" | "kk";
 
-export const LANGUAGES: { code: Lang; label: string; flag: string }[] = [
-  { code: "en", label: "English", flag: "🇬🇧" },
-  { code: "uk", label: "Українська", flag: "🇺🇦" },
-  { code: "ru", label: "Русский", flag: "🇷🇺" },
-  { code: "hi", label: "हिन्दी", flag: "🇮🇳" },
-  { code: "kk", label: "Қазақша", flag: "🇰🇿" },
+export const LANGUAGES: { code: Lang; label: string }[] = [
+  { code: "en", label: "English" },
+  { code: "uk", label: "Українська" },
+  { code: "ru", label: "Русский" },
+  { code: "hi", label: "हिन्दी" },
+  { code: "kk", label: "Қазақша" },
 ];
 
 /* ── Translation dictionaries ── */
@@ -40,6 +40,8 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
       const saved = localStorage.getItem("updownx_lang") as Lang | null;
       if (saved && dictionaries[saved]) return saved;
     } catch {}
+    // Default language is always English
+    try { localStorage.setItem("updownx_lang", "en"); } catch {}
     return "en";
   });
 

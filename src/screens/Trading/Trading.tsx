@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowDownRight, ArrowUpRight, ChevronDown, Menu, X } from "lucide-react";
 import { HeaderUserControls } from "../../components/HeaderUserControls";
@@ -157,14 +157,19 @@ const PerformanceChart = ({
   range,
   loading,
   error,
+  startingBalance,
 }: {
   points: TradingPerformancePoint[];
   range: TimeRange;
   loading: boolean;
   error: string | null;
+  startingBalance?: number;
 }) => {
   const { t } = useTranslation();
   const chartId = useId().replace(/:/g, "");
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
   const safePoints = useMemo(() => {
     if (points.length >= 2) {
@@ -223,8 +228,46 @@ const PerformanceChart = ({
     };
   }, [range, safePoints]);
 
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      const container = containerRef.current;
+      if (!container || !geometry.normalizedPoints.length) return;
+      const rect = container.getBoundingClientRect();
+      const scaleX = geometry.width / rect.width;
+      const svgX = (e.clientX - rect.left) * scaleX;
+
+      let closest = 0;
+      let closestDist = Infinity;
+      for (let i = 0; i < geometry.normalizedPoints.length; i++) {
+        const dist = Math.abs(geometry.normalizedPoints[i].x - svgX);
+        if (dist < closestDist) {
+          closestDist = dist;
+          closest = i;
+        }
+      }
+      setHoverIndex(closest);
+      setTooltipPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    },
+    [geometry],
+  );
+
+  const handleMouseLeave = useCallback(() => {
+    setHoverIndex(null);
+  }, []);
+
+  const hoveredPoint = hoverIndex !== null ? safePoints[hoverIndex] : null;
+  const hoveredNorm = hoverIndex !== null ? geometry.normalizedPoints[hoverIndex] : null;
+  const refBalance = startingBalance ?? safePoints[0]?.balance ?? 0;
+  const hoverChange = hoveredPoint ? hoveredPoint.balance - refBalance : 0;
+  const hoverChangePct = refBalance !== 0 && hoveredPoint ? ((hoveredPoint.balance - refBalance) / refBalance) * 100 : 0;
+
   return (
-    <div className="relative h-full w-full">
+    <div
+      ref={containerRef}
+      className="relative h-full w-full"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
       <svg viewBox={`0 0 ${geometry.width} ${geometry.height}`} className="block h-full w-full">
         <defs>
           <linearGradient id={`${chartId}-fill`} x1="0" y1="0" x2="0" y2="1">
@@ -291,7 +334,26 @@ const PerformanceChart = ({
           </>
         ) : null}
 
-        {geometry.normalizedPoints.length ? (
+        {/* Hover vertical line & dot */}
+        {hoveredNorm && (
+          <>
+            <line
+              x1={hoveredNorm.x}
+              y1={geometry.padding.top}
+              x2={hoveredNorm.x}
+              y2={geometry.height - geometry.padding.bottom}
+              stroke="#00FFA3"
+              strokeWidth="1"
+              strokeDasharray="4 3"
+              opacity="0.5"
+            />
+            <circle cx={hoveredNorm.x} cy={hoveredNorm.y} r="8" fill="#00FFA3" fillOpacity="0.2" />
+            <circle cx={hoveredNorm.x} cy={hoveredNorm.y} r="4" fill="#00FFA3" />
+          </>
+        )}
+
+        {/* Last-point dot (hide when hovering) */}
+        {geometry.normalizedPoints.length && hoverIndex === null ? (
           <g>
             <circle
               cx={geometry.normalizedPoints[geometry.normalizedPoints.length - 1].x}
@@ -329,6 +391,41 @@ const PerformanceChart = ({
           );
         })}
       </svg>
+
+      {/* Hover tooltip card */}
+      {hoveredPoint && hoverIndex !== null && (
+        <div
+          className="pointer-events-none absolute z-50"
+          style={{
+            left: Math.min(tooltipPos.x + 14, (containerRef.current?.clientWidth ?? 999) - 180),
+            top: Math.max(tooltipPos.y - 90, 4),
+          }}
+        >
+          <div className="rounded-xl border border-[#00FFA3]/20 bg-[#0b1016]/95 px-3 py-2.5 shadow-lg shadow-black/40 backdrop-blur-md min-w-[155px]">
+            <p className="text-[10px] text-gray-400 mb-1">
+              {new Date(hoveredPoint.ts).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}{" "}
+              {new Date(hoveredPoint.ts).toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </p>
+            <p className="text-sm font-bold text-white">
+              {formatMoney(hoveredPoint.balance)}{" "}
+              <span className="text-[10px] font-medium text-[#00ffa3]">USDT</span>
+            </p>
+            <div className={`mt-1 flex items-center gap-1 text-xs font-semibold ${
+              hoverChange >= 0 ? "text-[#00ffa3]" : "text-[#ff6b6b]"
+            }`}>
+              {hoverChange >= 0 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+              <span>{formatSignedMoney(hoverChange)} ({formatSignedPercent(hoverChangePct)})</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {(loading || error) && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-2xl bg-[#05070a]/35 backdrop-blur-[1px]">
@@ -580,7 +677,13 @@ export const Trading = (): JSX.Element => {
 
               <div className="bg-[#0b0f14] rounded-xl min-[375px]:rounded-2xl border border-white/5 relative h-[220px] min-[375px]:h-[260px] md:h-[340px] overflow-hidden">
                 <div className="absolute inset-2 min-[375px]:inset-3 md:inset-4">
-                  <RandomPerformanceChart />
+                  <PerformanceChart
+                    points={chartPoints}
+                    range={timeRange}
+                    loading={loadingPerformance}
+                    error={performanceError}
+                    startingBalance={performance.startingBalance}
+                  />
                 </div>
               </div>
             </div>
@@ -777,7 +880,13 @@ export const Trading = (): JSX.Element => {
 
                 <div className="bg-[#0b0f14] rounded-2xl border border-white/5 flex-1 relative min-h-[360px] overflow-hidden">
                   <div className="absolute inset-4">
-                    <RandomPerformanceChart />
+                    <PerformanceChart
+                      points={chartPoints}
+                      range={timeRange}
+                      loading={loadingPerformance}
+                      error={performanceError}
+                      startingBalance={performance.startingBalance}
+                    />
                   </div>
                 </div>
               </div>

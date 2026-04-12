@@ -1,28 +1,40 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "../../lib/i18n";
+import { LanguageSwitcher } from "../../components/LanguageSwitcher";
 
 export const NotFound = (): JSX.Element => {
   const { t } = useTranslation();
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#02060c] text-white">
-      {/* BG texture */}
-      <img
-        src="/images/bg-lines.png"
-        alt=""
-        className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40"
-      />
-      <img
-        src="/images/bg-lines1.png"
-        alt=""
-        className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-11 mix-blend-screen"
-      />
+    <main className="relative flex min-h-screen flex-col bg-[#02060c] text-white">
+      {/* Top Navigation Bar */}
+      <nav className="sticky top-0 z-40 w-full border-b border-[#2cf6c3] bg-[#0b0f14]/95 backdrop-blur">
+        <div className="mx-auto flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-[30px]">
+          <Link to="/" className="flex items-center">
+            <img className="h-8 w-auto object-contain sm:h-[40.29px]" alt="Logo" src="/images/logo.png" />
+          </Link>
+          <LanguageSwitcher />
+        </div>
+      </nav>
 
+      {/* Content */}
+      <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden">
+        {/* BG texture */}
+        <img
+          src="/images/bg-lines.png"
+          alt=""
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40"
+        />
+        <img
+          src="/images/bg-lines1.png"
+          alt=""
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-11 mix-blend-screen"
+        />
 
-      {/* Glow blobs */}
-      <div className="pointer-events-none absolute -top-40 left-1/4 h-[500px] w-[500px] rounded-full bg-[#00ffa3]/8 blur-[120px]" />
-      <div className="pointer-events-none absolute -bottom-40 right-1/4 h-[500px] w-[500px] rounded-full bg-[#00ffa3]/6 blur-[120px]" />
+        {/* Glow blobs */}
+        <div className="pointer-events-none absolute -top-40 left-1/4 h-[500px] w-[500px] rounded-full bg-[#00ffa3]/8 blur-[120px]" />
+        <div className="pointer-events-none absolute -bottom-40 right-1/4 h-[500px] w-[500px] rounded-full bg-[#00ffa3]/6 blur-[120px]" />
 
-      <section className="relative z-10 mx-auto flex w-full max-w-[620px] flex-col items-center px-5 text-center">
+        <section className="relative z-10 mx-auto flex w-full max-w-[620px] flex-col items-center px-5 text-center">
         {/* Chart icon card */}
         <div className="mb-4 flex h-[120px] w-[180px] items-end justify-center gap-1.5 rounded-2xl bg-gradient-to-b from-[#0e3d43]/80 to-[#082a30]/60 p-5 shadow-[0_8px_32px_rgba(0,255,163,0.08)]">
           <div className="h-[50px] w-[14px] rounded-sm bg-[#00ffa3]/70" />
@@ -66,9 +78,8 @@ export const NotFound = (): JSX.Element => {
         >
           {t("page.new_challenge")}
         </Link>
-      </section>
-
-
+        </section>
+      </div>
     </main>
   );
 };

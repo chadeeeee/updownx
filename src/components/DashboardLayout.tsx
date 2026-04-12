@@ -8,7 +8,22 @@ export const DashboardLayout = ({ children }: PropsWithChildren): JSX.Element =>
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <main className="min-h-screen bg-[#05070A] font-['Inter',sans-serif] text-white">
+    <>
+      {/* Background texture — fixed layer behind everything */}
+      <div className="fixed inset-0 z-0 pointer-events-none bg-[#05070A]">
+        <img
+          src="/images/bg-lines.png"
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover opacity-40"
+        />
+        <img
+          src="/images/bg-lines1.png"
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover opacity-11 mix-blend-screen"
+        />
+      </div>
+
+      <main className="relative z-[1] flex min-h-screen flex-col font-['Inter',sans-serif] text-white">
       {/* ═══ Top header bar ═══ */}
       <header data-top-menu className="sticky top-0 z-50 flex h-16 2xl:h-20 items-center justify-between border-b border-[#2cf6c3] bg-[#05070A]/95 px-4 sm:px-6 2xl:px-10 backdrop-blur-md">
         {/* Left: hamburger + Logo */}
@@ -29,28 +44,17 @@ export const DashboardLayout = ({ children }: PropsWithChildren): JSX.Element =>
         <HeaderUserControls />
       </header>
 
-      <div className="flex min-h-[calc(100vh-64px)]">
+      <div className="flex flex-1">
         {/* ═══ Sidebar ═══ */}
         <Sidebar mobileOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         {/* ═══ Main content ═══ */}
         <section className="relative flex-1 min-w-0 overflow-x-hidden">
-          {/* Background texture */}
-          <img
-            src="/images/bg-lines.png"
-            alt=""
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40"
-          />
-          <img
-            src="/images/bg-lines1.png"
-            alt=""
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-11 mix-blend-screen"
-          />
-
           <div className="relative z-10 min-w-0 p-4 sm:p-6 lg:p-8 2xl:p-12">{children}</div>
         </section>
       </div>
     </main>
+    </>
   );
 };
 

@@ -57,7 +57,7 @@ export const LandingSlidebarSubsection = (): JSX.Element => {
       {/* Navigation menu items */}
       <div className="flex flex-col w-[210px] items-start gap-[5px]">
         {navItems.map((item) => {
-          const isActive = item.route === "#" ? false : location.pathname.startsWith(item.route) || (item.route === "/challenge" && location.pathname === "/event-live");
+          const isActive = item.route === "#" ? false : location.pathname.startsWith(item.route) || (item.route === "/challenge" && location.pathname === "/event-live") || (item.route === "/challenge" && location.pathname.startsWith("/checkout"));
           const isHelp = item.id === "help";
           
           return (

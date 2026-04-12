@@ -2,21 +2,21 @@ import { useState } from "react";
 import { useTranslation } from "../../../../lib/i18n";
 
 // Account size tab options
-const accountSizeTabs = ["$799", "5K", "25K", "50K", "100K"];
+const accountSizeTabs = ["5K", "50K", "100K"];
 
 // Pricing plans data
 const pricingPlans = [
   {
-    id: "trial",
-    name: "TRIAL",
-    subtitle: "pricing.ideal_beginners",
-    accountSize: "$799",
-    price: "$49",
-    featured: false,
-    borderClass: "border border-solid border-slate-400",
-    buttonClass:
-      "bg-[#ffffff0d] border border-solid border-[#ffffff1a] text-white font-bold",
-    buttonTextClass: "text-white",
+    id: "shark",
+    name: "SHARK",
+    subtitle: "pricing.for_serious",
+    accountSize: "$50,000",
+    price: "$399",
+    featured: true,
+    borderClass:
+      "border-2 border-solid border-[#00ffa3] shadow-[0px_0px_30px_#00ffa326]",
+    buttonClass: "bg-[#00ffa3] text-[#05070a] font-black",
+    buttonTextClass: "text-[#05070a]",
   },
   {
     id: "hunter",
@@ -26,30 +26,6 @@ const pricingPlans = [
     price: "$69",
     featured: false,
     borderClass: "border border-solid border-slate-400",
-    buttonClass:
-      "bg-[#ffffff0d] border border-solid border-[#ffffff1a] text-white font-bold",
-    buttonTextClass: "text-white",
-  },
-  {
-    id: "killer",
-    name: "KILLER",
-    subtitle: "pricing.for_serious",
-    accountSize: "$25,000",
-    price: "$199",
-    featured: true,
-    borderClass:
-      "border-2 border-solid border-[#00ffa3] shadow-[0px_0px_30px_#00ffa326]",
-    buttonClass: "bg-[#00ffa3] text-[#05070a] font-black",
-    buttonTextClass: "text-[#05070a]",
-  },
-  {
-    id: "shark",
-    name: "SHARK",
-    subtitle: "pricing.for_serious",
-    accountSize: "$50,000",
-    price: "$399",
-    featured: false,
-    borderClass: "border border-solid border-gray-500",
     buttonClass:
       "bg-[#ffffff0d] border border-solid border-[#ffffff1a] text-white font-bold",
     buttonTextClass: "text-white",
@@ -69,7 +45,7 @@ const pricingPlans = [
 ];
 
 export const ChallengePricingSection = (): JSX.Element => {
-  const [activeTab, setActiveTab] = useState("5K");
+  const [activeTab, setActiveTab] = useState("50K");
   const { t } = useTranslation();
 
   const planSteps = [

@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ChevronDown, Menu } from "lucide-react";
 import { CheckoutDetailSection } from "./sections/CheckoutDetailSection/CheckoutDetailSection";
-import { LandingSlidebarSubsection } from "./sections/LandingSlidebarSubsection";
-import { PrimaryNavigationSection } from "./sections/PrimaryNavigationSection";
+import { DashboardLayout } from "../../components/DashboardLayout";
 import { Button } from "../../components/ui/button";
 import { api, type Challenge } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
@@ -291,14 +290,10 @@ const DesktopLayout = ({
 }: DesktopLayoutProps) => {
   const { t } = useTranslation();
   return (
-  <div className="hidden xl:block bg-[#05070a] w-full relative overflow-hidden">
-    <img src="/images/bg-lines.png" alt="" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-40" />
-    <img src="/images/bg-lines1.png" alt="" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-11 mix-blend-screen" />
-    <PrimaryNavigationSection />
-    <div className="flex flex-row w-full relative">
-      <LandingSlidebarSubsection />
-      <div className="flex flex-col flex-1 relative">
-        <header className="flex flex-col items-start gap-2 px-8 pt-[36px] pb-2 bg-transparent">
+  <div className="hidden xl:block">
+    <DashboardLayout>
+      <div className="flex flex-col">
+        <header className="flex flex-col items-start gap-2 px-0 pt-[4px] pb-2 bg-transparent">
           <div className="w-full h-9 flex items-center">
             <span className="[font-family:'Public_Sans',Helvetica] font-black text-white text-3xl tracking-[-0.75px] leading-9">{t("checkout.title")}</span>
           </div>
@@ -322,7 +317,7 @@ const DesktopLayout = ({
           plan={plan}
         />
       </div>
-    </div>
+    </DashboardLayout>
   </div>
   );
 };
