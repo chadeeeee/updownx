@@ -24,8 +24,16 @@ interface CheckoutDetailSectionProps {
   fullName: string;
   email: string;
   loading: boolean;
+  couponCode: string;
+  couponApplied: boolean;
+  couponDiscount: number;
+  couponError: string | null;
+  couponValidating: boolean;
+  finalAmountLabel: string;
+  onApplyCoupon: () => void;
   onCityChange: (value: string) => void;
   onCompleteOrder: () => void;
+  onCouponCodeChange: (value: string) => void;
   onCountryChange: (value: string) => void;
   onEmailChange: (value: string) => void;
   onFullNameChange: (value: string) => void;
@@ -38,8 +46,16 @@ export const CheckoutDetailSection = ({
   fullName,
   email,
   loading,
+  couponCode,
+  couponApplied,
+  couponDiscount,
+  couponError,
+  couponValidating,
+  finalAmountLabel,
+  onApplyCoupon,
   onCityChange,
   onCompleteOrder,
+  onCouponCodeChange,
   onCountryChange,
   onEmailChange,
   onFullNameChange,
@@ -51,7 +67,7 @@ export const CheckoutDetailSection = ({
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col w-full items-end justify-center gap-5 pr-8 pb-8">
+    <div className="flex flex-col w-full items-start justify-center gap-5 pr-8 pb-8">
       <div className="flex items-start gap-5 w-full">
         <div className="flex flex-col flex-1 items-start gap-[34px]">
           <div className={`${gradientCardClass} flex flex-col gap-8 w-full p-[33px]`}>
@@ -182,15 +198,48 @@ export const CheckoutDetailSection = ({
             </div>
             <div className="flex items-center h-[56px] px-5 bg-[#0b0f14] rounded-xl border border-solid border-[#ffffff1a] transition-all focus-within:border-[#00ffa3]/40">
               <input
+                value={couponCode}
+                onChange={(e) => onCouponCodeChange(e.target.value)}
                 placeholder={t("checkout.coupon_placeholder")}
                 className="bg-transparent border-none outline-none w-full [font-family:'Public_Sans',Helvetica] font-normal text-white text-base tracking-wide leading-6 placeholder:text-gray-600"
+                disabled={couponApplied}
               />
             </div>
+            {couponApplied && (
+              <p className="text-[#00FFA3] text-sm font-semibold">
+                {t("checkout.coupon_applied").replace("{percent}", String(couponDiscount))}
+              </p>
+            )}
+            {couponError && (
+              <p className="text-red-400 text-sm font-semibold">{couponError}</p>
+            )}
             <Button
-              className="w-full h-14 bg-[#00ffa3] hover:bg-[#00ffa3]/90 rounded-xl [font-family:'Public_Sans',Helvetica] font-bold text-black text-[15px] uppercase tracking-widest border-none mt-2"
+              onClick={onApplyCoupon}
+              disabled={couponApplied || couponValidating || !couponCode.trim()}
+              className="w-full h-14 bg-[#00ffa3] hover:bg-[#00ffa3]/90 rounded-xl [font-family:'Public_Sans',Helvetica] font-bold text-black text-[15px] uppercase tracking-widest border-none mt-2 disabled:opacity-60"
             >
-              {t("checkout.coupon_apply")}
+              {couponValidating ? t("checkout.coupon_validating") : t("checkout.coupon_apply")}
             </Button>
+          </div>
+
+          <div
+            className={`${gradientCardClass} inline-flex items-center gap-4 p-[25px] w-full flex-shrink-0 backdrop-blur-[6px] backdrop-brightness-[100%] [-webkit-backdrop-filter:blur(6px)_brightness(100%)]`}
+          >
+            <div className="w-12 h-12 rounded-full bg-[#00ffa31a] flex items-center justify-center flex-shrink-0">
+              <img
+                className="w-4 h-5 flex-shrink-0"
+                alt="SSL Secure"
+                src="/svg/ssl-secure.svg"
+              />
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <span className="[font-family:'Public_Sans',Helvetica] font-bold text-white text-xs tracking-[-0.30px] leading-4 whitespace-nowrap">
+                {t("checkout.ssl_title")}
+              </span>
+              <span className="[font-family:'Public_Sans',Helvetica] font-normal text-gray-500 text-[10px] tracking-[0] leading-[15px] whitespace-nowrap">
+                {t("checkout.ssl_sub")}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -243,10 +292,20 @@ export const CheckoutDetailSection = ({
                 <span className="[font-family:'Public_Sans',Helvetica] font-normal text-gray-500 text-sm tracking-[0] leading-5 whitespace-nowrap">
                   {t("checkout.subtotal")}
                 </span>
-                <span className="[font-family:'Public_Sans',Helvetica] text-sm tracking-[0] leading-5 whitespace-nowrap text-white font-medium">
+                <span className={`[font-family:'Public_Sans',Helvetica] text-sm tracking-[0] leading-5 whitespace-nowrap font-medium ${couponApplied ? "line-through text-gray-500" : "text-white"}`}>
                   {amountLabel}
                 </span>
               </div>
+              {couponApplied && (
+                <div className="flex items-center justify-between w-full h-5">
+                  <span className="[font-family:'Public_Sans',Helvetica] font-normal text-[#00FFA3] text-sm tracking-[0] leading-5 whitespace-nowrap">
+                    {t("checkout.discount")} (-{couponDiscount}%)
+                  </span>
+                  <span className="[font-family:'Public_Sans',Helvetica] text-sm tracking-[0] leading-5 whitespace-nowrap text-[#00FFA3] font-medium">
+                    {finalAmountLabel}
+                  </span>
+                </div>
+              )}
               <div className="flex items-center justify-between w-full h-5">
                 <span className="[font-family:'Public_Sans',Helvetica] font-normal text-gray-500 text-sm tracking-[0] leading-5 whitespace-nowrap">
                   {t("checkout.platform_fee")}
@@ -262,7 +321,7 @@ export const CheckoutDetailSection = ({
                 {t("checkout.total_amount")}
               </span>
               <span className="[font-family:'Public_Sans',Helvetica] font-black text-white text-3xl tracking-[0] leading-9 whitespace-nowrap">
-                {amountLabel}
+                {couponApplied ? finalAmountLabel : amountLabel}
               </span>
             </div>
           </div>
@@ -287,26 +346,6 @@ export const CheckoutDetailSection = ({
               </p>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div
-        className={`${gradientCardClass} inline-flex items-center gap-4 p-[25px] flex-shrink-0 backdrop-blur-[6px] backdrop-brightness-[100%] [-webkit-backdrop-filter:blur(6px)_brightness(100%)]`}
-      >
-        <div className="w-12 h-12 rounded-full bg-[#00ffa31a] flex items-center justify-center flex-shrink-0">
-          <img
-            className="w-4 h-5 flex-shrink-0"
-            alt="SSL Secure"
-            src="/svg/ssl-secure.svg"
-          />
-        </div>
-        <div className="flex flex-col gap-0.5">
-          <span className="[font-family:'Public_Sans',Helvetica] font-bold text-white text-xs tracking-[-0.30px] leading-4 whitespace-nowrap">
-            {t("checkout.ssl_title")}
-          </span>
-          <span className="[font-family:'Public_Sans',Helvetica] font-normal text-gray-500 text-[10px] tracking-[0] leading-[15px] whitespace-nowrap">
-            {t("checkout.ssl_sub")}
-          </span>
         </div>
       </div>
     </div>

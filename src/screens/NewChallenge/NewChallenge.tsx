@@ -28,9 +28,8 @@ const NeedAssistance = () => {
   return (
   <div className="mt-4 rounded-[18px] border border-[#1a5a4a]/50 bg-[linear-gradient(180deg,rgba(15,56,50,0.92)_0%,rgba(8,20,27,0.92)_100%)] p-3 shadow-[0_12px_30px_rgba(0,0,0,0.22)] min-[375px]:rounded-[20px] min-[375px]:p-4 md:mt-6 md:p-6">
     <p className="mb-2.5 text-[11px] text-[#d7e4e0] min-[375px]:mb-3 min-[375px]:text-xs md:mb-4 md:text-sm">{t("sidebar.need_assistance")}</p>
-    <div className="grid grid-cols-2 gap-2 min-[375px]:gap-2.5 md:gap-4">
-      <button className="h-9 rounded-[10px] bg-[#00FFA3] px-2 text-[11px] font-bold text-black min-[375px]:h-10 min-[375px]:rounded-xl min-[375px]:text-xs md:h-14 md:text-sm">{t("sidebar.contact_support")}</button>
-      <button className="h-9 rounded-[10px] border border-[#2f7563] bg-transparent px-2 text-[11px] font-bold text-[#c3d8d0] min-[375px]:h-10 min-[375px]:rounded-xl min-[375px]:text-xs md:h-14 md:text-sm">{t("sidebar.help")}</button>
+    <div>
+      <button className="w-full h-9 rounded-[10px] bg-[#00FFA3] px-2 text-[11px] font-bold text-black min-[375px]:h-10 min-[375px]:rounded-xl min-[375px]:text-xs md:h-14 md:text-sm">{t("sidebar.contact_support")}</button>
     </div>
   </div>
   );

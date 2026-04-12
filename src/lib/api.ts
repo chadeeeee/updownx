@@ -53,6 +53,7 @@ export type CreateOrderPayload = {
   country: string;
   city: string;
   paymentMethod: string;
+  couponCode?: string;
 };
 
 export type CreateOrderResponse = {
@@ -197,6 +198,11 @@ export const api = {
       body: JSON.stringify(payload),
     }),
   challenges: () => request<Challenge[]>("/api/challenges"),
+  validateCoupon: (userId: number, code: string) =>
+    request<{ valid: boolean; discountPercent?: number; code?: string; message?: string }>(
+      "/api/coupons/validate",
+      { method: "POST", body: JSON.stringify({ userId, code }) },
+    ),
   createOrder: (payload: CreateOrderPayload) =>
     request<CreateOrderResponse>("/api/orders", {
       method: "POST",

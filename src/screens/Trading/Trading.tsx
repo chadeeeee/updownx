@@ -144,9 +144,8 @@ function NeedAssistance() {
   return (
   <div className="mt-5 rounded-xl md:rounded-2xl border border-[#163e4a]/40 bg-[#08141c]/60 p-3 min-[375px]:p-4 md:p-6">
     <p className="mb-2 min-[375px]:mb-3 md:mb-4 text-[10px] min-[375px]:text-xs md:text-sm text-gray-400">{t("sidebar.need_assistance")}</p>
-    <div className="grid grid-cols-2 gap-2 min-[375px]:gap-3 md:gap-4">
-      <button className="h-9 min-[375px]:h-10 md:h-14 rounded-xl md:rounded-2xl bg-[#00FFA3] text-[10px] min-[375px]:text-xs md:text-base font-bold text-black transition-colors hover:bg-[#00e693]">{t("sidebar.contact_support")}</button>
-      <button className="h-9 min-[375px]:h-10 md:h-14 rounded-xl md:rounded-2xl border border-[#163e4a] bg-[#0b1820] hover:bg-[#132028] text-[10px] min-[375px]:text-xs md:text-base font-bold text-white transition-colors">{t("sidebar.help")}</button>
+    <div>
+      <button className="w-full h-9 min-[375px]:h-10 md:h-14 rounded-xl md:rounded-2xl bg-[#00FFA3] text-[10px] min-[375px]:text-xs md:text-base font-bold text-black transition-colors hover:bg-[#00e693]">{t("sidebar.contact_support")}</button>
     </div>
   </div>
 );

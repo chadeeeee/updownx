@@ -1068,6 +1068,36 @@ const ensureSchema = async () => {
     );
   `);
 
+  // ─── Coupon Codes ───
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS coupon_codes (
+      id SERIAL PRIMARY KEY,
+      code TEXT UNIQUE NOT NULL,
+      discount_percent NUMERIC NOT NULL DEFAULT 0,
+      max_uses_per_user INTEGER NOT NULL DEFAULT 1,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS coupon_usages (
+      id SERIAL PRIMARY KEY,
+      coupon_id INTEGER NOT NULL REFERENCES coupon_codes(id) ON DELETE CASCADE,
+      user_id INTEGER NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+      order_id INTEGER,
+      used_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(coupon_id, user_id)
+    );
+  `);
+
+  // Seed summer2026 promo code (50% discount, 1 use per account)
+  await pool.query(`
+    INSERT INTO coupon_codes (code, discount_percent, max_uses_per_user, active)
+    VALUES ('summer2026', 50, 1, TRUE)
+    ON CONFLICT (code) DO UPDATE SET discount_percent = 50, max_uses_per_user = 1, active = TRUE
+  `);
+
   const users = await pool.query("SELECT id, account_id FROM app_users ORDER BY id ASC");
   for (const user of users.rows) {
     await syncPaymentsTableForUser(user.id, user.account_id);
@@ -1081,6 +1111,44 @@ app.get("/api/health", async (_, res) => {
 
 app.get("/api/challenges", (_, res) => {
   res.json(challenges);
+});
+
+// ─── Coupon Validation ───
+app.post("/api/coupons/validate", requireAuth, async (req, res) => {
+  const { code, userId } = req.body;
+  if (!ensureAuthorizedUserId(req, res, Number(userId))) return;
+
+  if (!code || typeof code !== "string") {
+    return res.status(400).json({ valid: false, message: "Coupon code is required." });
+  }
+
+  try {
+    const coupon = await pool.query(
+      "SELECT * FROM coupon_codes WHERE LOWER(code) = LOWER($1) AND active = TRUE",
+      [code.trim()],
+    );
+    if (!coupon.rowCount) {
+      return res.json({ valid: false, message: "Invalid coupon code." });
+    }
+
+    const couponRow = coupon.rows[0];
+    const usage = await pool.query(
+      "SELECT COUNT(*)::int AS cnt FROM coupon_usages WHERE coupon_id = $1 AND user_id = $2",
+      [couponRow.id, userId],
+    );
+    if (usage.rows[0].cnt >= couponRow.max_uses_per_user) {
+      return res.json({ valid: false, message: "Coupon already used." });
+    }
+
+    return res.json({
+      valid: true,
+      discountPercent: Number(couponRow.discount_percent),
+      code: couponRow.code,
+    });
+  } catch (error) {
+    console.error("[coupons] validate failed", error);
+    return res.status(500).json({ valid: false, message: "Failed to validate coupon." });
+  }
 });
 
 app.post("/api/auth/register", async (req, res) => {
@@ -1496,7 +1564,7 @@ app.post("/api/payments/nowpayments/ipn", async (req, res) => {
 });
 
 app.post("/api/orders", requireAuth, async (req, res) => {
-  const { userId, challengeId, country, city, fullName, email, paymentMethod } = req.body;
+  const { userId, challengeId, country, city, fullName, email, paymentMethod, couponCode } = req.body;
   if (!ensureAuthorizedUserId(req, res, Number(userId))) {
     return;
   }
@@ -1511,6 +1579,35 @@ app.post("/api/orders", requireAuth, async (req, res) => {
   }
   if (!userId || !normalizedFullName || !normalizedEmail || !normalizedCountry || !normalizedCity || !paymentMethod) {
     return res.status(400).json({ message: "Missing order fields." });
+  }
+
+  // ─── Coupon discount ───
+  let finalAmount = selected.fee;
+  let appliedCouponId = null;
+  let discountPercent = 0;
+
+  if (couponCode && typeof couponCode === "string" && couponCode.trim()) {
+    try {
+      const coupon = await pool.query(
+        "SELECT * FROM coupon_codes WHERE LOWER(code) = LOWER($1) AND active = TRUE",
+        [couponCode.trim()],
+      );
+      if (coupon.rowCount) {
+        const couponRow = coupon.rows[0];
+        const usage = await pool.query(
+          "SELECT COUNT(*)::int AS cnt FROM coupon_usages WHERE coupon_id = $1 AND user_id = $2",
+          [couponRow.id, userId],
+        );
+        if (usage.rows[0].cnt < couponRow.max_uses_per_user) {
+          appliedCouponId = couponRow.id;
+          discountPercent = Number(couponRow.discount_percent);
+          finalAmount = roundMoney(selected.fee * (1 - discountPercent / 100));
+          console.log(`[orders] coupon "${couponRow.code}" applied: ${discountPercent}% off → $${finalAmount}`);
+        }
+      }
+    } catch (err) {
+      console.error("[orders] coupon check failed", err);
+    }
   }
 
   const merchantOrderId = `UDX-${challengeId.toUpperCase()}-${userId}-${Date.now()}`;
@@ -1558,7 +1655,7 @@ app.post("/api/orders", requireAuth, async (req, res) => {
         userId,
         selected.id,
         selected.name,
-        selected.fee,
+        finalAmount,
         normalizedFullName,
         normalizedEmail,
         normalizedCountry,
@@ -1602,7 +1699,7 @@ app.post("/api/orders", requireAuth, async (req, res) => {
         orderRow.id,
         selected.id,
         selected.name,
-        selected.fee,
+        finalAmount,
         normalizedFullName,
         normalizedEmail,
         normalizedCountry,
@@ -1625,7 +1722,7 @@ app.post("/api/orders", requireAuth, async (req, res) => {
     if (paymentMethod === "crypto") {
       provider = "nowpayments";
       const charge = await createNowPaymentsCharge({
-        amount: selected.fee,
+        amount: finalAmount,
         challengeId: selected.id,
         challengeName: selected.name,
         balance: selected.balance,
@@ -1678,6 +1775,14 @@ app.post("/api/orders", requireAuth, async (req, res) => {
       paymentRow = updatedPayment.rows[0];
     }
 
+    // Record coupon usage
+    if (appliedCouponId && orderRow?.id) {
+      await pool.query(
+        "INSERT INTO coupon_usages (coupon_id, user_id, order_id) VALUES ($1, $2, $3) ON CONFLICT (coupon_id, user_id) DO NOTHING",
+        [appliedCouponId, userId, orderRow.id],
+      );
+    }
+
     return res.status(201).json({
       order: orderRow,
       payment: paymentRow,
@@ -1691,6 +1796,9 @@ app.post("/api/orders", requireAuth, async (req, res) => {
       provider,
       providerInvoiceId,
       providerPaymentId,
+      discountPercent,
+      originalAmount: selected.fee,
+      finalAmount,
     });
   } catch (error) {
     console.error("[orders] failed", error);

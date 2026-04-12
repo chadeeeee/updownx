@@ -37,9 +37,8 @@ function NeedAssistance() {
   return (
   <div className="mt-4 md:mt-6 rounded-xl border border-[#163e4a]/40 bg-[#08141c]/60 p-4 md:p-6">
     <p className="mb-3 md:mb-4 text-xs md:text-sm text-gray-400">{t("sidebar.need_assistance")}</p>
-    <div className="grid grid-cols-2 gap-3 md:gap-4">
-      <button className="h-10 md:h-14 rounded-xl bg-[#00FFA3] text-xs md:text-sm font-bold text-black">{t("sidebar.contact_support")}</button>
-      <button className="h-10 md:h-14 rounded-xl border border-[#163e4a] bg-[#0b1820] text-xs md:text-sm font-bold text-white">{t("sidebar.help")}</button>
+    <div>
+      <button className="w-full h-10 md:h-14 rounded-xl bg-[#00FFA3] text-xs md:text-sm font-bold text-black">{t("sidebar.contact_support")}</button>
     </div>
   </div>
 );
@@ -50,8 +49,15 @@ interface MobileStep1Props {
   country: string;
   email: string;
   fullName: string;
+  couponCode: string;
+  couponApplied: boolean;
+  couponDiscount: number;
+  couponError: string | null;
+  couponValidating: boolean;
   onCityChange: (value: string) => void;
   onCountryChange: (value: string) => void;
+  onCouponCodeChange: (value: string) => void;
+  onApplyCoupon: () => void;
   onEmailChange: (value: string) => void;
   onFullNameChange: (value: string) => void;
   onNext: () => void;
@@ -62,8 +68,15 @@ const MobileStep1 = ({
   country,
   email,
   fullName,
+  couponCode,
+  couponApplied,
+  couponDiscount,
+  couponError,
+  couponValidating,
   onCityChange,
   onCountryChange,
+  onCouponCodeChange,
+  onApplyCoupon,
   onEmailChange,
   onFullNameChange,
   onNext,
@@ -157,14 +170,27 @@ const MobileStep1 = ({
       </div>
       <div className="flex items-center h-11 md:h-14 bg-[#0b0f14] rounded-xl border border-solid border-[#ffffff1a] px-4 md:px-5">
         <input
+          value={couponCode}
+          onChange={(e) => onCouponCodeChange(e.target.value)}
           placeholder={t("checkout.coupon_placeholder")}
           className="bg-transparent border-none outline-none w-full [font-family:'Public_Sans',Helvetica] font-normal text-white text-xs md:text-sm tracking-[0] leading-6 placeholder:text-gray-600"
+          disabled={couponApplied}
         />
       </div>
+      {couponApplied && (
+        <p className="text-[#00FFA3] text-xs font-semibold">
+          {t("checkout.coupon_applied").replace("{percent}", String(couponDiscount))}
+        </p>
+      )}
+      {couponError && (
+        <p className="text-red-400 text-xs font-semibold">{couponError}</p>
+      )}
       <Button
-        className="w-full h-12 md:h-14 bg-[#00ffa3] hover:bg-[#00ffa3]/90 rounded-2xl [font-family:'Public_Sans',Helvetica] font-bold text-black text-xs md:text-sm uppercase tracking-wider border-none"
+        onClick={onApplyCoupon}
+        disabled={couponApplied || couponValidating || !couponCode.trim()}
+        className="w-full h-12 md:h-14 bg-[#00ffa3] hover:bg-[#00ffa3]/90 rounded-2xl [font-family:'Public_Sans',Helvetica] font-bold text-black text-xs md:text-sm uppercase tracking-wider border-none disabled:opacity-60"
       >
-        {t("checkout.coupon_apply")}
+        {couponValidating ? t("checkout.coupon_validating") : t("checkout.coupon_apply")}
       </Button>
     </div>
 
@@ -193,6 +219,9 @@ interface MobileStep2Props {
   amountLabel: string;
   challengeLabel: string;
   accountSizeLabel: string;
+  couponApplied: boolean;
+  couponDiscount: number;
+  finalAmountLabel: string;
   loading: boolean;
   onCompleteOrder: () => void;
   plan?: Challenge;
@@ -202,6 +231,9 @@ const MobileStep2 = ({
   amountLabel,
   challengeLabel,
   accountSizeLabel,
+  couponApplied,
+  couponDiscount,
+  finalAmountLabel,
   loading,
   onCompleteOrder,
   plan,
@@ -228,8 +260,14 @@ const MobileStep2 = ({
       <div className="flex flex-col gap-2.5 md:gap-4 pt-3 md:pt-5" style={{ borderTop: "1px solid", borderImage: "linear-gradient(227deg,rgba(44,246,195,0.3) 0%,rgba(1,50,38,0.3) 100%) 1" }}>
         <div className="flex justify-between text-sm md:text-base">
           <span className="[font-family:'Public_Sans',Helvetica] text-gray-500">{t("checkout.subtotal")}</span>
-          <span className="[font-family:'Public_Sans',Helvetica] font-medium text-white">{amountLabel}</span>
+          <span className={`[font-family:'Public_Sans',Helvetica] font-medium ${couponApplied ? "line-through text-gray-500" : "text-white"}`}>{amountLabel}</span>
         </div>
+        {couponApplied && (
+          <div className="flex justify-between text-sm md:text-base">
+            <span className="[font-family:'Public_Sans',Helvetica] text-[#00FFA3]">{t("checkout.discount")} (-{couponDiscount}%)</span>
+            <span className="[font-family:'Public_Sans',Helvetica] font-medium text-[#00FFA3]">{finalAmountLabel}</span>
+          </div>
+        )}
         <div className="flex justify-between text-sm md:text-base">
           <span className="[font-family:'Public_Sans',Helvetica] text-gray-500">{t("checkout.platform_fee")}</span>
           <span className="[font-family:'Public_Sans',Helvetica] font-medium text-[#00ffa3]">{t("checkout.free")}</span>
@@ -238,7 +276,7 @@ const MobileStep2 = ({
 
       <div className="flex items-end justify-between mt-2 md:mt-4">
         <span className="[font-family:'Public_Sans',Helvetica] font-bold text-gray-500 text-[10px] md:text-xs tracking-[1.2px]">{t("checkout.total_amount")}</span>
-        <span className="[font-family:'Public_Sans',Helvetica] font-black text-white text-3xl md:text-4xl">{amountLabel}</span>
+        <span className="[font-family:'Public_Sans',Helvetica] font-black text-white text-3xl md:text-4xl">{couponApplied ? finalAmountLabel : amountLabel}</span>
       </div>
 
       <Button
@@ -267,8 +305,16 @@ interface DesktopLayoutProps {
   email: string;
   fullName: string;
   loading: boolean;
+  couponCode: string;
+  couponApplied: boolean;
+  couponDiscount: number;
+  couponError: string | null;
+  couponValidating: boolean;
+  finalAmountLabel: string;
+  onApplyCoupon: () => void;
   onCityChange: (value: string) => void;
   onCompleteOrder: () => void;
+  onCouponCodeChange: (value: string) => void;
   onCountryChange: (value: string) => void;
   onEmailChange: (value: string) => void;
   onFullNameChange: (value: string) => void;
@@ -281,8 +327,16 @@ const DesktopLayout = ({
   email,
   fullName,
   loading,
+  couponCode,
+  couponApplied,
+  couponDiscount,
+  couponError,
+  couponValidating,
+  finalAmountLabel,
+  onApplyCoupon,
   onCityChange,
   onCompleteOrder,
+  onCouponCodeChange,
   onCountryChange,
   onEmailChange,
   onFullNameChange,
@@ -309,8 +363,16 @@ const DesktopLayout = ({
           email={email}
           fullName={fullName}
           loading={loading}
+          couponCode={couponCode}
+          couponApplied={couponApplied}
+          couponDiscount={couponDiscount}
+          couponError={couponError}
+          couponValidating={couponValidating}
+          finalAmountLabel={finalAmountLabel}
+          onApplyCoupon={onApplyCoupon}
           onCityChange={onCityChange}
           onCompleteOrder={onCompleteOrder}
+          onCouponCodeChange={onCouponCodeChange}
           onCountryChange={onCountryChange}
           onEmailChange={onEmailChange}
           onFullNameChange={onFullNameChange}
@@ -332,6 +394,11 @@ export const CheckoutLanding = (): JSX.Element => {
   const [city, setCity] = useState("");
   const [loading, setLoading] = useState(false);
   const [redirectNotice, setRedirectNotice] = useState<{ paymentId: string; challengeName: string } | null>(null);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [couponValidating, setCouponValidating] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -361,6 +428,39 @@ export const CheckoutLanding = (): JSX.Element => {
   const challengeLabel = plan ? `${plan.name.toUpperCase()} CHALLENGE` : "CHALLENGE";
   const accountSizeLabel = formatAccountSize(plan?.balance);
 
+  const finalAmount = couponApplied && plan ? plan.fee * (1 - couponDiscount / 100) : plan?.fee;
+  const finalAmountLabel = formatAmount(finalAmount);
+
+  const handleApplyCoupon = async () => {
+    const trimmed = couponCode.trim();
+    if (!trimmed || !user) return;
+    setCouponValidating(true);
+    setCouponError(null);
+    try {
+      const res = await api.validateCoupon(user.id, trimmed);
+      if (res.valid && res.discountPercent) {
+        setCouponDiscount(res.discountPercent);
+        setCouponApplied(true);
+        setCouponError(null);
+      } else {
+        setCouponApplied(false);
+        setCouponDiscount(0);
+        const msg = res.message || "";
+        if (msg.toLowerCase().includes("already")) {
+          setCouponError(t("checkout.coupon_used"));
+        } else {
+          setCouponError(t("checkout.coupon_invalid"));
+        }
+      }
+    } catch {
+      setCouponApplied(false);
+      setCouponDiscount(0);
+      setCouponError(t("checkout.coupon_invalid"));
+    } finally {
+      setCouponValidating(false);
+    }
+  };
+
   const handleCompleteOrder = async () => {
     if (!plan || !user) {
       alert(`Cannot create order: ${!plan ? "Plan not found" : "User not logged in"}`);
@@ -387,6 +487,7 @@ export const CheckoutLanding = (): JSX.Element => {
         country: normalizedCountry,
         city: normalizedCity,
         paymentMethod,
+        ...(couponApplied ? { couponCode: couponCode.trim() } : {}),
       });
 
       const paymentUrl =
@@ -516,8 +617,15 @@ export const CheckoutLanding = (): JSX.Element => {
                 country={country}
                 email={email}
                 fullName={fullName}
+                couponCode={couponCode}
+                couponApplied={couponApplied}
+                couponDiscount={couponDiscount}
+                couponError={couponError}
+                couponValidating={couponValidating}
                 onCityChange={setCity}
                 onCountryChange={setCountry}
+                onCouponCodeChange={setCouponCode}
+                onApplyCoupon={handleApplyCoupon}
                 onEmailChange={setEmail}
                 onFullNameChange={setFullName}
                 onNext={() => setMobileStep(2)}
@@ -527,6 +635,9 @@ export const CheckoutLanding = (): JSX.Element => {
                 accountSizeLabel={accountSizeLabel}
                 amountLabel={amountLabel}
                 challengeLabel={challengeLabel}
+                couponApplied={couponApplied}
+                couponDiscount={couponDiscount}
+                finalAmountLabel={finalAmountLabel}
                 loading={loading}
                 onCompleteOrder={handleCompleteOrder}
                 plan={plan}
@@ -542,8 +653,16 @@ export const CheckoutLanding = (): JSX.Element => {
         email={email}
         fullName={fullName}
         loading={loading}
+        couponCode={couponCode}
+        couponApplied={couponApplied}
+        couponDiscount={couponDiscount}
+        couponError={couponError}
+        couponValidating={couponValidating}
+        finalAmountLabel={finalAmountLabel}
+        onApplyCoupon={handleApplyCoupon}
         onCityChange={setCity}
         onCompleteOrder={handleCompleteOrder}
+        onCouponCodeChange={setCouponCode}
         onCountryChange={setCountry}
         onEmailChange={setEmail}
         onFullNameChange={setFullName}

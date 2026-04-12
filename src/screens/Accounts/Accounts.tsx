@@ -27,9 +27,8 @@ const NeedAssistance = () => {
   return (
   <div className="mt-4 min-[375px]:mt-5 md:mt-auto md:pt-6 lg:pt-8 rounded-xl md:rounded-2xl border border-[#163e4a]/40 bg-[#08141c]/60 p-3 min-[375px]:p-4 md:p-6 lg:p-8">
     <p className="mb-2 min-[375px]:mb-3 md:mb-4 lg:mb-5 text-[10px] min-[375px]:text-xs md:text-sm lg:text-base text-gray-400">{t("sidebar.need_assistance")}</p>
-    <div className="grid grid-cols-2 gap-2 min-[375px]:gap-3 md:gap-4 lg:gap-5">
-      <button className="h-9 min-[375px]:h-10 md:h-12 lg:h-16 rounded-xl md:rounded-2xl bg-[#00FFA3] text-[10px] min-[375px]:text-xs md:text-sm lg:text-base font-bold text-black transition-colors hover:bg-[#00e693]">{t("sidebar.contact_support")}</button>
-      <button className="h-9 min-[375px]:h-10 md:h-12 lg:h-16 rounded-xl md:rounded-2xl border border-[#163e4a] bg-[#0b1820] hover:bg-[#132028] text-[10px] min-[375px]:text-xs md:text-sm lg:text-base font-bold text-white transition-colors">{t("sidebar.help")}</button>
+    <div>
+      <button className="w-full h-9 min-[375px]:h-10 md:h-12 lg:h-16 rounded-xl md:rounded-2xl bg-[#00FFA3] text-[10px] min-[375px]:text-xs md:text-sm lg:text-base font-bold text-black transition-colors hover:bg-[#00e693]">{t("sidebar.contact_support")}</button>
     </div>
   </div>
 );};

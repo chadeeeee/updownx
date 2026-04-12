@@ -1097,32 +1097,32 @@ export const ControlPanel = (): JSX.Element => {
           {/* Tab Content */}
           <div className="overflow-x-auto">
             {bottomTab === "positions" && (<>
-              <div className="grid grid-cols-7 gap-1 px-3 min-[375px]:px-4 md:px-6 py-1.5 border-b border-white/5 min-w-[560px]">
-                {[t("trading.size"),t("trading.entry_price"),t("trading.mark_price"),t("trading.liq_price"),t("trading.margin_ratio"),t("trading.pnl_roe"),""].map(c => <span key={c} className="text-[6px] min-[375px]:text-[7px] md:text-[9px] text-[#A6B2C8] font-semibold tracking-[0.5px] uppercase">{c}</span>)}
+              <div className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_auto] gap-2 min-[375px]:gap-3 md:gap-4 px-3 min-[375px]:px-4 md:px-6 py-1.5 border-b border-white/5 min-w-[560px]">
+                {[t("trading.size"),t("trading.entry_price"),t("trading.mark_price"),t("trading.liq_price"),t("trading.margin_ratio"),t("trading.pnl_roe"),""].map(c => <span key={c} className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-[#A6B2C8] font-semibold tracking-[0.5px] uppercase">{c}</span>)}
               </div>
               {positions.length ? positions.map(pos => {
                 const mark = priceMap[pos.pair]||pos.entryPrice;
                 const pnl = calcPnl(pos, mark);
                 const roe = (pnl/pos.margin)*100;
                 const up = pnl>=0;
-                return <div key={pos.id} className="grid grid-cols-7 gap-1 py-1.5 px-3 min-[375px]:px-4 md:px-6 border-b border-white/5 items-center min-w-[560px]">
+                return <div key={pos.id} className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_auto] gap-2 min-[375px]:gap-3 md:gap-4 py-1.5 px-3 min-[375px]:px-4 md:px-6 border-b border-white/5 items-center min-w-[560px]">
                   <span className={`text-[7px] min-[375px]:text-[8px] md:text-[10px] font-bold ${pos.side==="long"?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>${fmt(pos.sizeUsdt)}</span>
                   <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-white font-mono">{fmt(pos.entryPrice)}</span>
                   <span className={`text-[7px] min-[375px]:text-[8px] md:text-[10px] font-mono ${up?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{fmt(mark)}</span>
                   <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-[#ff9500] font-mono">{fmt(pos.liqPrice)}</span>
                   <span className={`text-[7px] min-[375px]:text-[8px] md:text-[10px] text-white font-mono`}>${fmt(pos.margin)}</span>
                   <span className={`text-[7px] min-[375px]:text-[8px] md:text-[10px] font-bold ${up?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{up?"+":""}{pnl.toFixed(2)} ({up?"+":""}{roe.toFixed(2)}%)</span>
-                  <div className="flex flex-col items-start gap-1">
+                  <div className="flex items-center gap-1.5 min-[375px]:gap-2 md:gap-2.5 pl-2 min-[375px]:pl-3 md:pl-4">
                     <button
                       onClick={() => openTpSlModal(pos)}
-                      className="inline-flex items-center gap-0.5 text-[6px] min-[375px]:text-[7px] font-bold text-[#00ffa3] bg-[#09231c] px-1.5 py-0.5 rounded border border-[#00ffa3]/30 cursor-pointer w-fit"
+                      className="inline-flex items-center gap-0.5 min-[375px]:gap-1 text-[7px] min-[375px]:text-[8px] md:text-[10px] font-bold text-[#00ffa3] bg-[#09231c] hover:bg-[#0d2d23] px-2 min-[375px]:px-2.5 md:px-3 py-1 min-[375px]:py-1.5 md:py-1.5 rounded min-[375px]:rounded-md border border-[#00ffa3]/30 cursor-pointer transition-colors whitespace-nowrap"
                     >
-                      <Plus className="w-2.5 h-2.5" />
+                      <Plus className="w-2.5 h-2.5 min-[375px]:w-3 min-[375px]:h-3" />
                       {t("trading.add")}
                     </button>
-                    <button onClick={() => closePosition(pos.id)} className="text-[6px] min-[375px]:text-[7px] font-bold text-white bg-[#ff4d4d] hover:bg-[#ff6b6b] px-1.5 py-0.5 rounded border-none cursor-pointer w-fit transition-colors">{t("trading.close")}</button>
+                    <button onClick={() => closePosition(pos.id)} className="text-[7px] min-[375px]:text-[8px] md:text-[10px] font-bold text-white bg-[#ff4d4d] hover:bg-[#ff6b6b] px-2 min-[375px]:px-2.5 md:px-3 py-1 min-[375px]:py-1.5 md:py-1.5 rounded min-[375px]:rounded-md border-none cursor-pointer transition-colors whitespace-nowrap">{t("trading.close")}</button>
                     {(pos.takeProfit != null || pos.stopLoss != null) && (
-                      <span className="text-[6px] min-[375px]:text-[7px] text-gray-400 leading-tight">
+                      <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-400 leading-tight whitespace-nowrap">
                         TP: {pos.takeProfit != null ? fmt(pos.takeProfit) : "—"} / SL: {pos.stopLoss != null ? fmt(pos.stopLoss) : "—"}
                       </span>
                     )}
