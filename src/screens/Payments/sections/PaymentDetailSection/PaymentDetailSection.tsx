@@ -1,21 +1,31 @@
 import type { PaymentRecord } from "../../../../lib/api";
+import { useTranslation } from "../../../../lib/i18n";
 
 type StatusStyle = { bg: string; border: string; dot: string; text: string };
 
 const STATUS_CONFIG: Record<string, StatusStyle> = {
   COMPLETED: { bg: "bg-[#00ffa3]/10", border: "border-[#00ffa3]/20", dot: "bg-[#00ffa3]", text: "text-[#00ffa3]" },
   PENDING: { bg: "bg-yellow-500/10", border: "border-yellow-500/20", dot: "bg-yellow-500", text: "text-yellow-500" },
+  FAILED: { bg: "bg-red-500/10", border: "border-red-500/20", dot: "bg-red-500", text: "text-red-500" },
   CANCELLED: { bg: "bg-red-500/10", border: "border-red-500/20", dot: "bg-red-500", text: "text-red-500" },
   default: { bg: "bg-gray-500/10", border: "border-gray-500/20", dot: "bg-gray-500", text: "text-gray-500" },
 };
 
-const renderStatusBadge = (status: string) => {
+const STATUS_KEYS: Record<string, string> = {
+  COMPLETED: "payments.completed",
+  PENDING: "payments.pending",
+  FAILED: "payments.failed",
+  CANCELLED: "payments.cancelled",
+};
+
+const StatusBadge = ({ status }: { status: string }) => {
+  const { t } = useTranslation();
   const config = STATUS_CONFIG[status] || STATUS_CONFIG.default;
 
   return (
     <div className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 ${config.bg} ${config.border}`}>
       <span className={`h-2.5 w-2.5 rounded-full ${config.dot}`} />
-      <span className={`text-xs font-bold tracking-[0.12em] ${config.text}`}>{status}</span>
+      <span className={`text-xs font-bold tracking-[0.12em] ${config.text}`}>{STATUS_KEYS[status] ? t(STATUS_KEYS[status]) : status}</span>
     </div>
   );
 };
@@ -31,10 +41,12 @@ export const PaymentDetailSection = ({
   loading,
   payment,
 }: PaymentDetailSectionProps): JSX.Element => {
+  const { t } = useTranslation();
+
   if (loading) {
     return (
       <div className="rounded-3xl border border-white/5 bg-[#0b0f14] p-6 text-sm text-gray-400">
-        Loading payment details...
+        {t("payments.detail_loading")}
       </div>
     );
   }
@@ -50,7 +62,7 @@ export const PaymentDetailSection = ({
   if (!payment) {
     return (
       <div className="rounded-3xl border border-white/5 bg-[#0b0f14] p-6 text-sm text-gray-400">
-        Payment not found.
+        {t("payments.detail_not_found")}
       </div>
     );
   }
@@ -64,11 +76,11 @@ export const PaymentDetailSection = ({
         {/* Header with title and status on the same line */}
         <div className="flex items-center justify-between gap-4 mb-8">
           <div className="space-y-2">
-            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-500">Payment Details</p>
-            <h2 className="text-2xl font-bold text-white sm:text-3xl">{payment.challenge_name.toUpperCase()} CHALLENGE</h2>
+            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-500">{t("payments.detail_title")}</p>
+            <h2 className="text-2xl font-bold text-white sm:text-3xl">{payment.challenge_name.toUpperCase()} {t("payments.challenge")}</h2>
           </div>
 
-          <div className="flex items-center gap-3 self-end mb-1">{renderStatusBadge(statusLabel)}</div>
+          <div className="flex items-center gap-3 self-end mb-1"><StatusBadge status={statusLabel} /></div>
         </div>
 
         {/* Thank you message */}
@@ -79,14 +91,14 @@ export const PaymentDetailSection = ({
               <polyline points="22 4 12 14.01 9 11.01" />
             </svg>
           </div>
-          <h3 className="text-xl font-bold text-white tracking-[-0.2px]">Thank you for your payment!</h3>
-          <p className="text-sm text-gray-400">Your payment has been processed successfully.</p>
+          <h3 className="text-xl font-bold text-white tracking-[-0.2px]">{t("payments.detail_thank_you")}</h3>
+          <p className="text-sm text-gray-400">{t("payments.detail_success")}</p>
         </div>
 
         {/* Payment ID */}
         <div className="rounded-2xl border border-white/5 bg-[#08141c] p-5">
           <div className="flex items-center justify-between gap-4 text-sm text-white">
-            <span className="text-gray-400">Payment ID</span>
+            <span className="text-gray-400">{t("payments.payment_id")}</span>
             <span className="break-all text-right font-mono font-semibold">{nowPaymentsId}</span>
           </div>
         </div>

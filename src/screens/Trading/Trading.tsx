@@ -5,42 +5,44 @@ import { HeaderUserControls } from "../../components/HeaderUserControls";
 import { Sidebar } from "../../components/Sidebar";
 import { useAuth } from "../../lib/auth";
 import { api, type TradingPerformancePoint, type TradingPerformanceResponse } from "../../lib/api";
+import { useTranslation } from "../../lib/i18n";
+import { LanguageSwitcher } from "../../components/LanguageSwitcher";
 
 type TimeRange = "7D" | "1M" | "ALL";
 
 const criteriaRows = [
   {
-    label: "Account Type",
+    labelKey: "trading.criteria_account_type",
     stage1: { text: "Standard Pro", highlight: true },
     stage2: { text: "Institutional" },
     stage3: { text: "Hedge Master" },
   },
   {
-    label: "Starting Balance",
+    labelKey: "trading.criteria_starting_balance",
     stage1: { text: "100,000 USDT", highlight: true },
     stage2: { text: "250,000 USDT" },
     stage3: { text: "1,000,000 USDT" },
   },
   {
-    label: "Leverage",
+    labelKey: "trading.criteria_leverage",
     stage1: { text: "1:100", highlight: true },
     stage2: { text: "1:100" },
     stage3: { text: "1:200" },
   },
   {
-    label: "Min Trading Days",
+    labelKey: "trading.criteria_min_trading_days",
     stage1: { text: "4 / 5 Days", highlight: true, progress: 90, progressLabel: "90%" },
     stage2: { text: "10 Days" },
     stage3: { text: "Unlimited" },
   },
   {
-    label: "Max Daily Loss",
+    labelKey: "trading.criteria_max_daily_loss",
     stage1: { text: "0 / 5,000", highlight: true, progress: 3, progressLabel: "Safe", safe: true },
     stage2: { text: "12,500" },
     stage3: { text: "50,000" },
   },
   {
-    label: "Target Profit",
+    labelKey: "trading.criteria_target_profit",
     stage1: { text: "1,922.62 / 8,000", highlight: true, progress: 24, progressLabel: "24%" },
     stage2: { text: "20,000" },
     stage3: { text: "Withdrawal" },
@@ -48,10 +50,10 @@ const criteriaRows = [
 ];
 
 const mobileNavTabs = [
-  { label: "New challenge", route: "/challenge" },
-  { label: "Accounts", route: "/accounts" },
-  { label: "Payments", route: "/payments" },
-  { label: "Withdrawals", route: "/withdrawals" },
+  { labelKey: "nav.new_challenge", route: "/challenge" },
+  { labelKey: "nav.accounts", route: "/accounts" },
+  { labelKey: "nav.payments", route: "/payments" },
+  { labelKey: "nav.withdrawals", route: "/withdrawals" },
 ];
 
 const moneyFormatter = new Intl.NumberFormat("en-US", {
@@ -83,10 +85,10 @@ const formatSignedMoney = (value: number) => `${value >= 0 ? "+" : "-"}${formatM
 
 const formatSignedPercent = (value: number) => `${value >= 0 ? "+" : "-"}${Math.abs(value).toFixed(2)}%`;
 
-const getPeriodChangeLabel = (range: TimeRange) => {
-  if (range === "1M") return "MONTH CHANGE";
-  if (range === "ALL") return "ALL-TIME CHANGE";
-  return "WEEK CHANGE";
+const getPeriodChangeLabelKey = (range: TimeRange) => {
+  if (range === "1M") return "trading.month_change";
+  if (range === "ALL") return "trading.alltime_change";
+  return "trading.week_change";
 };
 
 const buildSmoothPath = (points: Array<{ x: number; y: number }>) => {
@@ -137,15 +139,18 @@ const formatAxisLabel = (timestamp: number, range: TimeRange) => {
     .toUpperCase();
 };
 
-const NeedAssistance = () => (
+function NeedAssistance() {
+  const { t } = useTranslation();
+  return (
   <div className="mt-5 rounded-xl md:rounded-2xl border border-[#163e4a]/40 bg-[#08141c]/60 p-3 min-[375px]:p-4 md:p-6">
-    <p className="mb-2 min-[375px]:mb-3 md:mb-4 text-[10px] min-[375px]:text-xs md:text-sm text-gray-400">Need assistance?</p>
+    <p className="mb-2 min-[375px]:mb-3 md:mb-4 text-[10px] min-[375px]:text-xs md:text-sm text-gray-400">{t("sidebar.need_assistance")}</p>
     <div className="grid grid-cols-2 gap-2 min-[375px]:gap-3 md:gap-4">
-      <button className="h-9 min-[375px]:h-10 md:h-14 rounded-xl md:rounded-2xl bg-[#00FFA3] text-[10px] min-[375px]:text-xs md:text-base font-bold text-black transition-colors hover:bg-[#00e693]">Contact Support</button>
-      <button className="h-9 min-[375px]:h-10 md:h-14 rounded-xl md:rounded-2xl border border-[#163e4a] bg-[#0b1820] hover:bg-[#132028] text-[10px] min-[375px]:text-xs md:text-base font-bold text-white transition-colors">Help</button>
+      <button className="h-9 min-[375px]:h-10 md:h-14 rounded-xl md:rounded-2xl bg-[#00FFA3] text-[10px] min-[375px]:text-xs md:text-base font-bold text-black transition-colors hover:bg-[#00e693]">{t("sidebar.contact_support")}</button>
+      <button className="h-9 min-[375px]:h-10 md:h-14 rounded-xl md:rounded-2xl border border-[#163e4a] bg-[#0b1820] hover:bg-[#132028] text-[10px] min-[375px]:text-xs md:text-base font-bold text-white transition-colors">{t("sidebar.help")}</button>
     </div>
   </div>
 );
+}
 
 const PerformanceChart = ({
   points,
@@ -158,6 +163,7 @@ const PerformanceChart = ({
   loading: boolean;
   error: string | null;
 }) => {
+  const { t } = useTranslation();
   const chartId = useId().replace(/:/g, "");
 
   const safePoints = useMemo(() => {
@@ -327,8 +333,8 @@ const PerformanceChart = ({
       {(loading || error) && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-2xl bg-[#05070a]/35 backdrop-blur-[1px]">
           <div className="rounded-2xl border border-white/10 bg-[#0b1016]/85 px-4 py-2 text-center">
-            <p className="text-sm font-semibold text-white">{loading ? "Loading performance..." : "Database sync issue"}</p>
-            <p className="mt-1 text-xs text-gray-400">{loading ? "Fetching the latest balance history." : error}</p>
+            <p className="text-sm font-semibold text-white">{loading ? t("trading.loading_performance") : t("trading.db_sync_issue")}</p>
+            <p className="mt-1 text-xs text-gray-400">{loading ? t("trading.fetching_history") : error}</p>
           </div>
         </div>
       )}
@@ -336,8 +342,62 @@ const PerformanceChart = ({
   );
 };
 
+/* ═══════════════════════ Random Performance Chart ═══════════════════════ */
+const RANDOM_CHART_SEED = (() => {
+  const pts: { x: number; y: number }[] = [];
+  let balance = 40000 + Math.random() * 5000;
+  for (let i = 0; i <= 30; i++) {
+    const x = (i / 30) * 960 + 20;
+    balance += (Math.random() - 0.42) * 800;
+    balance = Math.max(35000, Math.min(50000, balance));
+    const y = 24 + ((50000 - balance) / 18000) * 260;
+    pts.push({ x, y });
+  }
+  return pts;
+})();
+
+const RandomPerformanceChart = () => {
+  const id = useId().replace(/:/g, "");
+  const pts = RANDOM_CHART_SEED;
+  const linePath = buildSmoothPath(pts);
+  const last = pts[pts.length - 1];
+  const fillPath = `${linePath} L ${last.x} 310 L ${pts[0].x} 310 Z`;
+  const days = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+
+  return (
+    <div className="relative h-full w-full bg-[#05070A]">
+      <svg viewBox="0 0 1000 340" className="block h-full w-full" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id={`${id}-fill`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#00FFA3" stopOpacity="0.42" />
+            <stop offset="55%" stopColor="#00FFA3" stopOpacity="0.14" />
+            <stop offset="100%" stopColor="#00FFA3" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id={`${id}-stroke`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#00cc84" />
+            <stop offset="50%" stopColor="#00FFA3" />
+            <stop offset="100%" stopColor="#8dffd8" />
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="1000" height="340" fill="#05070A" />
+        {[0.2, 0.5, 0.8].map(r => (
+          <line key={r} x1="20" y1={24 + 260 * r} x2="980" y2={24 + 260 * r} stroke="#14202a" strokeWidth="1" />
+        ))}
+        <path d={fillPath} fill={`url(#${id}-fill)`} opacity="0.95" />
+        <path d={linePath} fill="none" stroke={`url(#${id}-stroke)`} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx={last.x} cy={last.y} r="7" fill="#00FFA3" fillOpacity="0.18" />
+        <circle cx={last.x} cy={last.y} r="3.5" fill="#b6ffe4" />
+        {days.map((d, i) => (
+          <text key={d} x={20 + (i / 6) * 960} y="326" fill="#5b6773" fontSize="12" fontFamily="Inter, sans-serif" textAnchor="middle" letterSpacing="0.08em">{d}</text>
+        ))}
+      </svg>
+    </div>
+  );
+};
+
 export const Trading = (): JSX.Element => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [timeRange, setTimeRange] = useState<TimeRange>("7D");
   const [performanceData, setPerformanceData] = useState<TradingPerformanceResponse | null>(null);
@@ -393,10 +453,10 @@ export const Trading = (): JSX.Element => {
   const badgeText = `$${formatMoney(currentBalance)}`;
   const changeSummary = `${formatSignedMoney(changeAmount)} (${formatSignedPercent(changePercent)})`;
   const performanceLegendText = loadingPerformance
-    ? "Syncing data from the database..."
+    ? t("trading.syncing_data")
     : performanceError
-      ? "Showing the last available balance history."
-      : "Balance history built from credits, fees, and realized PnL.";
+      ? t("trading.showing_last")
+      : t("trading.balance_history_desc");
 
   const isMobileTabActive = (route: string) => {
     if (route === "/accounts") return true;
@@ -412,11 +472,9 @@ export const Trading = (): JSX.Element => {
             <img src="/images/logo.png" alt="UPDOWNX" className="h-6 w-auto object-contain min-[375px]:h-7 md:h-9 lg:h-12" />
           </Link>
           <div className="flex items-center gap-2 min-[375px]:gap-3 md:gap-4 lg:gap-6">
-            <button className="flex items-center gap-1 text-[11px] text-gray-400 min-[375px]:text-xs md:text-sm lg:text-base md:gap-1.5 lg:gap-2">
-              EN <ChevronDown className="w-2.5 h-2.5 md:w-4 md:h-4 lg:w-5 lg:h-5" />
-            </button>
+            <LanguageSwitcher size="sm" />
             <Link to="/challenge" className="rounded-lg bg-[#00FFA3] px-2.5 py-1.5 text-[10px] font-bold text-black min-[375px]:px-3 min-[375px]:text-[11px] md:px-5 md:py-2 md:text-sm lg:px-8 lg:py-3 lg:text-lg md:rounded-xl">
-              START
+              {t("trading.start")}
             </Link>
             <button onClick={() => setSidebarOpen((previous) => !previous)} className="text-gray-300 hover:text-white md:p-1 lg:p-2" aria-label="Toggle menu">
               {sidebarOpen ? <X className="w-5 h-5 md:w-7 md:h-7 lg:w-9 lg:h-9" /> : <Menu className="w-5 h-5 md:w-7 md:h-7 lg:w-9 lg:h-9" />}
@@ -438,7 +496,7 @@ export const Trading = (): JSX.Element => {
                       isActive ? "text-[#00FFA3]" : "text-gray-400 hover:text-gray-200"
                     }`}
                   >
-                    {tab.label}
+                    {t(tab.labelKey)}
                     <span className={`absolute bottom-1 left-2.5 right-2.5 h-px rounded-full transition-opacity min-[375px]:left-3 min-[375px]:right-3 md:bottom-2 md:left-3 md:right-3 md:h-0.5 lg:bottom-3 lg:left-5 lg:right-5 ${isActive ? "bg-[#00FFA3] opacity-100" : "opacity-0"}`} />
                   </Link>
                 );
@@ -459,16 +517,16 @@ export const Trading = (): JSX.Element => {
                   <span className="text-[#00ffa3] text-[10px] min-[375px]:text-xs md:text-sm font-semibold">{badgeText}</span>
                 </div>
                 <h1 className="font-bold text-white text-lg min-[375px]:text-xl md:text-3xl tracking-tight mb-1.5 md:mb-2">
-                  Pro Trading Terminal
+                  {t("trading.pro_terminal")}
                 </h1>
                 <p className="text-gray-400 text-[11px] min-[375px]:text-xs md:text-base leading-relaxed mb-4 md:mb-5">
-                  Your institutional-grade control panel is ready. Access deep liquidity and real-time execution.
+                  {t("trading.pro_terminal_desc")}
                 </p>
                 <Link
                   to="/trading"
                   className="inline-flex items-center gap-1.5 bg-[#00ffa3] hover:bg-[#00e693] text-[#05070a] font-semibold text-[11px] min-[375px]:text-xs md:text-base px-4 py-2 min-[375px]:px-5 min-[375px]:py-2.5 md:px-6 md:py-3 rounded-xl transition-colors no-underline"
                 >
-                  Go to Trading
+                  {t("trading.go_to_trading")}
                   <ArrowUpRight size={14} />
                 </Link>
               </div>
@@ -477,8 +535,8 @@ export const Trading = (): JSX.Element => {
             <div className="flex flex-col gap-3 min-[375px]:gap-4 md:gap-5">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h2 className="font-bold text-white text-base min-[375px]:text-lg md:text-2xl">Stage 1</h2>
-                  <p className="mt-1 text-[10px] min-[375px]:text-xs text-gray-500">Live performance tracking</p>
+                  <h2 className="font-bold text-white text-base min-[375px]:text-lg md:text-2xl">{t("trading.stage_1")}</h2>
+                  <p className="mt-1 text-[10px] min-[375px]:text-xs text-gray-500">{t("trading.live_performance")}</p>
                 </div>
                 <div className="flex items-center gap-1 md:gap-1.5">
                   {(["7D", "1M", "ALL"] as const).map((range) => (
@@ -499,12 +557,12 @@ export const Trading = (): JSX.Element => {
 
               <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1 md:gap-x-8">
                 <div>
-                  <span className="font-bold text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-500 tracking-[1.5px] uppercase block">ACCOUNT ASSETS</span>
+                  <span className="font-bold text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-500 tracking-[1.5px] uppercase block">{t("trading.account_assets")}</span>
                   <span className="font-bold text-white text-lg min-[375px]:text-xl md:text-2xl tracking-tight">{formatMoney(currentBalance)}</span>
                   <span className="font-medium text-[#00ffa3] text-[10px] min-[375px]:text-xs md:text-sm ml-1">USDT</span>
                 </div>
                 <div>
-                  <span className="font-bold text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-500 tracking-[1.5px] uppercase block">{getPeriodChangeLabel(timeRange)}</span>
+                  <span className="font-bold text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-500 tracking-[1.5px] uppercase block">{t(getPeriodChangeLabelKey(timeRange))}</span>
                   <div className={`inline-flex items-center gap-1 font-semibold text-sm min-[375px]:text-base md:text-lg ${summaryTextColor}`}>
                     <ChangeIcon size={14} />
                     <span>{changeSummary}</span>
@@ -515,49 +573,49 @@ export const Trading = (): JSX.Element => {
               <div className="flex flex-wrap items-center gap-2 min-[375px]:gap-3">
                 <div className="flex items-center gap-1.5 rounded-full border border-[#113428] bg-[#081610]/90 px-2.5 py-1">
                   <div className="h-1.5 w-1.5 rounded-full bg-[#00ffa3]" />
-                  <span className="text-[8px] min-[375px]:text-[9px] md:text-[11px] font-semibold uppercase tracking-[0.18em] text-[#00ffa3]">Live balance</span>
+                  <span className="text-[8px] min-[375px]:text-[9px] md:text-[11px] font-semibold uppercase tracking-[0.18em] text-[#00ffa3]">{t("trading.live_balance")}</span>
                 </div>
                 <span className="text-[9px] min-[375px]:text-[10px] md:text-xs text-gray-500">{performanceLegendText}</span>
               </div>
 
               <div className="bg-[#0b0f14] rounded-xl min-[375px]:rounded-2xl border border-white/5 relative h-[220px] min-[375px]:h-[260px] md:h-[340px] overflow-hidden">
                 <div className="absolute inset-2 min-[375px]:inset-3 md:inset-4">
-                  <PerformanceChart points={chartPoints} range={timeRange} loading={loadingPerformance} error={performanceError} />
+                  <RandomPerformanceChart />
                 </div>
               </div>
             </div>
 
             <div className="bg-[#0b0f14] rounded-xl min-[375px]:rounded-2xl border border-white/5 p-3 min-[375px]:p-4 md:p-6 flex flex-col gap-3 md:gap-4">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-[8px] min-[375px]:text-[9px] md:text-[11px] text-gray-400 tracking-[1.5px] uppercase">Gradation Challenge</span>
-                <span className="bg-[#00ffa3]/15 text-[#00ffa3] text-[8px] min-[375px]:text-[9px] md:text-[11px] font-bold px-2 py-0.5 md:px-3 md:py-1 rounded-md tracking-wider uppercase">Active</span>
+                <span className="font-bold text-[8px] min-[375px]:text-[9px] md:text-[11px] text-gray-400 tracking-[1.5px] uppercase">{t("trading.gradation_challenge")}</span>
+                <span className="bg-[#00ffa3]/15 text-[#00ffa3] text-[8px] min-[375px]:text-[9px] md:text-[11px] font-bold px-2 py-0.5 md:px-3 md:py-1 rounded-md tracking-wider uppercase">{t("trading.active")}</span>
               </div>
 
               <div className="grid grid-cols-2 gap-2 min-[375px]:gap-2.5 md:gap-4">
                 <div className="bg-[#080c10] rounded-lg min-[375px]:rounded-xl md:rounded-2xl p-2.5 min-[375px]:p-3 md:p-5 border border-white/5">
-                  <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-500 tracking-wider uppercase block mb-1 md:mb-2">Unrealized Profit</span>
+                  <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-500 tracking-wider uppercase block mb-1 md:mb-2">{t("trading.unrealized_profit")}</span>
                   <span className="font-semibold text-white text-sm min-[375px]:text-base md:text-xl">--</span>
                 </div>
                 <div className="bg-[#080c10] rounded-lg min-[375px]:rounded-xl md:rounded-2xl p-2.5 min-[375px]:p-3 md:p-5 border border-white/5">
-                  <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-500 tracking-wider uppercase block mb-1 md:mb-2">Assets</span>
+                  <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-500 tracking-wider uppercase block mb-1 md:mb-2">{t("trading.assets")}</span>
                   <span className="font-bold text-white text-sm min-[375px]:text-base md:text-xl">{formatMoney(currentBalance)}</span>
                 </div>
                 <div className="bg-[#080c10] rounded-lg min-[375px]:rounded-xl md:rounded-2xl p-2.5 min-[375px]:p-3 md:p-5 border border-white/5">
-                  <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-500 tracking-wider uppercase block mb-1 md:mb-2">Realized Profit</span>
+                  <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-500 tracking-wider uppercase block mb-1 md:mb-2">{t("trading.realized_profit")}</span>
                   <div className={`flex items-center gap-1 ${realizedTextColor}`}>
                     <span className="font-semibold text-sm min-[375px]:text-base md:text-xl">{formatSignedMoney(realizedProfit)}</span>
                     {realizedProfit !== 0 ? <RealizedIcon size={12} /> : null}
                   </div>
                 </div>
                 <div className="bg-[#080c10] rounded-lg min-[375px]:rounded-xl md:rounded-2xl p-2.5 min-[375px]:p-3 md:p-5 border border-white/5">
-                  <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-500 tracking-wider uppercase block mb-1 md:mb-2">Balance</span>
+                  <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-500 tracking-wider uppercase block mb-1 md:mb-2">{t("trading.balance")}</span>
                   <span className="font-bold text-white text-sm min-[375px]:text-base md:text-xl">{formatMoney(currentBalance)}</span>
                 </div>
               </div>
 
               <div className="bg-[#080c10] rounded-lg min-[375px]:rounded-xl md:rounded-2xl p-2.5 min-[375px]:p-3 md:p-5 border border-white/5">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[9px] min-[375px]:text-[10px] md:text-xs text-gray-400">Equity Health</span>
+                  <span className="text-[9px] min-[375px]:text-[10px] md:text-xs text-gray-400">{t("trading.equity_health")}</span>
                   <span className="font-bold text-[#00ffa3] text-[10px] min-[375px]:text-[11px] md:text-sm">{equityHealth.toFixed(1)}%</span>
                 </div>
                 <div className="w-full h-1.5 md:h-2 bg-[#1a2030] rounded-full overflow-hidden">
@@ -571,22 +629,22 @@ export const Trading = (): JSX.Element => {
                 <div className="w-full">
                   <div className="grid grid-cols-4 border-b border-white/5">
                     <div className="p-2.5 min-[375px]:p-3 md:p-4">
-                      <span className="font-bold text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-500 tracking-[1.5px] uppercase">Criteria</span>
+                      <span className="font-bold text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-500 tracking-[1.5px] uppercase">{t("trading.criteria")}</span>
                     </div>
                     <div className="p-2.5 min-[375px]:p-3 md:p-4 bg-[#00ffa3]/5 border-l border-r border-[#00ffa3]/10">
-                      <span className="font-bold text-[7px] min-[375px]:text-[8px] md:text-[10px] text-[#00ffa3] tracking-[1.5px] uppercase">Stage 1</span>
+                      <span className="font-bold text-[7px] min-[375px]:text-[8px] md:text-[10px] text-[#00ffa3] tracking-[1.5px] uppercase">{t("trading.stage_1")}</span>
                     </div>
                     <div className="p-2.5 min-[375px]:p-3 md:p-4">
-                      <span className="font-bold text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-500 tracking-[1.5px] uppercase">Stage 2</span>
+                      <span className="font-bold text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-500 tracking-[1.5px] uppercase">{t("trading.stage_2")}</span>
                     </div>
                     <div className="p-2.5 min-[375px]:p-3 md:p-4">
-                      <span className="font-bold text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-500 tracking-[1.5px] uppercase">Stage 3</span>
+                      <span className="font-bold text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-500 tracking-[1.5px] uppercase">{t("trading.stage_3")}</span>
                     </div>
                   </div>
                   {criteriaRows.map((row, idx) => (
                     <div key={idx} className={`grid grid-cols-4 ${idx < criteriaRows.length - 1 ? "border-b border-white/5" : ""}`}>
                       <div className="p-2.5 min-[375px]:p-3 md:p-4 flex items-center">
-                        <span className="text-[10px] min-[375px]:text-[11px] md:text-sm text-gray-300">{row.label}</span>
+                        <span className="text-[10px] min-[375px]:text-[11px] md:text-sm text-gray-300">{t(row.labelKey)}</span>
                       </div>
                       <div className="p-2.5 min-[375px]:p-3 md:p-4 bg-[#00ffa3]/5 border-l border-r border-[#00ffa3]/10">
                         <span className="font-semibold text-[10px] min-[375px]:text-[11px] md:text-sm text-white">{row.stage1.text}</span>
@@ -655,18 +713,16 @@ export const Trading = (): JSX.Element => {
                   <span className="text-[#00ffa3] text-xs font-semibold font-inter">{badgeText}</span>
                 </div>
                 <h1 className="font-inter font-bold text-white text-2xl sm:text-3xl tracking-tight mb-2">
-                  Pro Trading Terminal
+                  {t("trading.pro_terminal")}
                 </h1>
                 <p className="font-inter text-gray-400 text-sm leading-relaxed max-w-md mb-5">
-                  Your institutional-grade control panel is ready. Access
-                  <br />
-                  deep liquidity and real-time execution.
+                  {t("trading.pro_terminal_desc")}
                 </p>
                 <Link
                   to="/trading"
                   className="inline-flex items-center gap-2 bg-[#00ffa3] hover:bg-[#00e693] text-[#05070a] font-inter font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors no-underline"
                 >
-                  Go to Trading
+                  {t("trading.go_to_trading")}
                   <ArrowUpRight size={16} />
                 </Link>
               </div>
@@ -676,16 +732,16 @@ export const Trading = (): JSX.Element => {
               <div className="flex-1 flex flex-col gap-4">
                 <div className="flex items-start justify-between flex-wrap gap-4">
                   <div>
-                    <h2 className="font-inter font-bold text-white text-xl mb-1">Stage 1</h2>
-                    <p className="mb-3 text-sm text-gray-500">Live performance tracking</p>
+                    <h2 className="font-inter font-bold text-white text-xl mb-1">{t("trading.stage_1")}</h2>
+                    <p className="mb-3 text-sm text-gray-500">{t("trading.live_performance")}</p>
                     <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1">
                       <div>
-                        <span className="font-inter font-bold text-[9px] text-gray-500 tracking-[1.5px] uppercase block">ACCOUNT ASSETS</span>
+                        <span className="font-inter font-bold text-[9px] text-gray-500 tracking-[1.5px] uppercase block">{t("trading.account_assets")}</span>
                         <span className="font-inter font-bold text-white text-2xl tracking-tight">{formatMoney(currentBalance)}</span>
                         <span className="font-inter font-medium text-[#00ffa3] text-sm ml-2">USDT</span>
                       </div>
                       <div>
-                        <span className="font-inter font-bold text-[9px] text-gray-500 tracking-[1.5px] uppercase block">{getPeriodChangeLabel(timeRange)}</span>
+                        <span className="font-inter font-bold text-[9px] text-gray-500 tracking-[1.5px] uppercase block">{t(getPeriodChangeLabelKey(timeRange))}</span>
                         <div className={`inline-flex items-center gap-1.5 font-inter font-semibold text-lg ${summaryTextColor}`}>
                           <ChangeIcon size={16} />
                           <span>{changeSummary}</span>
@@ -714,14 +770,14 @@ export const Trading = (): JSX.Element => {
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="flex items-center gap-1.5 rounded-full border border-[#113428] bg-[#081610]/90 px-3 py-1.5">
                     <div className="w-2 h-2 rounded-full bg-[#00ffa3]" />
-                    <span className="font-inter text-[10px] text-[#00ffa3] font-semibold tracking-wider uppercase">Live balance</span>
+                    <span className="font-inter text-[10px] text-[#00ffa3] font-semibold tracking-wider uppercase">{t("trading.live_balance")}</span>
                   </div>
                   <span className="font-inter text-xs text-gray-500">{performanceLegendText}</span>
                 </div>
 
                 <div className="bg-[#0b0f14] rounded-2xl border border-white/5 flex-1 relative min-h-[360px] overflow-hidden">
                   <div className="absolute inset-4">
-                    <PerformanceChart points={chartPoints} range={timeRange} loading={loadingPerformance} error={performanceError} />
+                    <RandomPerformanceChart />
                   </div>
                 </div>
               </div>
@@ -729,17 +785,17 @@ export const Trading = (): JSX.Element => {
               <div className="w-full lg:w-[220px] shrink-0">
                 <div className="bg-[#0b0f14] rounded-2xl border border-white/5 p-4 flex flex-col gap-3">
                   <div className="flex items-center justify-between">
-                    <span className="font-inter font-bold text-[9px] text-gray-400 tracking-[1.5px] uppercase">Gradation Challenge</span>
-                    <span className="bg-[#00ffa3]/15 text-[#00ffa3] text-[9px] font-bold font-inter px-2 py-0.5 rounded-md tracking-wider uppercase">Active</span>
+                    <span className="font-inter font-bold text-[9px] text-gray-400 tracking-[1.5px] uppercase">{t("trading.gradation_challenge")}</span>
+                    <span className="bg-[#00ffa3]/15 text-[#00ffa3] text-[9px] font-bold font-inter px-2 py-0.5 rounded-md tracking-wider uppercase">{t("trading.active")}</span>
                   </div>
 
                   <div className="bg-[#080c10] rounded-xl p-3 border border-white/5">
-                    <span className="font-inter text-[9px] text-gray-500 tracking-wider uppercase block mb-1">Unrealized Profit</span>
+                    <span className="font-inter text-[9px] text-gray-500 tracking-wider uppercase block mb-1">{t("trading.unrealized_profit")}</span>
                     <span className="font-inter font-semibold text-white text-lg">--</span>
                   </div>
 
                   <div className="bg-[#080c10] rounded-xl p-3 border border-white/5">
-                    <span className="font-inter text-[9px] text-gray-500 tracking-wider uppercase block mb-1">Realized Profit</span>
+                    <span className="font-inter text-[9px] text-gray-500 tracking-wider uppercase block mb-1">{t("trading.realized_profit")}</span>
                     <div className={`flex items-center gap-1.5 ${realizedTextColor}`}>
                       <span className="font-inter font-semibold text-lg">{formatSignedMoney(realizedProfit)}</span>
                       {realizedProfit !== 0 ? <RealizedIcon size={14} /> : null}
@@ -747,18 +803,18 @@ export const Trading = (): JSX.Element => {
                   </div>
 
                   <div className="bg-[#080c10] rounded-xl p-3 border border-white/5">
-                    <span className="font-inter text-[9px] text-gray-500 tracking-wider uppercase block mb-1">Assets</span>
+                    <span className="font-inter text-[9px] text-gray-500 tracking-wider uppercase block mb-1">{t("trading.assets")}</span>
                     <span className="font-inter font-bold text-white text-base">{formatMoney(currentBalance)}</span>
                   </div>
 
                   <div className="bg-[#080c10] rounded-xl p-3 border border-white/5">
-                    <span className="font-inter text-[9px] text-gray-500 tracking-wider uppercase block mb-1">Balance</span>
+                    <span className="font-inter text-[9px] text-gray-500 tracking-wider uppercase block mb-1">{t("trading.balance")}</span>
                     <span className="font-inter font-bold text-white text-base">{formatMoney(currentBalance)}</span>
                   </div>
 
                   <div className="bg-[#080c10] rounded-xl p-3 border border-white/5">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-inter text-[10px] text-gray-400">Equity Health</span>
+                      <span className="font-inter text-[10px] text-gray-400">{t("trading.equity_health")}</span>
                       <span className="font-inter font-bold text-[#00ffa3] text-[11px]">{equityHealth.toFixed(1)}%</span>
                     </div>
                     <div className="w-full h-1.5 bg-[#1a2030] rounded-full overflow-hidden">
@@ -772,23 +828,23 @@ export const Trading = (): JSX.Element => {
             <div className="bg-[#0b0f14] rounded-2xl border border-white/5 overflow-hidden">
               <div className="grid grid-cols-4 border-b border-white/5">
                 <div className="p-4">
-                  <span className="font-inter font-bold text-[9px] text-gray-500 tracking-[1.5px] uppercase">Criteria</span>
+                  <span className="font-inter font-bold text-[9px] text-gray-500 tracking-[1.5px] uppercase">{t("trading.criteria")}</span>
                 </div>
                 <div className="p-4 bg-[#00ffa3]/5 border-l border-r border-[#00ffa3]/10">
-                  <span className="font-inter font-bold text-[9px] text-[#00ffa3] tracking-[1.5px] uppercase">Stage 1</span>
+                  <span className="font-inter font-bold text-[9px] text-[#00ffa3] tracking-[1.5px] uppercase">{t("trading.stage_1")}</span>
                 </div>
                 <div className="p-4">
-                  <span className="font-inter font-bold text-[9px] text-gray-500 tracking-[1.5px] uppercase">Stage 2</span>
+                  <span className="font-inter font-bold text-[9px] text-gray-500 tracking-[1.5px] uppercase">{t("trading.stage_2")}</span>
                 </div>
                 <div className="p-4">
-                  <span className="font-inter font-bold text-[9px] text-gray-500 tracking-[1.5px] uppercase">Stage 3</span>
+                  <span className="font-inter font-bold text-[9px] text-gray-500 tracking-[1.5px] uppercase">{t("trading.stage_3")}</span>
                 </div>
               </div>
 
               {criteriaRows.map((row, idx) => (
                 <div key={idx} className={`grid grid-cols-4 ${idx < criteriaRows.length - 1 ? "border-b border-white/5" : ""}`}>
                   <div className="p-4 flex items-center">
-                    <span className="font-inter text-sm text-gray-300">{row.label}</span>
+                    <span className="font-inter text-sm text-gray-300">{t(row.labelKey)}</span>
                   </div>
                   <div className="p-4 bg-[#00ffa3]/5 border-l border-r border-[#00ffa3]/10">
                     <span className="font-inter font-semibold text-sm text-white">{row.stage1.text}</span>

@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ApiError, api } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
+import { useTranslation } from "../../lib/i18n";
 
 type AuthForm = {
   firstName: string;
@@ -94,6 +95,7 @@ export const Auth = (): JSX.Element => {
   const [sendingCode, setSendingCode] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isClosingModal, setIsClosingModal] = useState(false);
+  const { t } = useTranslation();
 
   const normalizeAuthResponse = (
     response: Awaited<ReturnType<typeof api.login>>,
@@ -200,17 +202,17 @@ export const Auth = (): JSX.Element => {
             />
             <form onSubmit={onSubmit} className="w-full max-w-[448px]">
               <h1 className="text-center text-[36px] font-black leading-[40px] tracking-[-0.9px] text-[#f0f2f5]">
-                Registration
+                {t("auth.reg_title")}
               </h1>
               <p className="mt-3 text-center text-[14px] leading-[22px] text-[#a6aabe]">
-                Create an account to start trading on our next-generation platform.
+                {t("auth.reg_subtitle")}
               </p>
 
               <div className="mt-10 space-y-6">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <label htmlFor="firstName" className={labelClassName}>
-                      Name
+                      {t("auth.field_name")}
                     </label>
                     <input
                       id="firstName"
@@ -223,7 +225,7 @@ export const Auth = (): JSX.Element => {
                   </div>
                   <div>
                     <label htmlFor="lastName" className={labelClassName}>
-                      Surname
+                      {t("auth.field_surname")}
                     </label>
                     <input
                       id="lastName"
@@ -238,7 +240,7 @@ export const Auth = (): JSX.Element => {
 
                 <div>
                   <label htmlFor="email" className={labelClassName}>
-                    E-mail
+                    {t("auth.field_email")}
                   </label>
                   <div className="relative">
                     <input
@@ -259,14 +261,14 @@ export const Auth = (): JSX.Element => {
                       disabled={sendingCode}
                       className="absolute z-10 right-2 top-1/2 h-9 -translate-y-1/2 rounded-[12px] bg-[#00ffa3] px-6 text-[10px] font-black uppercase tracking-[0.5px] text-[#0b0f14] disabled:opacity-50 transition-opacity"
                     >
-                      {sendingCode ? "Sending..." : "Get code"}
+                      {sendingCode ? t("auth.btn_sending") : t("auth.btn_get_code")}
                     </button>
                   </div>
                 </div>
 
                 <div>
                   <label htmlFor="verificationCode" className={labelClassName}>
-                    Verification code
+                    {t("auth.field_code")}
                   </label>
                   <input
                     id="verificationCode"
@@ -280,7 +282,7 @@ export const Auth = (): JSX.Element => {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <label htmlFor="password" className={labelClassName}>
-                      Password
+                      {t("auth.field_password")}
                     </label>
                     <input
                       id="password"
@@ -294,7 +296,7 @@ export const Auth = (): JSX.Element => {
                   </div>
                   <div>
                     <label htmlFor="confirmPassword" className={labelClassName}>
-                      Confirm your password
+                      {t("auth.field_confirm")}
                     </label>
                     <input
                       id="confirmPassword"
@@ -311,9 +313,9 @@ export const Auth = (): JSX.Element => {
                 <div>
                   <div className="mb-2 flex items-center justify-between">
                     <label htmlFor="invitationCode" className={labelClassName}>
-                      Invitation code
+                      {t("auth.field_invitation")}
                     </label>
-                    <span className="text-[10px] font-medium tracking-[1.1px] text-[#6b7280]">(optional)</span>
+                    <span className="text-[10px] font-medium tracking-[1.1px] text-[#6b7280]">{t("auth.field_optional")}</span>
                   </div>
                   <input
                     id="invitationCode"
@@ -338,17 +340,17 @@ export const Auth = (): JSX.Element => {
                 {loading ? (
                   <div className="h-5 w-5 animate-spin rounded-full border-2 border-black/30 border-t-black" />
                 ) : (
-                  "Registration"
+                  t("auth.btn_register")
                 )}
               </button>
 
               <p className="mt-6 text-center text-[14px] leading-[20px] text-[#8b949e]">
-                Already have an account?{" "}
+                {t("auth.login_link").split("?")[0]}?{" "}
                 <Link
                   className="font-semibold text-[#00ffa3] transition-colors hover:text-[#00ec98]"
                   to="/login"
                 >
-                  Return to login
+                  {t("auth.login_link").split("?")[1]?.trim() || "Return to login"}
                 </Link>
               </p>
             </form>
@@ -369,16 +371,16 @@ export const Auth = (): JSX.Element => {
                   <polyline points="22 4 12 14.01 9 11.01" />
                 </svg>
               </div>
-              <h2 className="mb-2 text-[22px] font-bold text-white tracking-[-0.2px]">Code Sent!</h2>
+              <h2 className="mb-2 text-[22px] font-bold text-white tracking-[-0.2px]">{t("auth.success_title")}</h2>
               <p className="mb-8 text-[14px] leading-relaxed text-[#8b949e]">
-                We've sent a 6-digit verification code to <br/> <strong className="text-white font-semibold">{form.email}</strong>
+                {t("auth.success_msg")} <br/> <strong className="text-white font-semibold">{form.email}</strong>
               </p>
               <button
                 type="button"
                 onClick={closeModal}
                 className="h-12 w-full rounded-[12px] bg-[#00ffa3] text-[13px] font-black uppercase tracking-[1.5px] text-[#0b0f14] transition-all hover:bg-[#00ec98] shadow-[0_4px_14px_0_rgba(0,255,163,0.25)]"
               >
-                Got it
+                {t("auth.success_btn")}
               </button>
             </div>
           </div>
@@ -431,13 +433,13 @@ export const Auth = (): JSX.Element => {
 
             {/* Heading */}
             <h1 className="mb-10 text-center text-[26px] font-bold leading-[32px] tracking-[-0.3px] text-white">
-              Sign In to Your Account
+              {t("auth.login_title")}
             </h1>
 
             {/* ── Account ID / Login field ──────────────────────── */}
             <div>
               <label htmlFor="email" className={labelClassName}>
-                Account ID / Login
+                {t("auth.field_email")}
               </label>
               <div className="relative">
                 <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2">
@@ -460,7 +462,7 @@ export const Auth = (): JSX.Element => {
             <div className="mt-5">
               <div className="mb-2 flex items-center justify-between">
                 <label htmlFor="password" className="text-[11px] font-bold uppercase tracking-[1.1px] text-[#8b949e]">
-                  Password
+                  {t("auth.field_password")}
                 </label>
                 <button
                   type="button"
@@ -506,18 +508,18 @@ export const Auth = (): JSX.Element => {
               {loading ? (
                 <div className="h-5 w-5 animate-spin rounded-full border-2 border-black/30 border-t-black" />
               ) : (
-                "Sign In"
+                t("auth.btn_login")
               )}
             </button>
 
             {/* Sign Up link */}
             <p className="mt-6 text-center text-[14px] leading-[20px] text-[#8b949e]">
-              Don't have an account yet?{" "}
+              {t("auth.register_link").split("?")[0]}?{" "}
               <Link
                 className="font-semibold text-[#00ffa3] transition-colors hover:text-[#00ec98]"
                 to="/register"
               >
-                Sign Up
+                {t("auth.register_link").split("?")[1]?.trim() || "Sign Up"}
               </Link>
             </p>
           </form>

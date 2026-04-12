@@ -5,30 +5,34 @@ import { NavAccountsSubsection } from "./sections/NavAccountsSubsection";
 import { ChevronDown, Menu, X, ArrowUpRight } from "lucide-react";
 import { ApiError, api, type AppUser, type ActiveChallenge } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
+import { useTranslation } from "../../lib/i18n";
+import { LanguageSwitcher } from "../../components/LanguageSwitcher";
 
 const mobileNavTabs = [
-  { label: "New challenge", route: "/challenge" },
-  { label: "Accounts", route: "/accounts" },
-  { label: "Payments", route: "/payments" },
-  { label: "Withdrawals", route: "/withdrawals" },
+  { labelKey: "nav.new_challenge", route: "/challenge" },
+  { labelKey: "nav.accounts", route: "/accounts" },
+  { labelKey: "nav.payments", route: "/payments" },
+  { labelKey: "nav.withdrawals", route: "/withdrawals" },
 ];
 
-const accountTabs = [
-  { value: "trader", label: "Trader" },
-  { value: "challenge", label: "Challenge" },
-  { value: "will-be-activated", label: "Will be activated" },
-  { value: "failed", label: "Failed" },
+const accountTabKeys = [
+  { value: "trader", labelKey: "accounts.tab_trader" },
+  { value: "challenge", labelKey: "accounts.tab_challenge" },
+  { value: "will-be-activated", labelKey: "accounts.tab_activated" },
+  { value: "failed", labelKey: "accounts.tab_failed" },
 ];
 
-const NeedAssistance = () => (
+const NeedAssistance = () => {
+  const { t } = useTranslation();
+  return (
   <div className="mt-4 min-[375px]:mt-5 md:mt-auto md:pt-6 lg:pt-8 rounded-xl md:rounded-2xl border border-[#163e4a]/40 bg-[#08141c]/60 p-3 min-[375px]:p-4 md:p-6 lg:p-8">
-    <p className="mb-2 min-[375px]:mb-3 md:mb-4 lg:mb-5 text-[10px] min-[375px]:text-xs md:text-sm lg:text-base text-gray-400">Need assistance?</p>
+    <p className="mb-2 min-[375px]:mb-3 md:mb-4 lg:mb-5 text-[10px] min-[375px]:text-xs md:text-sm lg:text-base text-gray-400">{t("sidebar.need_assistance")}</p>
     <div className="grid grid-cols-2 gap-2 min-[375px]:gap-3 md:gap-4 lg:gap-5">
-      <button className="h-9 min-[375px]:h-10 md:h-12 lg:h-16 rounded-xl md:rounded-2xl bg-[#00FFA3] text-[10px] min-[375px]:text-xs md:text-sm lg:text-base font-bold text-black transition-colors hover:bg-[#00e693]">Contact Support</button>
-      <button className="h-9 min-[375px]:h-10 md:h-12 lg:h-16 rounded-xl md:rounded-2xl border border-[#163e4a] bg-[#0b1820] hover:bg-[#132028] text-[10px] min-[375px]:text-xs md:text-sm lg:text-base font-bold text-white transition-colors">Help</button>
+      <button className="h-9 min-[375px]:h-10 md:h-12 lg:h-16 rounded-xl md:rounded-2xl bg-[#00FFA3] text-[10px] min-[375px]:text-xs md:text-sm lg:text-base font-bold text-black transition-colors hover:bg-[#00e693]">{t("sidebar.contact_support")}</button>
+      <button className="h-9 min-[375px]:h-10 md:h-12 lg:h-16 rounded-xl md:rounded-2xl border border-[#163e4a] bg-[#0b1820] hover:bg-[#132028] text-[10px] min-[375px]:text-xs md:text-sm lg:text-base font-bold text-white transition-colors">{t("sidebar.help")}</button>
     </div>
   </div>
-);
+);};
 
 const sameUser = (left: AppUser | null | undefined, right: AppUser | null | undefined) =>
   Boolean(left) &&
@@ -42,6 +46,7 @@ const sameUser = (left: AppUser | null | undefined, right: AppUser | null | unde
 
 /* ─── Challenge Card (Mobile) ─── */
 const ChallengeCardMobile = ({ challenge, navigate }: { challenge: ActiveChallenge; navigate: (path: string) => void }) => {
+  const { t } = useTranslation();
   const accountSuffix = (3830 + challenge.id).toString().padStart(4, "0");
   return (
     <div className="relative rounded-2xl border border-white/5 bg-[linear-gradient(135deg,#0a2118_0%,#05110e_100%)] p-3 min-[375px]:p-4 md:p-6 lg:p-8 overflow-hidden flex flex-col">
@@ -54,7 +59,7 @@ const ChallengeCardMobile = ({ challenge, navigate }: { challenge: ActiveChallen
           <div className="w-full max-w-[260px] min-[375px]:max-w-[300px] md:max-w-[300px] lg:max-w-[420px] h-[150px] min-[375px]:h-[170px] md:h-[190px] lg:h-[260px] rounded-2xl bg-[linear-gradient(135deg,#13161c_0%,#07080a_100%)] border border-white/10 px-4 pt-4 pb-7 min-[375px]:px-5 min-[375px]:pt-5 min-[375px]:pb-8 md:px-6 md:pt-5 md:pb-10 lg:px-8 lg:pt-7 lg:pb-14 flex flex-col justify-between shadow-2xl overflow-hidden shrink-0">
             <span className="font-black italic text-white text-xl min-[375px]:text-2xl md:text-3xl lg:text-4xl tracking-tighter">{challenge.challenge_name.toUpperCase()}</span>
             <div className="flex flex-col">
-              <span className="text-[8px] min-[375px]:text-[9px] md:text-[10px] lg:text-[12px] text-gray-500 font-bold tracking-[0.2em] uppercase">Master Equity</span>
+              <span className="text-[8px] min-[375px]:text-[9px] md:text-[10px] lg:text-[12px] text-gray-500 font-bold tracking-[0.2em] uppercase">{t("accounts.master_equity")}</span>
               <span className="text-white text-xs min-[375px]:text-sm md:text-sm lg:text-lg tracking-[0.4em] mt-1 min-[375px]:mt-1.5 md:mt-2 opacity-80">•••• •••• •••• ••••</span>
               <span className="text-white text-base min-[375px]:text-lg md:text-xl lg:text-2xl font-medium tracking-widest mt-1 min-[375px]:mt-1.5 md:mt-2">{accountSuffix}</span>
             </div>
@@ -62,10 +67,10 @@ const ChallengeCardMobile = ({ challenge, navigate }: { challenge: ActiveChallen
 
           {/* Stage heading */}
           <div className="mt-4 md:mt-0 md:flex-1">
-            <h2 className="text-[28px] min-[375px]:text-[32px] md:text-[40px] lg:text-[56px] font-bold text-white tracking-tight">Stage 1</h2>
+            <h2 className="text-[28px] min-[375px]:text-[32px] md:text-[40px] lg:text-[56px] font-bold text-white tracking-tight">{t("accounts.stage")}</h2>
             <div className="flex items-center gap-1.5 min-[375px]:gap-2 mt-1 md:mt-2 lg:mt-3">
               <div className="w-1.5 h-1.5 min-[375px]:w-2 min-[375px]:h-2 md:w-2.5 md:h-2.5 lg:w-3 lg:h-3 rounded-full bg-[#00FFA3] shadow-[0_0_8px_#00ffa3]" />
-              <span className="text-[10px] min-[375px]:text-[11px] md:text-[14px] lg:text-[17px] font-bold text-[#00FFA3] uppercase tracking-[0.1em]">STATUS: CHALLENGE</span>
+              <span className="text-[10px] min-[375px]:text-[11px] md:text-[14px] lg:text-[17px] font-bold text-[#00FFA3] uppercase tracking-[0.1em]">{t("accounts.status_challenge")}</span>
             </div>
           </div>
         </div>
@@ -73,15 +78,15 @@ const ChallengeCardMobile = ({ challenge, navigate }: { challenge: ActiveChallen
         {/* Balance items */}
         <div className="flex flex-col gap-2 min-[375px]:gap-3 md:flex-row md:gap-6 lg:gap-10">
           <div>
-            <span className="text-[9px] min-[375px]:text-[10px] md:text-[12px] lg:text-[15px] font-medium text-gray-400 uppercase tracking-[0.08em] block mb-0.5 md:mb-1">Start Balance</span>
+            <span className="text-[9px] min-[375px]:text-[10px] md:text-[12px] lg:text-[15px] font-medium text-gray-400 uppercase tracking-[0.08em] block mb-0.5 md:mb-1">{t("accounts.start_balance")}</span>
             <span className="text-[17px] min-[375px]:text-[19px] md:text-[24px] lg:text-[32px] font-medium text-white tracking-tight">{challenge.balance.toLocaleString("en-US", { minimumFractionDigits: 2 })} USDT</span>
           </div>
           <div>
-            <span className="text-[9px] min-[375px]:text-[10px] md:text-[12px] lg:text-[15px] font-medium text-gray-400 uppercase tracking-[0.08em] block mb-0.5 md:mb-1">End of Period</span>
-            <span className="text-[17px] min-[375px]:text-[19px] md:text-[24px] lg:text-[32px] font-medium text-white tracking-tight">Unlimited</span>
+            <span className="text-[9px] min-[375px]:text-[10px] md:text-[12px] lg:text-[15px] font-medium text-gray-400 uppercase tracking-[0.08em] block mb-0.5 md:mb-1">{t("accounts.end_period")}</span>
+            <span className="text-[17px] min-[375px]:text-[19px] md:text-[24px] lg:text-[32px] font-medium text-white tracking-tight">{t("accounts.unlimited")}</span>
           </div>
           <div>
-            <span className="text-[9px] min-[375px]:text-[10px] md:text-[12px] lg:text-[15px] font-medium text-gray-400 uppercase tracking-[0.08em] block mb-0.5 md:mb-1">Purchased</span>
+            <span className="text-[9px] min-[375px]:text-[10px] md:text-[12px] lg:text-[15px] font-medium text-gray-400 uppercase tracking-[0.08em] block mb-0.5 md:mb-1">{t("accounts.purchased")}</span>
             <span className="text-[17px] min-[375px]:text-[19px] md:text-[24px] lg:text-[32px] font-medium text-white tracking-tight">{new Date(challenge.created_at).toLocaleDateString()}</span>
           </div>
         </div>
@@ -92,13 +97,13 @@ const ChallengeCardMobile = ({ challenge, navigate }: { challenge: ActiveChallen
             onClick={() => navigate("/trading")}
             className="flex-1 h-11 min-[375px]:h-12 md:h-14 lg:h-16 flex items-center justify-center rounded-xl md:rounded-2xl bg-[#00FFA3] hover:bg-[#00e693] text-[13px] min-[375px]:text-[14px] md:text-[16px] lg:text-[18px] font-bold text-black transition-colors"
           >
-            Trade
+            {t("accounts.trade")}
           </button>
           <button
             onClick={() => navigate("/control-panel")}
             className="flex-1 h-11 min-[375px]:h-12 md:h-14 lg:h-16 flex items-center justify-center rounded-xl md:rounded-2xl border border-white/10 bg-[#131f1c] hover:bg-[#1a2824] text-[13px] min-[375px]:text-[14px] md:text-[16px] lg:text-[18px] font-medium text-white transition-colors"
           >
-            Control Panel
+            {t("accounts.control_panel")}
           </button>
         </div>
       </div>
@@ -107,23 +112,27 @@ const ChallengeCardMobile = ({ challenge, navigate }: { challenge: ActiveChallen
 };
 
 /* ─── Empty state ─── */
-const NoChallenges = ({ navigate }: { navigate: (path: string) => void }) => (
+const NoChallenges = ({ navigate }: { navigate: (path: string) => void }) => {
+  const { t } = useTranslation();
+  return (
   <div className="relative rounded-2xl border border-white/5 bg-[linear-gradient(135deg,#0a1a14_0%,#0b0f14_100%)] p-6 min-[375px]:p-8 md:p-10 overflow-hidden flex flex-col items-center justify-center gap-4 min-h-[200px]">
     <div className="text-center">
-      <h3 className="text-white text-lg min-[375px]:text-xl md:text-2xl font-bold mb-2">No Active Challenges</h3>
-      <p className="text-gray-400 text-xs min-[375px]:text-sm md:text-base mb-4">Purchase a challenge to start trading and see it here.</p>
+      <h3 className="text-white text-lg min-[375px]:text-xl md:text-2xl font-bold mb-2">{t("accounts.no_challenges_title")}</h3>
+      <p className="text-gray-400 text-xs min-[375px]:text-sm md:text-base mb-4">{t("accounts.no_challenges_sub")}</p>
       <button
         onClick={() => navigate("/challenge")}
         className="inline-flex items-center gap-2 bg-[#00ffa3] hover:bg-[#00e693] text-[#05070a] font-bold text-sm px-6 py-3 rounded-xl transition-colors border-none cursor-pointer"
       >
-        Get a Challenge
+        {t("accounts.get_challenge")}
         <ArrowUpRight size={16} />
       </button>
     </div>
   </div>
-);
+);};
 
-const WillBeActivatedState = () => (
+const WillBeActivatedState = () => {
+  const { t } = useTranslation();
+  return (
   <section className="relative z-10 mx-auto flex w-full max-w-[620px] flex-col items-center px-5 text-center">
     <div className="mb-4 flex h-[120px] w-[180px] items-end justify-center gap-1.5 rounded-2xl bg-gradient-to-b from-[#0e3d43]/80 to-[#082a30]/60 p-5 shadow-[0_8px_32px_rgba(0,255,163,0.08)]">
       <div className="h-[50px] w-[14px] rounded-sm bg-[#00ffa3]/70" />
@@ -152,28 +161,26 @@ const WillBeActivatedState = () => (
       <path d="M37 23L39 25" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
 
-    <h1 className="text-[42px] font-bold leading-tight tracking-tight">
-      Sorry, this page is available
-      <br />
-      only to traders.
+    <h1 className="text-[42px] font-bold leading-tight tracking-tight whitespace-pre-line">
+      {t("accounts.not_available_title")}
     </h1>
 
-    <p className="mt-4 max-w-[460px] text-base leading-relaxed text-[#6e8188]">
-      Traders are individuals who have successfully completed the Evaluation
-      Process and manage a Hash Updown trading account.
+    <p className="mt-4 max-w-[460px] text-base leading-relaxed text-[#6e8188] whitespace-pre-line">
+      {t("accounts.not_available_desc")}
     </p>
 
     <Link
       to="/challenge"
       className="mt-10 inline-block rounded-xl bg-[#00FFA3] px-10 py-3.5 text-lg font-bold text-black transition-all hover:bg-[#00e895] hover:shadow-[0_0_20px_rgba(0,255,163,0.3)]"
     >
-      New challenge
+      {t("page.new_challenge")}
     </Link>
   </section>
-);
+);};
 
 /* ─── Desktop Challenge Card ─── */
 const DesktopChallengeCard = ({ challenge, navigate }: { challenge: ActiveChallenge; navigate: (path: string) => void }) => {
+  const { t } = useTranslation();
   const accountSuffix = (3830 + challenge.id).toString().padStart(4, "0");
   return (
     <div className="w-full relative rounded-2xl 2xl:rounded-3xl p-6 sm:p-8 2xl:p-10 flex flex-col xl:flex-row items-center justify-between gap-8 2xl:gap-12 border border-white/5 bg-[linear-gradient(90deg,#0a2118_0%,#05110e_100%)] overflow-hidden">
@@ -185,7 +192,7 @@ const DesktopChallengeCard = ({ challenge, navigate }: { challenge: ActiveChalle
             <span className="font-inter font-black italic text-white text-2xl 2xl:text-3xl tracking-tighter">{challenge.challenge_name.toUpperCase()}</span>
           </div>
           <div className="relative z-10 flex flex-col">
-            <span className="font-inter font-bold text-[8px] 2xl:text-[10px] text-gray-500 tracking-[0.2em] uppercase">Master Equity</span>
+            <span className="font-inter font-bold text-[8px] 2xl:text-[10px] text-gray-500 tracking-[0.2em] uppercase">{t("accounts.master_equity")}</span>
             <div className="flex items-center mt-2 opacity-80">
               <span className="text-white text-sm 2xl:text-base tracking-[0.4em] leading-none">•••• •••• •••• ••••</span>
             </div>
@@ -197,25 +204,25 @@ const DesktopChallengeCard = ({ challenge, navigate }: { challenge: ActiveChalle
         <div className="flex flex-col sm:flex-row items-start sm:items-center flex-1 gap-8 sm:gap-12 2xl:gap-16 w-full">
           <div className="flex flex-col gap-4 2xl:gap-6 flex-1">
             <div>
-              <h2 className="font-inter font-bold text-white text-[26px] 2xl:text-[34px] tracking-tight mb-2 2xl:mb-3">Stage 1</h2>
+              <h2 className="font-inter font-bold text-white text-[26px] 2xl:text-[34px] tracking-tight mb-2 2xl:mb-3">{t("accounts.stage")}</h2>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 2xl:w-2.5 2xl:h-2.5 rounded-full bg-[#00ffa3] shadow-[0_0_6px_#00ffa3]" />
-                <span className="font-inter font-bold text-[#00ffa3] text-[10px] 2xl:text-[13px] tracking-[0.1em] uppercase">STATUS: CHALLENGE</span>
+                <span className="font-inter font-bold text-[#00ffa3] text-[10px] 2xl:text-[13px] tracking-[0.1em] uppercase">{t("accounts.status_challenge")}</span>
               </div>
             </div>
             <div className="mt-2">
-              <span className="font-inter font-medium text-gray-400 text-[10px] 2xl:text-[13px] tracking-[0.08em] uppercase block mb-1 2xl:mb-2">START BALANCE</span>
+              <span className="font-inter font-medium text-gray-400 text-[10px] 2xl:text-[13px] tracking-[0.08em] uppercase block mb-1 2xl:mb-2">{t("accounts.start_balance")}</span>
               <span className="font-inter font-medium text-white text-[19px] 2xl:text-[26px] tracking-tight">{challenge.balance.toLocaleString("en-US", { minimumFractionDigits: 2 })} USDT</span>
             </div>
           </div>
 
           <div className="flex flex-col gap-5 2xl:gap-7 flex-1 sm:border-l sm:border-white/10 sm:pl-10 2xl:pl-14">
             <div>
-              <span className="font-inter font-medium text-gray-400 text-[10px] 2xl:text-[13px] tracking-[0.08em] uppercase block mb-1 2xl:mb-2">END OF PERIOD</span>
-              <span className="font-inter font-medium text-white text-[19px] 2xl:text-[26px] tracking-tight">Unlimited</span>
+              <span className="font-inter font-medium text-gray-400 text-[10px] 2xl:text-[13px] tracking-[0.08em] uppercase block mb-1 2xl:mb-2">{t("accounts.end_period")}</span>
+              <span className="font-inter font-medium text-white text-[19px] 2xl:text-[26px] tracking-tight">{t("accounts.unlimited")}</span>
             </div>
             <div>
-              <span className="font-inter font-medium text-gray-400 text-[10px] 2xl:text-[13px] tracking-[0.08em] uppercase block mb-1 2xl:mb-2">PURCHASED</span>
+              <span className="font-inter font-medium text-gray-400 text-[10px] 2xl:text-[13px] tracking-[0.08em] uppercase block mb-1 2xl:mb-2">{t("accounts.purchased")}</span>
               <span className="font-inter font-medium text-white text-[19px] 2xl:text-[26px] tracking-tight">{new Date(challenge.created_at).toLocaleDateString()}</span>
             </div>
           </div>
@@ -228,13 +235,13 @@ const DesktopChallengeCard = ({ challenge, navigate }: { challenge: ActiveChalle
           onClick={() => navigate("/trading")}
           className="w-full flex justify-center items-center py-3.5 2xl:py-[18px] px-6 2xl:px-8 bg-[#00ffa3] hover:bg-[#00e693] rounded-xl 2xl:rounded-2xl transition-colors shadow-[0_4px_24px_rgba(0,255,163,0.15)]"
         >
-          <span className="font-inter font-bold text-[#0b0f14] text-[15px] 2xl:text-[17px] tracking-wide">Trade</span>
+          <span className="font-inter font-bold text-[#0b0f14] text-[15px] 2xl:text-[17px] tracking-wide">{t("accounts.trade")}</span>
         </button>
         <button
           onClick={() => navigate("/control-panel")}
           className="w-full flex justify-center items-center py-3.5 2xl:py-[18px] px-6 2xl:px-8 bg-[#131f1c] hover:bg-[#1a2824] border border-[#ffffff0a] rounded-xl 2xl:rounded-2xl transition-colors"
         >
-          <span className="font-inter font-medium text-white text-[15px] 2xl:text-[17px] tracking-wide">Control Panel</span>
+          <span className="font-inter font-medium text-white text-[15px] 2xl:text-[17px] tracking-wide">{t("accounts.control_panel")}</span>
         </button>
       </div>
     </div>
@@ -250,6 +257,7 @@ export const Accounts = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, setUser } = useAuth();
+  const { t } = useTranslation();
   const tradingIdentity = liveUser?.account_id || user?.account_id || "000000000000";
 
   useEffect(() => {
@@ -354,11 +362,9 @@ export const Accounts = () => {
           <img src="/images/logo.png" alt="UPDOWNX" className="h-6 w-auto object-contain min-[375px]:h-7 md:h-9 lg:h-12" />
         </Link>
         <div className="flex items-center gap-2 min-[375px]:gap-3 md:gap-4 lg:gap-6">
-          <button className="flex items-center gap-1 text-[11px] text-gray-400 min-[375px]:text-xs md:text-sm lg:text-base md:gap-1.5 lg:gap-2">
-            EN <ChevronDown className="w-2.5 h-2.5 md:w-4 md:h-4 lg:w-5 lg:h-5" />
-          </button>
+          <LanguageSwitcher size="sm" />
           <Link to="/challenge" className="rounded-lg bg-[#00FFA3] px-2.5 py-1.5 text-[10px] font-bold text-black min-[375px]:px-3 min-[375px]:text-[11px] md:px-5 md:py-2 md:text-sm lg:px-8 lg:py-3 lg:text-lg md:rounded-xl">
-            START
+            {t("trading.start")}
           </Link>
           <button onClick={() => setSidebarOpen((p) => !p)} className="text-gray-300 hover:text-white md:p-1 lg:p-2" aria-label="Toggle menu">
             {sidebarOpen ? <X className="w-5 h-5 md:w-7 md:h-7 lg:w-9 lg:h-9" /> : <Menu className="w-5 h-5 md:w-7 md:h-7 lg:w-9 lg:h-9" />}
@@ -380,7 +386,7 @@ export const Accounts = () => {
                   isActive ? "text-[#00FFA3]" : "text-gray-400 hover:text-gray-200"
                 }`}
               >
-                {tab.label}
+                {t(tab.labelKey)}
                 <span className={`absolute bottom-1 left-2.5 right-2.5 h-px rounded-full transition-opacity min-[375px]:left-3 min-[375px]:right-3 md:bottom-2 md:left-3 md:right-3 md:h-0.5 lg:bottom-3 lg:left-5 lg:right-5 ${isActive ? "bg-[#00FFA3] opacity-100" : "opacity-0"}`} />
               </Link>
             );
@@ -391,7 +397,7 @@ export const Accounts = () => {
       {/* Account sub-tabs */}
       <div className="flex justify-center border-b border-[#1a2a32]/60 bg-[#05070A] px-1 py-2 min-[375px]:px-2 min-[375px]:py-3 md:px-6 md:py-4 lg:px-10 lg:py-6 w-full">
         <div className="flex w-full justify-evenly rounded-[13px] border border-[#12313a] bg-[#081018]/80 p-1 min-[375px]:rounded-[16px] min-[375px]:p-1.5 min-[400px]:rounded-[18px] md:gap-2 md:rounded-[22px] md:px-3 md:py-2 lg:gap-4 lg:rounded-[28px] lg:px-5 lg:py-3">
-          {accountTabs.map((tab) => (
+          {accountTabKeys.map((tab) => (
             <button
               key={tab.value}
               onClick={() => setActiveTab(tab.value)}
@@ -399,7 +405,7 @@ export const Accounts = () => {
                 activeTab === tab.value ? "text-[#00FFA3]" : "text-gray-400 hover:text-gray-200"
               }`}
             >
-              {tab.label}
+              {t(tab.labelKey)}
               <span className={`absolute bottom-1 left-2.5 right-2.5 h-px rounded-full transition-opacity min-[375px]:left-3 min-[375px]:right-3 md:bottom-2 md:left-3 md:right-3 md:h-0.5 lg:bottom-3 lg:left-5 lg:right-5 ${activeTab === tab.value ? "bg-[#00FFA3] opacity-100" : "opacity-0"}`} />
             </button>
           ))}
@@ -415,9 +421,9 @@ export const Accounts = () => {
           {/* Trading Identity */}
           {!isWillBeActivatedTab && (
             <div className="flex flex-col gap-1 md:gap-1.5 lg:gap-2 pb-3 min-[375px]:pb-4 md:pb-5 lg:pb-6 border-b border-white/5">
-              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-gray-500 min-[375px]:text-[10px] md:text-[11px] lg:text-[13px]">Trading Identity</span>
+              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-gray-500 min-[375px]:text-[10px] md:text-[11px] lg:text-[13px]">{t("accounts.trading_identity")}</span>
               <h1 className="text-[22px] font-bold text-white tracking-tight min-[375px]:text-[26px] md:text-[32px] lg:text-[40px]">ID: {tradingIdentity}</h1>
-              <p className="text-[10px] text-gray-400 min-[375px]:text-[11px] md:text-sm lg:text-base">Institutional Prop Account • Multi-Asset Environment</p>
+              <p className="text-[10px] text-gray-400 min-[375px]:text-[11px] md:text-sm lg:text-base">{t("accounts.institutional_prop")}</p>
             </div>
           )}
 
@@ -436,9 +442,9 @@ export const Accounts = () => {
           <NavAccountsSubsection activeTab={activeTab} onTabChange={setActiveTab} />
           {!isWillBeActivatedTab && (
             <div className="flex flex-col gap-1.5 2xl:gap-2.5">
-              <header className="font-bold text-gray-400 text-[10px] 2xl:text-[13px] tracking-[2px] uppercase">Trading Identity</header>
+              <header className="font-bold text-gray-400 text-[10px] 2xl:text-[13px] tracking-[2px] uppercase">{t("accounts.trading_identity")}</header>
               <h1 className="text-white text-4xl 2xl:text-5xl tracking-tight">ID: {tradingIdentity}</h1>
-              <p className="text-gray-400 text-sm 2xl:text-base">Institutional Prop Account • Multi-Asset Environment</p>
+              <p className="text-gray-400 text-sm 2xl:text-base">{t("accounts.institutional_prop")}</p>
             </div>
           )}
           <section className="pb-2 flex flex-col gap-6">

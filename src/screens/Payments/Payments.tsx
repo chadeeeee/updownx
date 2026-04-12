@@ -6,12 +6,14 @@ import { DashboardLayout } from "../../components/DashboardLayout";
 import { ApiError, api, type PaymentRecord } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
 import { ChevronDown, Menu, X } from "lucide-react";
+import { useTranslation } from "../../lib/i18n";
+import { LanguageSwitcher } from "../../components/LanguageSwitcher";
 
 const mobileNavTabs = [
-  { label: "New challenge", route: "/challenge" },
-  { label: "Accounts", route: "/accounts" },
-  { label: "Payments", route: "/payments" },
-  { label: "Withdrawals", route: "/withdrawals" },
+  { labelKey: "nav.new_challenge", route: "/challenge" },
+  { labelKey: "nav.accounts", route: "/accounts" },
+  { labelKey: "nav.payments", route: "/payments" },
+  { labelKey: "nav.withdrawals", route: "/withdrawals" },
 ];
 
 const samePaymentRecord = (left: PaymentRecord | null, right: PaymentRecord | null) => {
@@ -66,6 +68,7 @@ export const Payments = (): JSX.Element => {
   const navigate = useNavigate();
   const { paymentId } = useParams();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const numericPaymentId = Number(paymentId);
   const routePaymentId = Number.isFinite(numericPaymentId) && numericPaymentId > 0 ? numericPaymentId : null;
@@ -94,7 +97,7 @@ export const Payments = (): JSX.Element => {
       setPayments((current) => (samePaymentList(current, nextPayments) ? current : nextPayments));
     } catch (error) {
       if (!silent) {
-        setPaymentsError(error instanceof ApiError ? error.message : "Failed to load payments.");
+        setPaymentsError(error instanceof ApiError ? error.message : t("payments.error_list"));
       }
     } finally {
       if (!silent) {
@@ -123,7 +126,7 @@ export const Payments = (): JSX.Element => {
       setPaymentDetail((current) => (samePaymentRecord(current, response.payment) ? current : response.payment));
     } catch (error) {
       if (!silent) {
-        setDetailError(error instanceof ApiError ? error.message : "Failed to load payment details.");
+        setDetailError(error instanceof ApiError ? error.message : t("payments.error"));
       }
     } finally {
       if (!silent) {
@@ -181,10 +184,10 @@ export const Payments = (): JSX.Element => {
     <div className="relative z-10 flex w-full min-w-0 flex-col gap-5 p-4 sm:p-6 lg:p-8">
       <div className="flex flex-col gap-2">
         <h1 className="[font-family:'Inter',Helvetica] font-bold text-white text-xl sm:text-2xl lg:text-3xl tracking-[-0.5px]">
-          Payments
+          {t("payments.title")}
         </h1>
         <p className="[font-family:'Inter',Helvetica] font-normal text-gray-400 text-sm lg:text-base">
-          Manage your orders and billing history
+          {t("payments.subtitle")}
         </p>
       </div>
 
@@ -236,11 +239,9 @@ export const Payments = (): JSX.Element => {
             <img src="/images/logo.png" alt="UPDOWNX" className="h-6 w-auto object-contain min-[375px]:h-7 md:h-9 lg:h-12" />
           </Link>
           <div className="flex items-center gap-2 min-[375px]:gap-3 md:gap-4 lg:gap-6">
-            <button className="flex items-center gap-1 text-[11px] text-gray-400 min-[375px]:text-xs md:text-sm lg:text-base md:gap-1.5 lg:gap-2">
-              EN <ChevronDown className="w-2.5 h-2.5 md:w-4 md:h-4 lg:w-5 lg:h-5" />
-            </button>
+            <LanguageSwitcher size="sm" />
             <Link to="/challenge" className="rounded-lg bg-[#00FFA3] px-2.5 py-1.5 text-[10px] font-bold text-black min-[375px]:px-3 min-[375px]:text-[11px] md:px-5 md:py-2 md:text-sm lg:px-8 lg:py-3 lg:text-lg md:rounded-xl">
-              START
+              {t("trading.start")}
             </Link>
             <button onClick={() => setSidebarOpen((p) => !p)} className="text-gray-300 hover:text-white md:p-1 lg:p-2" aria-label="Toggle menu">
               {sidebarOpen ? <X className="w-5 h-5 md:w-7 md:h-7 lg:w-9 lg:h-9" /> : <Menu className="w-5 h-5 md:w-7 md:h-7 lg:w-9 lg:h-9" />}
@@ -262,7 +263,7 @@ export const Payments = (): JSX.Element => {
                       isActive ? "text-[#00FFA3]" : "text-gray-400 hover:text-gray-200"
                     }`}
                   >
-                    {tab.label}
+                    {t(tab.labelKey)}
                     <span className={`absolute bottom-1 left-2.5 right-2.5 h-px rounded-full transition-opacity min-[375px]:left-3 min-[375px]:right-3 md:bottom-2 md:left-3 md:right-3 md:h-0.5 lg:bottom-3 lg:left-5 lg:right-5 ${isActive ? "bg-[#00FFA3] opacity-100" : "opacity-0"}`} />
                   </Link>
                 );

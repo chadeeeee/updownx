@@ -1,14 +1,23 @@
 import React, { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { PaymentRecord } from "../../../../lib/api";
+import { useTranslation } from "../../../../lib/i18n";
 
 type StatusStyle = { bg: string; border: string; dot: string; text: string };
 
 const STATUS_CONFIG: Record<string, StatusStyle> = {
   COMPLETED: { bg: "bg-[#00ffa3]/10", border: "border-[#00ffa3]/20", dot: "bg-[#00ffa3]", text: "text-[#00ffa3]" },
   PENDING: { bg: "bg-yellow-500/10", border: "border-yellow-500/20", dot: "bg-yellow-500", text: "text-yellow-500" },
+  FAILED: { bg: "bg-red-500/10", border: "border-red-500/20", dot: "bg-red-500", text: "text-red-500" },
   CANCELLED: { bg: "bg-red-500/10", border: "border-red-500/20", dot: "bg-red-500", text: "text-red-500" },
   default: { bg: "bg-gray-500/10", border: "border-gray-500/20", dot: "bg-gray-500", text: "text-gray-500" },
+};
+
+const STATUS_KEYS: Record<string, string> = {
+  COMPLETED: "payments.completed",
+  PENDING: "payments.pending",
+  FAILED: "payments.failed",
+  CANCELLED: "payments.cancelled",
 };
 
 const formatPaymentDate = (value: string) => {
@@ -51,6 +60,7 @@ export const ContentSubsection = ({
 }: ContentSubsectionProps): JSX.Element => {
   const [activePage, setActivePage] = useState(1);
   const itemsPerPage = 6;
+  const { t } = useTranslation();
 
   const totalPages = Math.max(1, Math.ceil(payments.length / itemsPerPage));
   const currentPage = Math.min(activePage, totalPages);
@@ -67,7 +77,7 @@ export const ContentSubsection = ({
   if (loading) {
     return (
       <div className="rounded-2xl border border-white/5 bg-[#0b0f14] p-6 text-sm text-gray-400">
-        Loading payments...
+        {t("payments.loading")}
       </div>
     );
   }
@@ -83,7 +93,7 @@ export const ContentSubsection = ({
   if (!payments.length) {
     return (
       <div className="rounded-2xl border border-white/5 bg-[#0b0f14] p-6 text-sm text-gray-400">
-        No payments found yet.
+        {t("payments.no_payments")}
       </div>
     );
   }
@@ -91,11 +101,11 @@ export const ContentSubsection = ({
   return (
     <div className="flex w-full min-w-0 flex-col gap-4">
       <div className="hidden min-w-0 sm:grid sm:grid-cols-[minmax(140px,1.4fr)_minmax(110px,1fr)_minmax(110px,0.9fr)_minmax(120px,1fr)_auto] sm:items-center sm:gap-4 border-b border-[#1a1f26] px-2.5 py-2">
-        <div className="min-w-0 font-inter font-bold text-gray-500 text-[10px] tracking-[1.00px] uppercase">PAYMENT ID</div>
-        <div className="min-w-0 font-inter font-bold text-gray-500 text-[10px] tracking-[1.00px] uppercase">DATE</div>
-        <div className="min-w-0 font-inter font-bold text-gray-500 text-[10px] tracking-[1.00px] uppercase">STATUS</div>
-        <div className="min-w-0 font-inter font-bold text-gray-500 text-[10px] tracking-[1.00px] uppercase">TOTAL</div>
-        <div className="flex justify-end font-inter font-bold text-gray-500 text-[10px] tracking-[1.00px] uppercase">ACTIONS</div>
+        <div className="min-w-0 font-inter font-bold text-gray-500 text-[10px] tracking-[1.00px] uppercase">{t("payments.payment_id")}</div>
+        <div className="min-w-0 font-inter font-bold text-gray-500 text-[10px] tracking-[1.00px] uppercase">{t("payments.date")}</div>
+        <div className="min-w-0 font-inter font-bold text-gray-500 text-[10px] tracking-[1.00px] uppercase">{t("payments.status")}</div>
+        <div className="min-w-0 font-inter font-bold text-gray-500 text-[10px] tracking-[1.00px] uppercase">{t("payments.total")}</div>
+        <div className="flex justify-end font-inter font-bold text-gray-500 text-[10px] tracking-[1.00px] uppercase">{t("payments.actions")}</div>
       </div>
 
       <div className="flex flex-col gap-1.5 sm:gap-2 2xl:gap-3">
@@ -125,7 +135,7 @@ export const ContentSubsection = ({
                 <div className={`inline-flex items-center gap-[1px] sm:gap-2 px-0.5 py-[1px] min-[375px]:px-1 min-[375px]:py-[2px] sm:px-3 sm:py-1 ${config.bg} rounded-full border border-solid ${config.border}`}>
                   <div className={`w-[2px] h-[2px] min-[375px]:w-[3px] min-[375px]:h-[3px] sm:w-[5px] sm:h-[5px] ${config.dot} rounded-full shadow-[0_0_8px_currentColor]`} />
                   <span className={`font-inter font-bold ${config.text} text-[4px] min-[375px]:text-[6px] sm:text-[9px] tracking-[0.50px] uppercase whitespace-nowrap leading-none`}>
-                    {payment.status}
+                    {STATUS_KEYS[payment.status] ? t(STATUS_KEYS[payment.status]) : payment.status}
                   </span>
                 </div>
               </div>
@@ -136,7 +146,7 @@ export const ContentSubsection = ({
                     {formatPaymentTotal(payment.amount, payCurrency)}
                   </div>
                   <div className="font-inter font-medium text-[#00ffa3] text-[5px] min-[375px]:text-[7px] sm:text-[9px] leading-none whitespace-nowrap shrink-0">
-                    / 1 item
+                    / 1 {t("payments.items")}
                   </div>
                 </div>
               </div>
@@ -147,7 +157,7 @@ export const ContentSubsection = ({
                   onClick={() => onViewDetails(payment.id)}
                 >
                   <span className="font-inter font-bold text-[#05070a] text-[5.5px] min-[375px]:text-[7px] sm:text-[10px] 2xl:text-xs whitespace-nowrap shrink-0">
-                    View Details
+                    {t("payments.view_details")}
                   </span>
                 </button>
               </div>
@@ -158,7 +168,7 @@ export const ContentSubsection = ({
 
       <div className="hidden xl:flex flex-col sm:flex-row justify-between items-center gap-4 mt-6 px-2">
         <div className="font-inter font-normal text-gray-500 text-[11px]">
-          Showing <span className="text-white">{startItem}</span> to <span className="text-white">{endItem}</span> of {payments.length} entries
+          {t("payments.showing")} <span className="text-white">{startItem}</span> {t("payments.to")} <span className="text-white">{endItem}</span> {t("payments.of")} {payments.length} {t("payments.entries")}
         </div>
 
         <div className="flex gap-2 items-center">
@@ -198,13 +208,13 @@ export const ContentSubsection = ({
 
       <div className="flex xl:hidden w-full mt-3 sm:mt-6">
         <div className="w-full rounded-2xl border border-[#163a3c] bg-gradient-to-r from-[#061616] to-[#0b1f1f] p-3 sm:p-5 flex flex-col gap-2.5 sm:gap-4 shadow-lg">
-          <span className="text-white text-[11px] sm:text-base font-medium">Need assistance?</span>
+          <span className="text-white text-[11px] sm:text-base font-medium">{t("sidebar.need_assistance")}</span>
           <div className="flex flex-row gap-2 sm:gap-4">
             <button className="flex-1 bg-[#00FFA3] hover:bg-[#00FFA3]/90 text-black text-[9px] sm:text-sm font-bold min-h-[34px] sm:min-h-[44px] py-1.5 sm:py-2.5 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-colors w-full">
-              Contact Support
+              {t("sidebar.contact_support")}
             </button>
             <button className="flex-1 bg-transparent hover:bg-white/5 border border-white/10 text-white text-[9px] sm:text-sm font-medium min-h-[34px] sm:min-h-[44px] py-1.5 sm:py-2.5 px-2 sm:px-4 rounded-lg sm:rounded-xl transition-colors w-full">
-              Help
+              {t("sidebar.help")}
             </button>
           </div>
         </div>

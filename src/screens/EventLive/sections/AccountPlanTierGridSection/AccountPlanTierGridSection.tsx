@@ -1,13 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import type { Challenge } from "../../../../lib/api";
+import { useTranslation } from "../../../../lib/i18n";
 
-const features = [
-  "2 Step Assessment",
-  "Unlimited Trading",
-  "Up to 80% Profit Split",
-  "Challenge Fee",
-  "160+ Cryptos",
-  "1:5 Leverage",
+const featureKeys = [
+  "feature.2step",
+  "feature.unlimited",
+  "feature.profit_split",
+  "feature.fee",
+  "feature.cryptos",
+  "feature.leverage",
 ];
 
 interface AccountPlanTierGridSectionProps {
@@ -18,6 +19,7 @@ export const AccountPlanTierGridSection = ({
   plans,
 }: AccountPlanTierGridSectionProps): JSX.Element => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleCryptoPayment = (planId: string) => {
     navigate(`/checkout/${planId}?method=crypto`);
@@ -26,7 +28,7 @@ export const AccountPlanTierGridSection = ({
   return (
     <div className="flex w-full items-center gap-2.5 pl-2 pr-0 py-8">
       {plans.map((plan) => {
-        const isPopular = plan.id.toLowerCase().includes("pro");
+        const isPopular = plan.id.toLowerCase().includes("killer");
         const nameColor = isPopular ? "text-[#00ffa3]" : "text-slate-400";
         const cardBorderClass = isPopular ? "border-[#00ffa366]" : "border-[#ffffff0d]";
         const cardShadowClass = isPopular ? "shadow-[0px_0px_20px_#00ffa326]" : "";
@@ -44,7 +46,7 @@ export const AccountPlanTierGridSection = ({
               {isPopular && (
                 <div className="flex flex-col items-start px-3 py-1 absolute top-[-11px] left-1/2 -translate-x-1/2 bg-[#00ffa3] rounded-full z-10">
                   <span className="[font-family:'Public_Sans',Helvetica] font-black text-[#05070a] text-[10px] tracking-[-0.50px] leading-[15px] whitespace-nowrap">
-                    MOST POPULAR
+                    {t("pricing.most_popular")}
                   </span>
                 </div>
               )}
@@ -65,12 +67,12 @@ export const AccountPlanTierGridSection = ({
 
               <div className="flex flex-col w-[calc(100%_-_50px)] items-start absolute top-[89px] left-[25px]">
                 <span className="[font-family:'Public_Sans',Helvetica] font-bold text-gray-500 text-[10px] tracking-[0] leading-[15px] whitespace-nowrap">
-                  ACCOUNT BALANCE
+                  {t("event.account_balance")}
                 </span>
               </div>
 
               <div className="flex flex-col w-[calc(100%_-_50px)] items-start gap-3 absolute top-32 left-[25px]">
-                {features.map((feature, index) => (
+                {featureKeys.map((featureKey, index) => (
                   <div
                     key={index}
                     className="flex items-center gap-2 self-stretch w-full"
@@ -81,7 +83,7 @@ export const AccountPlanTierGridSection = ({
                       src="/svg/tick.svg"
                     />
                     <span className="[font-family:'Public_Sans',Helvetica] font-normal text-gray-300 text-xs tracking-[0] leading-4 whitespace-nowrap">
-                      {feature}
+                      {t(featureKey)}
                     </span>
                   </div>
                 ))}
@@ -109,7 +111,7 @@ export const AccountPlanTierGridSection = ({
                 >
                   <div className="absolute inset-0 bg-[#ffffff01] rounded-lg shadow-[0px_4px_6px_-4px_#00ffa31a,0px_10px_15px_-3px_#00ffa31a]" />
                   <span className="relative [font-family:'Public_Sans',Helvetica] font-black text-[#05070a] text-xs text-center tracking-[0] leading-4 whitespace-nowrap">
-                    Crypto Payment
+                    {t("event.crypto_payment")}
                   </span>
                 </button>
               </div>

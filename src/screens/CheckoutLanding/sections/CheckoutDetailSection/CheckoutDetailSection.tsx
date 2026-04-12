@@ -1,5 +1,6 @@
 import { Button } from "../../../../components/ui/button";
 import type { Challenge } from "../../../../lib/api";
+import { useTranslation } from "../../../../lib/i18n";
 
 const gradientCardClass =
   "relative bg-[#05070a] rounded-xl border-none before:content-[''] before:absolute before:inset-0 before:p-px before:rounded-xl before:[background:linear-gradient(227deg,rgba(44,246,195,0.3)_0%,rgba(1,50,38,0.3)_100%)] before:[-webkit-mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] before:[-webkit-mask-composite:xor] before:[mask-composite:exclude] before:z-[1] before:pointer-events-none";
@@ -47,6 +48,7 @@ export const CheckoutDetailSection = ({
   const challengeLabel = plan ? `${plan.name.toUpperCase()} CHALLENGE` : "CHALLENGE";
   const accountSizeLabel = formatAccountSize(plan?.balance);
   const amountLabel = formatAmount(plan?.fee);
+  const { t } = useTranslation();
 
   return (
     <div className="flex flex-col w-full items-end justify-center gap-5 pr-8 pb-8">
@@ -60,7 +62,7 @@ export const CheckoutDetailSection = ({
                 src="/svg/billing-man.svg"
               />
               <span className="[font-family:'Public_Sans',Helvetica] font-bold text-white text-xl tracking-[-0.50px] leading-7 whitespace-nowrap">
-                BILLING DETAILS
+                {t("checkout.billing_title")}
               </span>
             </div>
 
@@ -68,7 +70,7 @@ export const CheckoutDetailSection = ({
               <div className="grid grid-cols-2 gap-6">
                 <div className="flex flex-col gap-2">
                   <label className="[font-family:'Public_Sans',Helvetica] font-bold text-gray-500 text-xs tracking-[1.20px] leading-4 whitespace-nowrap">
-                    FULL NAME
+                    {t("checkout.full_name")}
                   </label>
                   <div className="flex items-center px-4 py-3 bg-[#0b0f14] rounded-lg border border-solid border-[#00ffa333] overflow-hidden">
                     <input
@@ -81,7 +83,7 @@ export const CheckoutDetailSection = ({
 
                 <div className="flex flex-col gap-2">
                   <label className="[font-family:'Public_Sans',Helvetica] font-bold text-gray-500 text-xs tracking-[1.20px] leading-4 whitespace-nowrap">
-                    E-MAIL ADDRESS
+                    {t("checkout.email")}
                   </label>
                   <div className="flex items-center px-4 py-3 bg-[#0b0f14] rounded-lg border border-solid border-[#00ffa333] overflow-hidden">
                     <input
@@ -96,13 +98,13 @@ export const CheckoutDetailSection = ({
               <div className="grid grid-cols-2 gap-6">
                 <div className="flex flex-col gap-2">
                   <label className="[font-family:'Public_Sans',Helvetica] font-bold text-gray-500 text-xs tracking-[1.20px] leading-4 whitespace-nowrap">
-                    COUNTRY/REGION
+                    {t("checkout.country")}
                   </label>
                   <div className="flex items-center h-[50px] bg-[#0b0f14] rounded-lg border border-solid border-[#00ffa333] px-4">
                     <input
                       value={country}
                       onChange={(event) => onCountryChange(event.target.value)}
-                      placeholder="Enter Country"
+                      placeholder={t("checkout.enter_country")}
                       className="bg-transparent border-none outline-none w-full [font-family:'Public_Sans',Helvetica] font-normal text-white text-base tracking-[0] leading-6"
                     />
                   </div>
@@ -110,13 +112,13 @@ export const CheckoutDetailSection = ({
 
                 <div className="flex flex-col gap-2">
                   <label className="[font-family:'Public_Sans',Helvetica] font-bold text-gray-500 text-xs tracking-[1.20px] leading-4 whitespace-nowrap">
-                    CITY/TOWN
+                    {t("checkout.city")}
                   </label>
                   <div className="flex items-center px-4 py-3 bg-[#0b0f14] rounded-lg border border-solid border-[#00ffa333] overflow-hidden">
                     <input
                       value={city}
                       onChange={(event) => onCityChange(event.target.value)}
-                      placeholder="Enter City"
+                      placeholder={t("checkout.enter_city")}
                       className="bg-transparent border-none outline-none w-full [font-family:'Public_Sans',Helvetica] font-normal text-white text-base tracking-[0] leading-6"
                     />
                   </div>
@@ -133,7 +135,7 @@ export const CheckoutDetailSection = ({
                 src="/svg/wallet.svg"
               />
               <span className="[font-family:'Public_Sans',Helvetica] font-bold text-white text-xl tracking-[-0.50px] leading-7 whitespace-nowrap">
-                PAYMENT METHOD
+                {t("checkout.payment_method")}
               </span>
             </div>
 
@@ -155,10 +157,10 @@ export const CheckoutDetailSection = ({
                 </div>
                 <div className="flex flex-col gap-0.5">
                   <span className="[font-family:'Public_Sans',Helvetica] font-bold text-white text-base tracking-[0] leading-6 whitespace-nowrap">
-                    CRYPTO PAYMENT
+                    {t("checkout.crypto_payment")}
                   </span>
                   <span className="[font-family:'Public_Sans',Helvetica] font-normal text-slate-500 text-xs tracking-[0] leading-4 whitespace-nowrap">
-                    BTC, ETH, USDT, USDC (Fast & Secure)
+                    {t("checkout.crypto_sub")}
                   </span>
                 </div>
               </div>
@@ -172,29 +174,29 @@ export const CheckoutDetailSection = ({
           <div className={`${gradientCardClass} flex flex-col gap-6 w-full p-[33px]`}>
             <div className="flex flex-col gap-1">
               <h3 className="[font-family:'Public_Sans',Helvetica] font-bold text-white text-[22px] tracking-tight m-0 p-0 text-left">
-                Apply Coupon Code
+                {t("checkout.coupon_title")}
               </h3>
               <p className="[font-family:'Public_Sans',Helvetica] font-normal text-gray-500 text-[15px] m-0 p-0 mb-1 text-left">
-                If you have a coupon code, please use it below.
+                {t("checkout.coupon_sub")}
               </p>
             </div>
             <div className="flex items-center h-[56px] px-5 bg-[#0b0f14] rounded-xl border border-solid border-[#ffffff1a] transition-all focus-within:border-[#00ffa3]/40">
               <input
-                placeholder="Coupon code"
+                placeholder={t("checkout.coupon_placeholder")}
                 className="bg-transparent border-none outline-none w-full [font-family:'Public_Sans',Helvetica] font-normal text-white text-base tracking-wide leading-6 placeholder:text-gray-600"
               />
             </div>
             <Button
               className="w-full h-14 bg-[#00ffa3] hover:bg-[#00ffa3]/90 rounded-xl [font-family:'Public_Sans',Helvetica] font-bold text-black text-[15px] uppercase tracking-widest border-none mt-2"
             >
-              APPLY COUPON CODE
+              {t("checkout.coupon_apply")}
             </Button>
           </div>
         </div>
 
         <div className={`${gradientCardClass} flex flex-col gap-8 w-[448px] p-[33px] flex-shrink-0`}>
           <h2 className="[font-family:'Public_Sans',Helvetica] font-bold text-white text-xl tracking-[-0.50px] leading-7">
-            YOUR ORDER
+            {t("checkout.your_order")}
           </h2>
 
           <div
@@ -239,7 +241,7 @@ export const CheckoutDetailSection = ({
             <div className="flex flex-col gap-2 w-full">
               <div className="flex items-center justify-between w-full h-5">
                 <span className="[font-family:'Public_Sans',Helvetica] font-normal text-gray-500 text-sm tracking-[0] leading-5 whitespace-nowrap">
-                  Subtotal
+                  {t("checkout.subtotal")}
                 </span>
                 <span className="[font-family:'Public_Sans',Helvetica] text-sm tracking-[0] leading-5 whitespace-nowrap text-white font-medium">
                   {amountLabel}
@@ -247,17 +249,17 @@ export const CheckoutDetailSection = ({
               </div>
               <div className="flex items-center justify-between w-full h-5">
                 <span className="[font-family:'Public_Sans',Helvetica] font-normal text-gray-500 text-sm tracking-[0] leading-5 whitespace-nowrap">
-                  Platform Fee
+                  {t("checkout.platform_fee")}
                 </span>
                 <span className="[font-family:'Public_Sans',Helvetica] text-sm tracking-[0] leading-5 whitespace-nowrap text-[#00ffa3] font-medium">
-                  Free
+                  {t("checkout.free")}
                 </span>
               </div>
             </div>
 
             <div className="flex items-end justify-between w-full mt-4">
               <span className="[font-family:'Public_Sans',Helvetica] font-bold text-gray-500 text-xs tracking-[1.20px] leading-4 whitespace-nowrap">
-                TOTAL AMOUNT
+                {t("checkout.total_amount")}
               </span>
               <span className="[font-family:'Public_Sans',Helvetica] font-black text-white text-3xl tracking-[0] leading-9 whitespace-nowrap">
                 {amountLabel}
@@ -272,18 +274,16 @@ export const CheckoutDetailSection = ({
               className="w-full h-[60px] bg-[#00ffa3] hover:bg-[#00ffa3]/90 rounded-xl shadow-[0px_4px_6px_-4px_#a3e63533,0px_10px_15px_-3px_#a3e63533] [font-family:'Public_Sans',Helvetica] font-black text-slate-950 text-lg text-center tracking-[-0.90px] leading-7 whitespace-nowrap border-none disabled:opacity-60"
               style={{ height: "60px" }}
             >
-              {loading ? "PROCESSING..." : "COMPLETE ORDER"}
+              {loading ? t("checkout.processing") : t("checkout.complete_order")}
             </Button>
 
             <div className="w-full mt-7 bg-[#02061780] rounded-lg border border-solid border-[#ffffff0d] px-[17px] py-[17px]">
               <p className="[font-family:'Public_Sans',Helvetica] font-normal text-gray-500 text-[10px] text-center tracking-[0] leading-[16.2px]">
-                Your personal data will be used to process your order, support
-                your experience throughout this website, and for other purposes
-                described in our{" "}
+                {t("checkout.privacy_text")}{" "}
                 <span className="text-[#2cf6c3] cursor-pointer">
-                  Privacy Policy
+                  {t("checkout.privacy_policy")}
                 </span>
-                . By completing the order, you agree to our Terms of Service.
+                . {t("checkout.terms_text")}
               </p>
             </div>
           </div>
@@ -302,11 +302,10 @@ export const CheckoutDetailSection = ({
         </div>
         <div className="flex flex-col gap-0.5">
           <span className="[font-family:'Public_Sans',Helvetica] font-bold text-white text-xs tracking-[-0.30px] leading-4 whitespace-nowrap">
-            SSL SECURE PAYMENT
+            {t("checkout.ssl_title")}
           </span>
           <span className="[font-family:'Public_Sans',Helvetica] font-normal text-gray-500 text-[10px] tracking-[0] leading-[15px] whitespace-nowrap">
-            Your information is protected by industry-leading encryption
-            standards.
+            {t("checkout.ssl_sub")}
           </span>
         </div>
       </div>

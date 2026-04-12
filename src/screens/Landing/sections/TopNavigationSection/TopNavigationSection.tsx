@@ -2,26 +2,29 @@ import { useEffect, useState } from "react";
 import { Button } from "../../../../components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../lib/auth";
+import { LanguageSwitcher } from "../../../../components/LanguageSwitcher";
+import { useTranslation } from "../../../../lib/i18n";
 
-const navLinks = [
-  { label: "Challenges", href: "#challenges" },
-  { label: "Affiliate", href: "#affiliate" },
-  { label: "FAQ", href: "#faq" },
-  { label: "Blog", href: "#blog" },
+const navLinkKeys = [
+  { key: "nav.challenges", href: "#challenges" },
+  { key: "nav.affiliate", href: "#affiliate" },
+  { key: "nav.faq", href: "#faq" },
+  { key: "nav.blog", href: "#blog" },
 ];
 
-const mobileNavLinks = [
-  { label: "Home", href: "/", isActive: true },
-  { label: "Challenge", href: "#challenges" },
-  { label: "Affiliate", href: "#affiliate" },
-  { label: "FAQ", href: "#faq" },
-  { label: "Blog", href: "#blog" },
-  { label: "Help", href: "#help" },
+const mobileNavLinkKeys = [
+  { key: "nav.home", href: "/", isActive: true },
+  { key: "nav.challenge", href: "#challenges" },
+  { key: "nav.affiliate", href: "#affiliate" },
+  { key: "nav.faq", href: "#faq" },
+  { key: "nav.blog", href: "#blog" },
+  { key: "nav.help", href: "#help" },
 ];
 
 export const TopNavigationSection = (): JSX.Element => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -56,24 +59,19 @@ export const TopNavigationSection = (): JSX.Element => {
         </Link>
 
         <div className="hidden flex-1 items-center justify-center gap-8 lg:flex">
-          {navLinks.map((link) => (
+          {navLinkKeys.map((link) => (
             <a
-              key={link.label}
+              key={link.key}
               href={link.href}
               className="[font-family:'Inter',Helvetica] text-sm font-medium leading-5 tracking-[0] text-gray-400 transition-colors hover:text-[#00ffa3]"
             >
-              {link.label}
+              {t(link.key)}
             </a>
           ))}
         </div>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <div className="inline-flex cursor-pointer items-center gap-1">
-            <span className="[font-family:'Inter',Helvetica] text-center text-xs font-bold leading-4 tracking-[0] text-gray-400">
-              EN
-            </span>
-            <img className="h-4 w-4" alt="Arrow" src="/svg/arrow.svg" />
-          </div>
+          <LanguageSwitcher />
 
           {user ? (
             <button
@@ -88,7 +86,7 @@ export const TopNavigationSection = (): JSX.Element => {
               variant="outline"
               className="h-auto rounded-full border border-solid border-[#1e262f] bg-transparent px-5 py-2 text-sm font-normal leading-5 whitespace-nowrap text-white hover:bg-[#1e262f] hover:text-white"
             >
-              <Link to="/login">Login</Link>
+              <Link to="/login">{t("nav.login")}</Link>
             </Button>
           )}
 
@@ -96,7 +94,7 @@ export const TopNavigationSection = (): JSX.Element => {
             asChild
             className="h-auto rounded-full border-none bg-[#00ffa3] px-5 py-2 text-sm font-bold leading-5 whitespace-nowrap text-[#05070a] hover:bg-[#00e691]"
           >
-            <Link to={user ? "/challenge" : "/login"}>Start Challenge</Link>
+            <Link to={user ? "/challenge" : "/login"}>{t("nav.start_challenge")}</Link>
           </Button>
         </div>
 
@@ -159,9 +157,9 @@ export const TopNavigationSection = (): JSX.Element => {
 
           {/* Nav links - centered, no borders */}
           <div className="mb-8 flex flex-col items-center gap-2">
-            {mobileNavLinks.map((link, index) => (
+            {mobileNavLinkKeys.map((link, index) => (
               <a
-                key={link.label}
+                key={link.key}
                 href={link.href}
                 className={`[font-family:'Inter',Helvetica] w-[260px] rounded-xl py-3 text-center text-base font-semibold transition-all duration-300 ${
                   link.isActive
@@ -175,7 +173,7 @@ export const TopNavigationSection = (): JSX.Element => {
                 }}
                 onClick={() => setIsMenuOpen(false)}
               >
-                {link.label}
+                {t(link.key)}
               </a>
             ))}
           </div>
@@ -201,7 +199,7 @@ export const TopNavigationSection = (): JSX.Element => {
                   className="h-12 rounded-xl border border-solid border-[#1e262f] bg-transparent text-sm font-semibold text-white hover:bg-[#1e262f] hover:text-white"
                 >
                   <Link to="/login" onClick={() => setIsMenuOpen(false)}>
-                    Login
+                    {t("nav.login")}
                   </Link>
                 </Button>
               )}
@@ -214,7 +212,7 @@ export const TopNavigationSection = (): JSX.Element => {
                   to={user ? "/challenge" : "/login"}
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Start Challenge
+                  {t("nav.start_challenge")}
                 </Link>
               </Button>
             </div>
@@ -231,14 +229,14 @@ export const TopNavigationSection = (): JSX.Element => {
               `}
             >
               <span className="[font-family:'Inter',Helvetica] text-[13px] font-normal text-white leading-5 z-10 relative">
-                Need assistance?
+                {t("sidebar.need_assistance")}
               </span>
               <Button
                 asChild
                 className="h-9 w-full rounded-[10px] border-none bg-[#00ffa3] [font-family:'Inter',Helvetica] text-[11.1px] font-[600] leading-[16px] text-[#0B0F14] hover:bg-[#00e691] z-10 relative"
               >
                 <a href="#help" onClick={() => setIsMenuOpen(false)}>
-                  Contact Support
+                  {t("sidebar.contact_support")}
                 </a>
               </Button>
             </div>

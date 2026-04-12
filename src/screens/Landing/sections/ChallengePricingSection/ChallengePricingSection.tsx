@@ -1,23 +1,17 @@
 import { useState } from "react";
+import { useTranslation } from "../../../../lib/i18n";
 
 // Account size tab options
-const accountSizeTabs = ["5K", "10K", "25K", "50K", "100K"];
-
-// Steps data shared across all plans
-const planSteps = [
-  { label: "Step 1: Challenge", value: "10% Target", highlight: false },
-  { label: "Step 2: Verification", value: "5% Target", highlight: false },
-  { label: "Step 3: Funded", value: "Earn 80%", highlight: true },
-];
+const accountSizeTabs = ["$799", "5K", "25K", "50K", "100K"];
 
 // Pricing plans data
 const pricingPlans = [
   {
-    id: "starter",
-    name: "STARTER",
-    subtitle: "Ideal for beginners",
-    accountSize: "$5,000",
-    price: "$79",
+    id: "trial",
+    name: "TRIAL",
+    subtitle: "pricing.ideal_beginners",
+    accountSize: "$799",
+    price: "$49",
     featured: false,
     borderClass: "border border-solid border-slate-400",
     buttonClass:
@@ -25,11 +19,23 @@ const pricingPlans = [
     buttonTextClass: "text-white",
   },
   {
-    id: "pro",
-    name: "PRO",
-    subtitle: "For serious traders",
-    accountSize: "$50,000",
-    price: "$349",
+    id: "hunter",
+    name: "HUNTER",
+    subtitle: "pricing.ideal_beginners",
+    accountSize: "$5,000",
+    price: "$69",
+    featured: false,
+    borderClass: "border border-solid border-slate-400",
+    buttonClass:
+      "bg-[#ffffff0d] border border-solid border-[#ffffff1a] text-white font-bold",
+    buttonTextClass: "text-white",
+  },
+  {
+    id: "killer",
+    name: "KILLER",
+    subtitle: "pricing.for_serious",
+    accountSize: "$25,000",
+    price: "$199",
     featured: true,
     borderClass:
       "border-2 border-solid border-[#00ffa3] shadow-[0px_0px_30px_#00ffa326]",
@@ -37,11 +43,23 @@ const pricingPlans = [
     buttonTextClass: "text-[#05070a]",
   },
   {
-    id: "elite",
-    name: "ELITE",
-    subtitle: "The ultimate platform",
+    id: "shark",
+    name: "SHARK",
+    subtitle: "pricing.for_serious",
+    accountSize: "$50,000",
+    price: "$399",
+    featured: false,
+    borderClass: "border border-solid border-gray-500",
+    buttonClass:
+      "bg-[#ffffff0d] border border-solid border-[#ffffff1a] text-white font-bold",
+    buttonTextClass: "text-white",
+  },
+  {
+    id: "whale",
+    name: "WHALE",
+    subtitle: "pricing.ultimate_platform",
     accountSize: "$100,000",
-    price: "$799",
+    price: "$699",
     featured: false,
     borderClass: "border border-solid border-gray-500",
     buttonClass:
@@ -52,6 +70,13 @@ const pricingPlans = [
 
 export const ChallengePricingSection = (): JSX.Element => {
   const [activeTab, setActiveTab] = useState("5K");
+  const { t } = useTranslation();
+
+  const planSteps = [
+    { label: t("pricing.step1_label"), value: t("pricing.step1_value"), highlight: false },
+    { label: t("pricing.step2_label"), value: t("pricing.step2_value"), highlight: false },
+    { label: t("pricing.step3_label"), value: t("pricing.step3_value"), highlight: true },
+  ];
 
   return (
     <section className="flex w-full flex-col items-center gap-10 px-4 py-0 sm:px-6 lg:gap-16 lg:px-8">
@@ -59,13 +84,13 @@ export const ChallengePricingSection = (): JSX.Element => {
       <div className="flex flex-col items-center gap-4 w-full">
         <div className="flex flex-col items-center w-full">
           <h2 className="[font-family:'Inter',Helvetica] text-center text-3xl font-extrabold leading-tight tracking-[0] text-white sm:text-4xl sm:leading-10">
-            Choose Your Challenge
+            {t("pricing.title")}
           </h2>
         </div>
 
         <div className="flex flex-col items-center pb-4 w-full">
           <p className="[font-family:'Inter',Helvetica] text-center text-base font-normal leading-6 tracking-[0] text-gray-400">
-            Select an account size that fits your expertise and trading style.
+            {t("pricing.subtitle")}
           </p>
         </div>
 
@@ -102,7 +127,7 @@ export const ChallengePricingSection = (): JSX.Element => {
             {plan.featured && (
               <div className="flex items-center justify-center px-[16.8px] py-[4.2px] absolute top-[-15px] left-1/2 -translate-x-1/2 bg-[#00ffa3] rounded-full whitespace-nowrap">
                 <span className="[font-family:'Inter',Helvetica] font-black text-[#05070a] text-[12.6px] tracking-[0] leading-[16.8px] whitespace-nowrap">
-                  MOST POPULAR
+                  {t("pricing.most_popular")}
                 </span>
               </div>
             )}
@@ -128,7 +153,7 @@ export const ChallengePricingSection = (): JSX.Element => {
                         : "text-sm leading-5"
                     }`}
                   >
-                    {plan.subtitle}
+                    {t(plan.subtitle)}
                   </span>
                 </div>
 
@@ -141,7 +166,7 @@ export const ChallengePricingSection = (): JSX.Element => {
                         : "text-xs leading-4"
                     }`}
                   >
-                    Account Size
+                    {t("pricing.account_size")}
                   </span>
                   <span
                     className={`[font-family:'Inter',Helvetica] font-black text-white text-right tracking-[0] whitespace-nowrap ${
@@ -205,7 +230,7 @@ export const ChallengePricingSection = (): JSX.Element => {
                       : "text-sm leading-5"
                   }`}
                 >
-                  One-time fee
+                  {t("pricing.one_time_fee")}
                 </span>
               </div>
 
@@ -220,7 +245,7 @@ export const ChallengePricingSection = (): JSX.Element => {
                       : "font-bold text-white"
                   }`}
                 >
-                  Start Now
+                  {t("pricing.start_now")}
                 </span>
               </button>
             </div>

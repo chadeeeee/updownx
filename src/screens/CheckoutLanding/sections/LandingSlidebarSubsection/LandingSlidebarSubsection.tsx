@@ -1,11 +1,12 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "../../../../components/ui/button";
+import { useTranslation } from "../../../../lib/i18n";
 
 // Navigation menu items data
 const navItems = [
   {
     id: "new-challenge",
-    label: "New Challenge",
+    labelKey: "nav.new_challenge",
     icon: "/svg/rocket.svg",
     alt: "Icon rocket",
     active: true,
@@ -13,7 +14,7 @@ const navItems = [
   },
   {
     id: "accounts",
-    label: "Accounts",
+    labelKey: "nav.accounts",
     icon: "/svg/wallet.svg",
     alt: "Icon wallet",
     active: false,
@@ -21,7 +22,7 @@ const navItems = [
   },
   {
     id: "payments",
-    label: "Payments",
+    labelKey: "nav.payments",
     icon: "/svg/money.svg",
     alt: "Icon cash",
     active: false,
@@ -29,7 +30,7 @@ const navItems = [
   },
   {
     id: "withdrawals",
-    label: "Withdrawals",
+    labelKey: "nav.withdrawals",
     icon: "/svg/withdrawal.svg",
     alt: "Icon withdrawals",
     active: false,
@@ -37,7 +38,7 @@ const navItems = [
   },
   {
     id: "help",
-    label: "Help",
+    labelKey: "sidebar.help",
     icon: "/svg/faq.svg",
     alt: "Icon faq",
     active: false,
@@ -48,6 +49,7 @@ const navItems = [
 export const LandingSlidebarSubsection = (): JSX.Element => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <>
@@ -92,7 +94,7 @@ export const LandingSlidebarSubsection = (): JSX.Element => {
                     : "font-normal text-gray-300"
                 }`}
               >
-                {item.label}
+                {t(item.labelKey)}
               </span>
             </button>
           );
@@ -112,13 +114,13 @@ export const LandingSlidebarSubsection = (): JSX.Element => {
         }}
       >
         <p className="absolute top-[17px] left-[17px] [font-family:'Inter',Helvetica] font-normal text-white text-[11.3px] tracking-[0] leading-4">
-          Need assistance?
+          {t("sidebar.need_assistance")}
         </p>
         <Button
           className="absolute top-[41px] left-1/2 -translate-x-1/2 w-[173px] h-[33px] bg-[#00ffa3] hover:bg-[#00e691] rounded-xl [font-family:'Inter',Helvetica] font-semibold text-[#0b0f14] text-[11.1px] tracking-[0] leading-4 whitespace-nowrap p-0"
           style={{ minWidth: 0 }}
         >
-          Contact Support
+          {t("sidebar.contact_support")}
         </Button>
       </div>
     </div>

@@ -5,33 +5,38 @@ import { AccountPlanTierGridSection } from "./sections/AccountPlanTierGridSectio
 import { EventPromotionHeroSection } from "./sections/EventPromotionHeroSection";
 import { ArrowRight, CheckCircle2, ChevronDown, Menu, X } from "lucide-react";
 import { api, type Challenge } from "../../lib/api";
+import { LanguageSwitcher } from "../../components/LanguageSwitcher";
+import { useTranslation } from "../../lib/i18n";
 
 /* ── Shared constants ── */
 const mobileNavTabs = [
-  { label: "New challenge", route: "/challenge" },
-  { label: "Accounts", route: "/accounts" },
-  { label: "Payments", route: "/payments" },
-  { label: "Withdrawals", route: "/withdrawals" },
+  { labelKey: "nav.new_challenge", route: "/challenge" },
+  { labelKey: "nav.accounts", route: "/accounts" },
+  { labelKey: "nav.payments", route: "/payments" },
+  { labelKey: "nav.withdrawals", route: "/withdrawals" },
 ];
 
-const features = [
-  "2 Step Assessment",
-  "Unlimited Trading",
-  "Up to 80% Profit Split",
-  "Challenge Fee",
-  "160+ Cryptos",
-  "1:5 Leverage",
+const featureKeys = [
+  "feature.2step",
+  "feature.unlimited",
+  "feature.profit_split",
+  "feature.fee",
+  "feature.cryptos",
+  "feature.leverage",
 ];
 
-const NeedAssistance = () => (
+function NeedAssistance() {
+  const { t } = useTranslation();
+  return (
   <div className="mt-4 md:mt-6 rounded-xl border border-[#163e4a]/40 bg-[#08141c]/60 p-4 md:p-6">
-    <p className="mb-3 md:mb-4 text-xs md:text-sm text-gray-400">Need assistance?</p>
+    <p className="mb-3 md:mb-4 text-xs md:text-sm text-gray-400">{t("sidebar.need_assistance")}</p>
     <div className="grid grid-cols-2 gap-3 md:gap-4">
-      <button className="h-10 md:h-14 rounded-xl bg-[#00FFA3] text-xs md:text-sm font-bold text-black">Contact Support</button>
-      <button className="h-10 md:h-14 rounded-xl border border-[#163e4a] bg-[#0b1820] text-xs md:text-sm font-bold text-white">Help</button>
+      <button className="h-10 md:h-14 rounded-xl bg-[#00FFA3] text-xs md:text-sm font-bold text-black">{t("sidebar.contact_support")}</button>
+      <button className="h-10 md:h-14 rounded-xl border border-[#163e4a] bg-[#0b1820] text-xs md:text-sm font-bold text-white">{t("sidebar.help")}</button>
     </div>
   </div>
 );
+}
 
 export const EventLive = (): JSX.Element => {
   const [plans, setPlans] = useState<Challenge[]>([]);
@@ -39,6 +44,7 @@ export const EventLive = (): JSX.Element => {
   const [activeCard, setActiveCard] = useState(1);
   const scrollRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+  const { t } = useTranslation();
 
   useEffect(() => {
     api.challenges()
@@ -72,11 +78,9 @@ export const EventLive = (): JSX.Element => {
           <img src="/images/logo.png" alt="UPDOWNX" className="h-6 w-auto object-contain min-[375px]:h-7" />
         </Link>
         <div className="flex items-center gap-2 min-[375px]:gap-3">
-          <button className="flex items-center gap-1 text-[11px] text-gray-400 min-[375px]:text-xs">
-            EN <ChevronDown size={10} />
-          </button>
+          <LanguageSwitcher size="sm" />
           <Link to="/challenge" className="rounded-lg bg-[#00FFA3] px-2.5 py-1.5 text-[10px] font-bold text-black min-[375px]:px-3 min-[375px]:text-[11px]">
-            START
+            {t("trading.start")}
           </Link>
           <button onClick={() => setSidebarOpen((p) => !p)} className="text-gray-300 hover:text-white" aria-label="Toggle menu">
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
@@ -98,7 +102,7 @@ export const EventLive = (): JSX.Element => {
                   : "border-transparent text-gray-400 hover:text-gray-200"
               }`}
             >
-              {tab.label}
+              {t(tab.labelKey)}
             </Link>
           );
         })}
@@ -120,19 +124,18 @@ export const EventLive = (): JSX.Element => {
               </span>
             </div>
             <h2 className="relative z-10 text-[17px] font-black leading-[1.08] tracking-tight text-white min-[375px]:text-[18px] md:text-3xl lg:text-4xl">
-              WSCT Blockchain Forum 2026 –
+              {t("event.title_line1")}
               <br />
-              Qualifying Tour
+              {t("event.title_line2")}
             </h2>
             <p className="relative z-10 mt-2 text-[9px] leading-[1.55] text-[#c9d6db]/72 min-[375px]:text-[10px] md:mt-3 md:text-sm">
-              Join the elite circle of institutional-grade traders. Complete the qualifying assessment
-              during the WSCT Forum and gain access to a dedicated $1M pool.
+              {t("event.description")}
             </p>
             <Link
               to="/event-live"
               className="relative z-10 mt-4 inline-flex h-8 items-center gap-1.5 rounded-[10px] bg-[#00FFA3] px-3.5 text-[11px] font-bold text-black transition-all hover:bg-[#00e895] min-[375px]:h-9 min-[375px]:px-4 min-[375px]:text-[12px] md:mt-6 md:h-11 md:px-6 md:text-base"
             >
-              Read the rules <ArrowRight size={13} />
+              {t("event.read_rules")} <ArrowRight size={13} />
             </Link>
           </section>
 
@@ -149,7 +152,7 @@ export const EventLive = (): JSX.Element => {
             }}
           >
             {plans.map((plan) => {
-              const isPro = plan.id.toLowerCase().includes("pro");
+              const isPro = plan.id.toLowerCase().includes("killer");
 
               return (
                 <div
@@ -173,21 +176,21 @@ export const EventLive = (): JSX.Element => {
                         ${plan.balance.toLocaleString()}
                       </span>
                       <span className="mt-2 block text-[8px] font-bold uppercase tracking-[0.16em] text-[#586b74] min-[375px]:text-[9px]">
-                        Account Balance
+                        {t("event.account_balance")}
                       </span>
                     </div>
                     <div className="space-y-2.5 min-[375px]:space-y-3">
-                      {features.map((feature, idx) => (
+                      {featureKeys.map((featureKey, idx) => (
                         <div key={idx} className="flex items-center gap-2">
                           <CheckCircle2 size={12} className="shrink-0 text-[#00FFA3]" />
-                          <span className="text-[10px] font-medium leading-tight text-[#95a7af] min-[375px]:text-[11px]">{feature}</span>
+                          <span className="text-[10px] font-medium leading-tight text-[#95a7af] min-[375px]:text-[11px]">{t(featureKey)}</span>
                         </div>
                       ))}
                     </div>
                     {isPro && (
                       <div className="absolute inset-x-0 -bottom-3 flex justify-center">
                         <span className="rounded-full bg-[#00FFA3] px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-black whitespace-nowrap min-[375px]:px-3 min-[375px]:text-[9px]">
-                          Most Popular
+                          {t("pricing.most_popular")}
                         </span>
                       </div>
                     )}
@@ -209,7 +212,7 @@ export const EventLive = (): JSX.Element => {
                         to={`/checkout/${plan.id}?method=crypto`}
                         className="flex h-9 w-full items-center justify-center rounded-[10px] bg-[#00FFA3] px-2 text-[10px] font-black uppercase tracking-[0.03em] text-black transition-all hover:bg-[#00e895] min-[375px]:h-10 min-[375px]:px-3 min-[375px]:text-[11px]"
                       >
-                        Crypto Payment
+                        {t("event.crypto_payment")}
                       </Link>
 
                     </div>

@@ -1,22 +1,25 @@
 import { Link } from "react-router-dom";
 import { Button } from "../../../../components/ui/button";
 import { Separator } from "../../../../components/ui/separator";
+import { useTranslation } from "../../../../lib/i18n";
 
-const quickLinks = [
-  "All Challenges",
-  "Payout Policy",
-  "Risk Disclosure",
-  "Affiliate Program",
-];
-
-const resourceLinks = [
-  "Trading Blog",
-  "Help Center",
-  "Discord Community",
-  "Market Analysis",
-];
 
 export const SupportFooterSection = (): JSX.Element => {
+  const { t } = useTranslation();
+
+  const quickLinks = [
+    t("footer.all_challenges"),
+    t("footer.payout_policy"),
+    t("footer.risk_disclosure"),
+    t("footer.affiliate_program"),
+  ];
+
+  const resourceLinks = [
+    t("footer.trading_blog"),
+    t("footer.help_center"),
+    t("footer.discord"),
+    t("footer.market_analysis"),
+  ];
   return (
     <footer className="flex w-full flex-col items-start border-t border-[#1e262f] border-b-0 border-l-0 border-r-0 bg-[#05070a] px-4 pb-10 pt-16 sm:px-6 lg:px-20 lg:pt-20">
       <div className="mx-auto flex w-full max-w-screen-xl flex-col gap-0">
@@ -36,10 +39,7 @@ export const SupportFooterSection = (): JSX.Element => {
             {/* Description */}
             <div className="flex flex-col items-start">
               <p className="[font-family:'Inter',Helvetica] font-normal text-gray-500 text-sm tracking-[0] leading-5">
-                The world&#39;s leading crypto prop trading
-                firm. Empowering traders with the
-                capital they need to succeed in the
-                digital asset market.
+                {t("footer.description")}
               </p>
             </div>
 
@@ -65,7 +65,7 @@ export const SupportFooterSection = (): JSX.Element => {
           {/* Column 2: Quick Links */}
           <div className="flex flex-col items-start gap-6 pt-[5px]">
             <div className="[font-family:'Inter',Helvetica] font-bold text-white text-base tracking-[0] leading-6">
-              Quick Links
+              {t("footer.quick_links")}
             </div>
             <div className="flex flex-col items-start gap-4">
               {quickLinks.map((link) => (
@@ -83,7 +83,7 @@ export const SupportFooterSection = (): JSX.Element => {
           {/* Column 3: Resources */}
           <div className="flex flex-col items-start gap-6 pt-[5px]">
             <div className="[font-family:'Inter',Helvetica] font-bold text-white text-base tracking-[0] leading-6">
-              Resources
+              {t("footer.resources")}
             </div>
             <div className="flex flex-col items-start gap-4">
               {resourceLinks.map((link) => (
@@ -101,24 +101,24 @@ export const SupportFooterSection = (): JSX.Element => {
           {/* Column 4: Newsletter */}
           <div className="flex w-full flex-col items-start gap-0 pt-[5px] sm:max-w-[320px] lg:w-[268px]">
             <div className="[font-family:'Inter',Helvetica] font-bold text-white text-base tracking-[0] leading-6">
-              Newsletter
+              {t("footer.newsletter")}
             </div>
 
             <p className="[font-family:'Inter',Helvetica] font-normal text-gray-500 text-xs tracking-[0] leading-4 mt-6">
-              Get weekly trading tips and platform updates.
+              {t("footer.newsletter_sub")}
             </p>
 
             <div className="flex flex-col items-start gap-2 mt-4 w-full">
               {/* Email input */}
               <div className="flex flex-col items-start pt-[13px] pb-3.5 px-4 w-full bg-[#0b0f14] rounded-xl overflow-hidden border border-solid border-[#1e262f]">
                 <span className="[font-family:'Inter',Helvetica] font-normal text-gray-500 text-sm tracking-[0] leading-[normal]">
-                  Your Email
+                  {t("footer.email_placeholder")}
                 </span>
               </div>
 
               {/* Subscribe button */}
               <Button className="w-full bg-[#00ffa3] hover:bg-[#00e693] text-[#05070a] [font-family:'Inter',Helvetica] font-bold text-sm text-center tracking-[0] leading-5 rounded-xl h-auto py-3">
-                Subscribe
+                {t("footer.subscribe")}
               </Button>
             </div>
           </div>
@@ -132,15 +132,14 @@ export const SupportFooterSection = (): JSX.Element => {
           {/* Disclaimer */}
           <div className="flex flex-col items-center max-w-4xl w-full">
             <p className="[font-family:'Inter',Helvetica] text-center text-[10px] font-normal leading-[16.2px] tracking-[1px] text-gray-600">
-              DISCLAIMER: TRADING CRYPTOCURRENCIES INVOLVES SIGNIFICANT RISK AND CAN RESULT IN THE LOSS OF YOUR INVESTED CAPITAL. YOU SHOULD NOT INVEST MORE THAN YOU CAN AFFORD TO LOSE AND SHOULD ENSURE THAT YOU FULLY UNDERSTAND THE RISKS INVOLVED. UPDOWNX IS A PROP TRADING FIRM AND DOES NOT PROVIDE FINANCIAL ADVICE.
+              {t("footer.disclaimer")}
             </p>
           </div>
 
           {/* Copyright */}
           <div className="flex flex-col items-center w-full">
             <p className="[font-family:'Inter',Helvetica] font-normal text-gray-500 text-xs text-center tracking-[0] leading-4 whitespace-nowrap">
-              © 2024 UPDOWNX. All rights reserved. Built for professional
-              traders.
+              {t("footer.copyright")}
             </p>
           </div>
         </div>

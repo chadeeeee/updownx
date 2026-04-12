@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import { AdvancedRealTimeChart } from "react-ts-tradingview-widgets";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../lib/auth";
 import { api, ApiError } from "../../lib/api";
 import { Globe, Search, X, ChevronDown, Menu, Plus } from "lucide-react";
+import { LanguageSwitcher } from "../../components/LanguageSwitcher";
+import { useTranslation } from "../../lib/i18n";
 import { Cryptocon } from "cryptocons";
 
 /* ═══════════════════════ Types ═══════════════════════ */
@@ -292,6 +294,7 @@ const scrollbarCls = "[&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:
 export const ControlPanel = (): JSX.Element => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
   const displayName = user?.name ?? "Trader";
   const initials = displayName.split(/\s+/).filter(Boolean).map(w => w[0]).join("").toUpperCase().slice(0, 2);
 
@@ -842,11 +845,11 @@ export const ControlPanel = (): JSX.Element => {
 
   /* ═══════════════════════ Bottom tabs config ═══════════════════════ */
   const bottomTabs = [
-    { id: "positions", label: `POSITIONS (${positions.length})` },
-    { id: "open-orders", label: `OPEN ORDERS (${pendingOrders.length})` },
-    { id: "order-history", label: "ORDER HISTORY" },
-    { id: "trade-history", label: "TRADE HISTORY" },
-    { id: "assets", label: "ASSETS" },
+    { id: "positions", label: `${t("trading.positions")} (${positions.length})` },
+    { id: "open-orders", label: `${t("trading.open_orders")} (${pendingOrders.length})` },
+    { id: "order-history", label: t("trading.order_history") },
+    { id: "trade-history", label: t("trading.trade_history") },
+    { id: "assets", label: t("trading.assets") },
   ];
 
   /* ═══════════════════════ Render ═══════════════════════ */
@@ -868,11 +871,9 @@ export const ControlPanel = (): JSX.Element => {
           <img src="public/images/logo.png" alt="UPDOWNX" className="h-5 min-[375px]:h-6 md:h-8 w-auto" />
         </Link>
         <div className="flex items-center gap-2 min-[375px]:gap-3 md:gap-4">
-          <button className="flex items-center gap-1 text-[10px] min-[375px]:text-[11px] md:text-sm text-gray-400 bg-transparent border-none cursor-pointer">
-            EN <ChevronDown className="w-2.5 h-2.5 md:w-3.5 md:h-3.5" />
-          </button>
+          <LanguageSwitcher size="sm" />
           <Link to="/challenge" className="rounded-lg bg-[#00FFA3] px-2.5 py-1 min-[375px]:px-3 min-[375px]:py-1.5 md:px-5 md:py-2 text-[9px] min-[375px]:text-[10px] md:text-sm font-bold text-black no-underline">
-            START
+            {t("trading.start")}
           </Link>
           <button onClick={() => setSidebarOpen(p => !p)} className="text-gray-300 hover:text-white bg-transparent border-none cursor-pointer p-0" aria-label="Toggle menu">
             {sidebarOpen ? <X className="w-5 h-5 md:w-6 md:h-6" /> : <Menu className="w-5 h-5 md:w-6 md:h-6" />}
@@ -884,16 +885,16 @@ export const ControlPanel = (): JSX.Element => {
       {sidebarOpen && (
         <nav className="relative z-30 flex justify-center border-b border-[#1a2a32]/60 bg-[#05070A] px-1 py-2 min-[375px]:px-2 min-[375px]:py-3 md:px-6 md:py-4 lg:px-10 lg:py-6 w-full">
           <div className="flex w-full justify-evenly rounded-[13px] border border-[#12313a] bg-[#081018]/80 p-1 min-[375px]:rounded-[16px] min-[375px]:p-1.5 min-[400px]:rounded-[18px] md:gap-2 md:rounded-[22px] md:px-3 md:py-2 lg:gap-4 lg:rounded-[28px] lg:px-5 lg:py-3">
-            {["Trade", "Markets", "Positions", "Traders"].map(item => (
+            {[{key:"Trade",labelKey:"cp.tab_trade"},{key:"Markets",labelKey:"cp.tab_markets"},{key:"Positions",labelKey:"cp.tab_positions_nav"},{key:"Traders",labelKey:"cp.tab_traders"}].map(item => (
               <button
-                key={item}
+                key={item.key}
                 className={`flex-1 relative flex items-center justify-center text-center rounded-lg px-0.5 py-1.5 text-[8px] leading-tight font-medium transition-colors min-[375px]:rounded-xl min-[375px]:px-1 min-[375px]:py-2 min-[375px]:text-[10px] min-[400px]:px-2 min-[400px]:text-[11px] md:rounded-2xl md:px-6 md:py-3 md:text-sm lg:px-10 lg:py-5 lg:text-lg ${
-                  item === "Trade" ? "text-[#00FFA3]" : "text-gray-400 hover:text-gray-200"
+                  item.key === "Trade" ? "text-[#00FFA3]" : "text-gray-400 hover:text-gray-200"
                 }`}
                 style={{background:"transparent"}}
               >
-                {item}
-                <span className={`absolute bottom-1 left-2.5 right-2.5 h-px rounded-full transition-opacity min-[375px]:left-3 min-[375px]:right-3 md:bottom-2 md:left-3 md:right-3 md:h-0.5 lg:bottom-3 lg:left-5 lg:right-5 ${item === "Trade" ? "bg-[#00FFA3] opacity-100" : "opacity-0"}`} />
+                {t(item.labelKey)}
+                <span className={`absolute bottom-1 left-2.5 right-2.5 h-px rounded-full transition-opacity min-[375px]:left-3 min-[375px]:right-3 md:bottom-2 md:left-3 md:right-3 md:h-0.5 lg:bottom-3 lg:left-5 lg:right-5 ${item.key === "Trade" ? "bg-[#00FFA3] opacity-100" : "opacity-0"}`} />
               </button>
             ))}
           </div>
@@ -908,6 +909,7 @@ export const ControlPanel = (): JSX.Element => {
           <div className="flex items-center gap-1.5 min-[375px]:gap-2 cursor-pointer select-none" onClick={() => setCoinSelectorOpen(o => !o)}>
             <CoinIcon symbol={selectedCoin.symbol} color={selectedCoin.color} size={18} />
             <span className="font-bold text-[12px] min-[375px]:text-[13px] md:text-[15px] text-white">{selectedCoin.symbol}/USDT</span>
+            <ChevronDown className={`w-3 h-3 min-[375px]:w-3.5 min-[375px]:h-3.5 text-gray-400 transition-transform ${coinSelectorOpen?"rotate-180":""}`} />
             <span className={`px-1 py-0.5 rounded text-[8px] min-[375px]:text-[9px] md:text-[10px] font-bold ${isPositive ? "text-[#00ffa3] bg-[#00ffa3]/10" : "text-[#ff4d4d] bg-[#ff4d4d]/10"}`}>{isPositive ? "+" : ""}{priceChangePercent}%</span>
           </div>
           <div className="flex items-center gap-0.5 min-[375px]:gap-1">
@@ -928,14 +930,15 @@ export const ControlPanel = (): JSX.Element => {
               </div>
               <div className={`overflow-y-auto flex-1 ${scrollbarCls}`} style={{maxHeight:260}}>
                 {filteredCoins.map(coin => (
-                  <div key={coin.symbol} className={`flex items-center gap-2 px-3 py-2 cursor-pointer transition-colors hover:bg-white/5 ${coin.symbol===selectedCoin.symbol?"bg-[#00ffa3]/10":""}`}
-                    onMouseDown={(e) => {e.preventDefault();e.stopPropagation();setSelectedCoin(coin);setCoinSelectorOpen(false);setCoinSearch("");}}>
+                  <div key={coin.symbol} className={`flex items-center gap-2 px-3 py-2 cursor-pointer transition-colors hover:bg-white/5 active:bg-white/10 ${coin.symbol===selectedCoin.symbol?"bg-[#00ffa3]/10":""}`}
+                    onClick={(e) => {e.preventDefault();e.stopPropagation();setSelectedCoin(coin);setCoinSelectorOpen(false);setCoinSearch("");}}
+                    onMouseDown={(e) => {e.preventDefault();e.stopPropagation();}}>
                     <CoinIcon symbol={coin.symbol} color={coin.color} size={20} />
                     <span className="text-xs font-semibold text-white">{coin.symbol}</span>
                     <span className="text-[10px] text-gray-500">{coin.name}</span>
                   </div>
                 ))}
-                {!filteredCoins.length && <div className="px-4 py-4 text-center text-gray-500 text-xs">No coins found</div>}
+                {!filteredCoins.length && <div className="px-4 py-4 text-center text-gray-500 text-xs">{t("trading.no_coins_found")}</div>}
               </div>
             </div>
           )}
@@ -952,7 +955,7 @@ export const ControlPanel = (): JSX.Element => {
           {/* Order Book */}
           <div className="w-1/2 border border-[#1a2a32] rounded-[16px] bg-[#0A0F14]/90 backdrop-blur-md flex flex-col overflow-hidden">
             <div className="flex items-center justify-between px-2 min-[375px]:px-2.5 md:px-4 py-1.5 min-[375px]:py-2 border-b border-[#1a2a32] shrink-0">
-              <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] font-bold text-[#A6B2C8] tracking-wider uppercase">Order Book</span>
+              <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] font-bold text-[#A6B2C8] tracking-wider uppercase">{t("trading.order_book")}</span>
               <div className="flex bg-[#111820] rounded p-0.5 gap-0.5">
                 {(["both","bids","asks"] as const).map(v => (
                   <button key={v} onClick={() => setOrderBookView(v)} className={`w-4 min-[375px]:w-5 md:w-6 h-3 min-[375px]:h-3.5 md:h-5 rounded flex items-center justify-center border-none cursor-pointer p-0 ${orderBookView===v?"bg-[#2A3441]":"bg-transparent"}`}>
@@ -963,7 +966,7 @@ export const ControlPanel = (): JSX.Element => {
             </div>
             {/* Column headers */}
             <div className="grid grid-cols-3 px-2 min-[375px]:px-2.5 md:px-4 py-0.5 min-[375px]:py-1 shrink-0">
-              {["PRICE","SIZE","SUM"].map(h => <span key={h} className={`text-[5px] min-[375px]:text-[6px] md:text-[8px] text-[#A6B2C8] font-semibold tracking-wide uppercase ${h!=="PRICE"?"text-right":""}`}>{h}</span>)}
+              {[t("trading.price"),t("trading.size"),t("trading.sum")].map(h => <span key={h} className={`text-[5px] min-[375px]:text-[6px] md:text-[8px] text-[#A6B2C8] font-semibold tracking-wide uppercase ${h!==t("trading.price")?"text-right":""}`}>{h}</span>)}
             </div>
             {/* Asks */}
             {orderBookView !== "bids" && (
@@ -975,13 +978,13 @@ export const ControlPanel = (): JSX.Element => {
                     <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-500 text-right font-mono truncate">{r.total}</span>
                   </div>
                 ))}
-                {!asks.length && <div className="text-[7px] text-gray-600 py-2 text-center">Loading...</div>}
+                {!asks.length && <div className="text-[7px] text-gray-600 py-2 text-center">{t("trading.loading")}</div>}
               </div>
             )}
             {/* Spread */}
             <div className="px-2 min-[375px]:px-2.5 md:px-4 py-1 min-[375px]:py-1.5 border-y border-white/5 flex items-center gap-1.5 shrink-0">
               <span className={`text-[9px] min-[375px]:text-[10px] md:text-[13px] font-bold ${isPositive?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{currentPrice}</span>
-              <span className="text-[6px] min-[375px]:text-[7px] md:text-[9px] text-gray-500 font-medium">Spread {bids.length && asks.length ? (parseFloat(asks[asks.length-1]?.price.replace(/,/g,'') || '0') - parseFloat(bids[0]?.price.replace(/,/g,'') || '0')).toFixed(2) : '—'}</span>
+              <span className="text-[6px] min-[375px]:text-[7px] md:text-[9px] text-gray-500 font-medium">{t("trading.spread")} {bids.length && asks.length ? (parseFloat(asks[asks.length-1]?.price.replace(/,/g,'') || '0') - parseFloat(bids[0]?.price.replace(/,/g,'') || '0')).toFixed(2) : '—'}</span>
             </div>
             {/* Bids */}
             {orderBookView !== "asks" && (
@@ -993,18 +996,18 @@ export const ControlPanel = (): JSX.Element => {
                     <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-gray-500 text-right font-mono truncate">{r.total}</span>
                   </div>
                 ))}
-                {!bids.length && <div className="text-[7px] text-gray-600 py-2 text-center">Loading...</div>}
+                {!bids.length && <div className="text-[7px] text-gray-600 py-2 text-center">{t("trading.loading")}</div>}
               </div>
             )}
           </div>
 
           {/* Trade Panel */}
           <div className="w-1/2 flex flex-col p-2 min-[375px]:p-2.5 md:p-4 border border-[#1a2a32] rounded-[16px] bg-[#0A0F14]/90 backdrop-blur-md relative overflow-hidden">
-            <span className="text-[8px] min-[375px]:text-[9px] md:text-sm font-bold text-[#A6B2C8] tracking-wider uppercase mb-1.5 min-[375px]:mb-2 md:mb-3">Trade</span>
+            <span className="text-[8px] min-[375px]:text-[9px] md:text-sm font-bold text-[#A6B2C8] tracking-wider uppercase mb-1.5 min-[375px]:mb-2 md:mb-3">{t("cp.trade")}</span>
             {/* Limit / Market / Trigger */}
             <div className="flex gap-0.5 bg-[#111820] rounded-lg p-0.5 mb-1.5 min-[375px]:mb-2 md:mb-3">
-              {(["Limit","Market","Trigger"] as const).map(t => (
-                <button key={t} onClick={() => setOrderType(t)} className={`flex-1 py-1 min-[375px]:py-1.5 text-[7px] min-[375px]:text-[8px] md:text-[11px] font-bold rounded-md border-none cursor-pointer transition-colors ${orderType===t?"bg-[#00FFA3] text-[#05070A]":"bg-transparent text-gray-500 hover:text-white"}`}>{t}</button>
+              {([{key:"Limit",label:t("trading.limit")},{key:"Market",label:t("trading.market")},{key:"Trigger",label:t("trading.trigger")}] as const).map(item => (
+                <button key={item.key} onClick={() => setOrderType(item.key as any)} className={`flex-1 py-1 min-[375px]:py-1.5 text-[7px] min-[375px]:text-[8px] md:text-[11px] font-bold rounded-md border-none cursor-pointer transition-colors ${orderType===item.key?"bg-[#00FFA3] text-[#05070A]":"bg-transparent text-gray-500 hover:text-white"}`}>{item.label}</button>
               ))}
             </div>
             {/* Margin + Leverage dropdowns */}
@@ -1015,7 +1018,7 @@ export const ControlPanel = (): JSX.Element => {
                   <ChevronDown className="w-2 h-2 min-[375px]:w-2.5 min-[375px]:h-2.5 text-gray-400" />
                 </div>
                 {marginDropdownOpen && <div className="absolute top-[calc(100%+2px)] left-0 w-full bg-[#111820] border border-white/10 rounded-lg z-50 shadow-2xl py-0.5">
-                  {(["CROSS","ISOLATED"] as const).map(t => <div key={t} onClick={() => {setMarginType(t);setMarginDropdownOpen(false);}} className={`px-2 py-1 text-[7px] min-[375px]:text-[8px] md:text-[11px] font-bold cursor-pointer ${marginType===t?"text-[#00ffa3] bg-white/5":"text-white hover:bg-white/5"}`}>{t}</div>)}
+                  {(["CROSS","ISOLATED"] as const).map(mt => <div key={mt} onClick={() => {setMarginType(mt);setMarginDropdownOpen(false);}} className={`px-2 py-1 text-[7px] min-[375px]:text-[8px] md:text-[11px] font-bold cursor-pointer ${marginType===mt?"text-[#00ffa3] bg-white/5":"text-white hover:bg-white/5"}`}>{mt === "CROSS" ? t("trading.cross") : t("trading.isolated")}</div>)}
                 </div>}
               </div>
               <div className="flex-1 relative">
@@ -1031,7 +1034,7 @@ export const ControlPanel = (): JSX.Element => {
             {/* Trigger Price */}
             {orderType === "Trigger" && (
               <div className="mb-1">
-                <div className="flex justify-between mb-0.5"><span className="text-[7px] min-[375px]:text-[8px] text-gray-500 font-bold">Trigger</span><span className="text-[6px] min-[375px]:text-[7px] text-gray-500">USDT</span></div>
+                <div className="flex justify-between mb-0.5"><span className="text-[7px] min-[375px]:text-[8px] text-gray-500 font-bold">{t("trading.trigger")}</span><span className="text-[6px] min-[375px]:text-[7px] text-gray-500">USDT</span></div>
                 <div className="bg-[#111820] rounded-lg px-1.5 min-[375px]:px-2 py-1 border border-transparent focus-within:border-[#00ffa3]/30">
                   <input type="number" value={triggerPriceInput} onChange={e => setTriggerPriceInput(e.target.value)} placeholder="0.00" className="w-full bg-transparent border-none outline-none text-[9px] min-[375px]:text-[10px] md:text-[12px] font-medium text-white placeholder-gray-700 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                 </div>
@@ -1040,7 +1043,7 @@ export const ControlPanel = (): JSX.Element => {
             {/* Price */}
             {!(orderType === "Trigger" && triggerExecType === "Market") && (
               <div className="mb-1">
-                <div className="flex justify-between mb-0.5"><span className="text-[7px] min-[375px]:text-[8px] text-gray-500 font-bold">Price</span><span className="text-[6px] min-[375px]:text-[7px] text-gray-500">USDT</span></div>
+                <div className="flex justify-between mb-0.5"><span className="text-[7px] min-[375px]:text-[8px] text-gray-500 font-bold">{t("trading.price")}</span><span className="text-[6px] min-[375px]:text-[7px] text-gray-500">USDT</span></div>
                 <div className="bg-[#111820] rounded-lg px-1.5 min-[375px]:px-2 py-1 border border-transparent focus-within:border-[#00ffa3]/30">
                   <input type="number" value={orderType==="Market"?(priceNumeric>0?priceNumeric.toFixed(2):""):priceInput} onChange={e => setPriceInput(e.target.value)} placeholder={orderType==="Market"?"Market":"0.00"} disabled={orderType==="Market"} className="w-full bg-transparent border-none outline-none text-[9px] min-[375px]:text-[10px] md:text-[12px] font-medium text-white placeholder-gray-700 disabled:text-gray-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                 </div>
@@ -1048,7 +1051,7 @@ export const ControlPanel = (): JSX.Element => {
             )}
             {/* Size */}
             <div className="mb-1">
-              <div className="flex justify-between mb-0.5"><span className="text-[7px] min-[375px]:text-[8px] text-gray-500 font-bold">Size</span><span className="text-[6px] min-[375px]:text-[7px] text-gray-500">BTC</span></div>
+              <div className="flex justify-between mb-0.5"><span className="text-[7px] min-[375px]:text-[8px] text-gray-500 font-bold">{t("trading.size")}</span><span className="text-[6px] min-[375px]:text-[7px] text-gray-500">BTC</span></div>
               <div className="bg-[#111820] rounded-lg px-1.5 min-[375px]:px-2 py-1 border border-transparent focus-within:border-[#00ffa3]/30">
                 <input type="number" value={sizeInput} onChange={e => handleSizeChange(e.target.value)} placeholder="0.00" className="w-full bg-transparent border-none outline-none text-[9px] min-[375px]:text-[10px] md:text-[12px] font-medium text-white placeholder-gray-700 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
               </div>
@@ -1063,18 +1066,18 @@ export const ControlPanel = (): JSX.Element => {
             </div>
             {/* Available Balance */}
             <div className="flex justify-between items-center py-0.5 mb-1.5 min-[375px]:mb-2">
-              <span className="text-[7px] min-[375px]:text-[8px] text-gray-500">Available Balance</span>
+              <span className="text-[7px] min-[375px]:text-[8px] text-gray-500">{t("trading.available")}</span>
               <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] font-bold text-white">{fmt(availableBalance)} USDT</span>
             </div>
             {/* Buy / Sell Buttons */}
             <div className="flex flex-col gap-1 min-[375px]:gap-1.5">
               <button onClick={() => openTrade("long")} className="w-full h-7 min-[375px]:h-8 md:h-10 rounded-lg bg-gradient-to-b from-[#00FFA3] to-[#009962] hover:brightness-110 border-none cursor-pointer transition-all flex flex-col items-center justify-center shadow-[0_0_8px_rgba(0,255,163,0.2)]">
-                <span className="font-bold text-[#05070a] text-[9px] min-[375px]:text-[10px] md:text-[12px] tracking-wide leading-none">{orderType==="Market"?"BUY / LONG":`${orderType.toUpperCase()} BUY`}</span>
-                <span className="text-[5px] min-[375px]:text-[6px] text-[#05070a]/70 font-bold tracking-wider leading-none mt-0.5">PRICE: {orderType==="Market"?currentPrice:priceInput||"—"}</span>
+                <span className="font-bold text-[#05070a] text-[9px] min-[375px]:text-[10px] md:text-[12px] tracking-wide leading-none">{orderType==="Market"?t("trading.buy_long"):orderType==="Limit"?t("trading.limit_buy"):t("trading.trigger_buy")}</span>
+                <span className="text-[5px] min-[375px]:text-[6px] text-[#05070a]/70 font-bold tracking-wider leading-none mt-0.5">{t("trading.price_colon")}: {orderType==="Market"?currentPrice:priceInput||"—"}</span>
               </button>
               <button onClick={() => openTrade("short")} className="w-full h-7 min-[375px]:h-8 md:h-10 rounded-lg bg-gradient-to-b from-[#FF3B3B] to-[#992323] hover:brightness-110 border-none cursor-pointer transition-all flex flex-col items-center justify-center shadow-[0_0_8px_rgba(255,59,59,0.2)]">
-                <span className="font-bold text-white text-[9px] min-[375px]:text-[10px] md:text-[12px] tracking-wide leading-none">{orderType==="Market"?"SELL / SHORT":`${orderType.toUpperCase()} SELL`}</span>
-                <span className="text-[5px] min-[375px]:text-[6px] text-white/70 font-bold tracking-wider leading-none mt-0.5">PRICE: {orderType==="Market"?currentPrice:priceInput||"—"}</span>
+                <span className="font-bold text-white text-[9px] min-[375px]:text-[10px] md:text-[12px] tracking-wide leading-none">{orderType==="Market"?t("trading.sell_short"):orderType==="Limit"?t("trading.limit_sell"):t("trading.trigger_sell")}</span>
+                <span className="text-[5px] min-[375px]:text-[6px] text-white/70 font-bold tracking-wider leading-none mt-0.5">{t("trading.price_colon")}: {orderType==="Market"?currentPrice:priceInput||"—"}</span>
               </button>
             </div>
           </div>
@@ -1095,7 +1098,7 @@ export const ControlPanel = (): JSX.Element => {
           <div className="overflow-x-auto">
             {bottomTab === "positions" && (<>
               <div className="grid grid-cols-7 gap-1 px-3 min-[375px]:px-4 md:px-6 py-1.5 border-b border-white/5 min-w-[560px]">
-                {["SIZE","ENTRY PRICE","MARK PRICE","LIQ.PRICE","MARGIN/RATIO","PNL (ROE%)",""].map(c => <span key={c} className="text-[6px] min-[375px]:text-[7px] md:text-[9px] text-[#A6B2C8] font-semibold tracking-[0.5px] uppercase">{c}</span>)}
+                {[t("trading.size"),t("trading.entry_price"),t("trading.mark_price"),t("trading.liq_price"),t("trading.margin_ratio"),t("trading.pnl_roe"),""].map(c => <span key={c} className="text-[6px] min-[375px]:text-[7px] md:text-[9px] text-[#A6B2C8] font-semibold tracking-[0.5px] uppercase">{c}</span>)}
               </div>
               {positions.length ? positions.map(pos => {
                 const mark = priceMap[pos.pair]||pos.entryPrice;
@@ -1115,9 +1118,9 @@ export const ControlPanel = (): JSX.Element => {
                       className="inline-flex items-center gap-0.5 text-[6px] min-[375px]:text-[7px] font-bold text-[#00ffa3] bg-[#09231c] px-1.5 py-0.5 rounded border border-[#00ffa3]/30 cursor-pointer w-fit"
                     >
                       <Plus className="w-2.5 h-2.5" />
-                      Add
+                      {t("trading.add")}
                     </button>
-                    <button onClick={() => closePosition(pos.id)} className="text-[6px] min-[375px]:text-[7px] font-bold text-gray-400 bg-[#1a2030] px-1.5 py-0.5 rounded border-none cursor-pointer w-fit">Close</button>
+                    <button onClick={() => closePosition(pos.id)} className="text-[6px] min-[375px]:text-[7px] font-bold text-white bg-[#ff4d4d] hover:bg-[#ff6b6b] px-1.5 py-0.5 rounded border-none cursor-pointer w-fit transition-colors">{t("trading.close")}</button>
                     {(pos.takeProfit != null || pos.stopLoss != null) && (
                       <span className="text-[6px] min-[375px]:text-[7px] text-gray-400 leading-tight">
                         TP: {pos.takeProfit != null ? fmt(pos.takeProfit) : "—"} / SL: {pos.stopLoss != null ? fmt(pos.stopLoss) : "—"}
@@ -1127,7 +1130,7 @@ export const ControlPanel = (): JSX.Element => {
                 </div>;
               }) : <div className="flex flex-col items-center justify-center gap-2 py-6">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4a5568" strokeWidth="1.5"><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></svg>
-                <span className="text-gray-500 text-[8px] min-[375px]:text-[9px] md:text-[10px]">No Open Positions</span>
+                <span className="text-gray-500 text-[8px] min-[375px]:text-[9px] md:text-[10px]">{t("trading.no_positions")}</span>
               </div>}
             </>)}
 
@@ -1135,12 +1138,12 @@ export const ControlPanel = (): JSX.Element => {
               pendingOrders.length ? <div className="px-3 min-[375px]:px-4 md:px-6 py-2">
                 {pendingOrders.map(o => <div key={o.id} className="flex items-center justify-between py-1.5 border-b border-white/5">
                   <div className="flex items-center gap-1.5">
-                    <span className={`text-[8px] min-[375px]:text-[9px] font-bold ${o.side==="long"?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{o.symbol} {o.side==="long"?"Buy":"Sell"}</span>
+                    <span className={`text-[8px] min-[375px]:text-[9px] font-bold ${o.side==="long"?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{o.symbol} {o.side==="long"?t("trading.buy"):t("trading.sell")}</span>
                     <span className="text-[8px] text-gray-400">{fmt(o.price)}</span>
                   </div>
-                  <button onClick={() => cancelOrder(o.id)} className="text-[7px] font-bold text-[#ff4d4d] bg-[#2a1520] px-1.5 py-0.5 rounded border-none cursor-pointer">Cancel</button>
+                  <button onClick={() => cancelOrder(o.id)} className="text-[7px] font-bold text-[#ff4d4d] bg-[#2a1520] px-1.5 py-0.5 rounded border-none cursor-pointer">{t("trading.cancel")}</button>
                 </div>)}
-              </div> : <div className="flex items-center justify-center py-6 text-gray-500 text-[8px] min-[375px]:text-[9px]">No Open Orders</div>
+              </div> : <div className="flex items-center justify-center py-6 text-gray-500 text-[8px] min-[375px]:text-[9px]">{t("trading.no_orders")}</div>
             )}
 
             {bottomTab === "order-history" && (
@@ -1149,34 +1152,34 @@ export const ControlPanel = (): JSX.Element => {
                   <span className={`text-[8px] min-[375px]:text-[9px] font-bold ${o.side==="long"?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{o.symbol} {o.type}</span>
                   <span className="text-[8px] text-gray-400">{fmtDate(o.createdAt)}</span>
                 </div>)}
-              </div> : <div className="flex items-center justify-center py-6 text-gray-500 text-[8px] min-[375px]:text-[9px]">No Order History</div>
+              </div> : <div className="flex items-center justify-center py-6 text-gray-500 text-[8px] min-[375px]:text-[9px]">{t("trading.no_order_history")}</div>
             )}
 
             {bottomTab === "trade-history" && (
               tradeHistory.length ? <div className="px-3 min-[375px]:px-4 md:px-6 py-2">
-                {tradeHistory.map(t => {
-                  const up=t.pnl>=0;
-                  const fee = t.sizeUsdt * FEE_MARKET;
-                  return <div key={t.id} className="flex items-center justify-between py-1.5 border-b border-white/5">
-                    <span className={`text-[8px] min-[375px]:text-[9px] font-bold ${t.side==="long"?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{t.symbol} {t.side==="long"?"Long":"Short"}</span>
+                {tradeHistory.map(tr => {
+                  const up=tr.pnl>=0;
+                  const fee = tr.sizeUsdt * FEE_MARKET;
+                  return <div key={tr.id} className="flex items-center justify-between py-1.5 border-b border-white/5">
+                    <span className={`text-[8px] min-[375px]:text-[9px] font-bold ${tr.side==="long"?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{tr.symbol} {tr.side==="long"?t("trading.long"):t("trading.short")}</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-[7px] text-[#ff9500]">fee: -${fee.toFixed(2)}</span>
-                      <span className={`text-[8px] font-bold ${up?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{up?"+":""}{t.pnl.toFixed(2)}</span>
+                      <span className="text-[7px] text-[#ff9500]">{t("trading.fee")}: -${fee.toFixed(2)}</span>
+                      <span className={`text-[8px] font-bold ${up?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{up?"+":""}{tr.pnl.toFixed(2)}</span>
                     </div>
                   </div>;
                 })}
-              </div> : <div className="flex items-center justify-center py-6 text-gray-500 text-[8px] min-[375px]:text-[9px]">No Trade History</div>
+              </div> : <div className="flex items-center justify-center py-6 text-gray-500 text-[8px] min-[375px]:text-[9px]">{t("trading.no_trade_history")}</div>
             )}
 
-            {bottomTab === "assets" && <div className="flex items-center justify-center py-6 text-gray-500 text-[8px] min-[375px]:text-[9px]">Assets view coming soon</div>}
+            {bottomTab === "assets" && <div className="flex items-center justify-center py-6 text-gray-500 text-[8px] min-[375px]:text-[9px]">{t("cp.assets_coming_soon")}</div>}
           </div>
         </div>
 
         {/* ─── Footer Info ─── */}
         <div className="flex flex-wrap items-center justify-between px-3 min-[375px]:px-4 md:px-6 py-2 min-[375px]:py-2.5">
           <div className="flex items-center gap-2 min-[375px]:gap-3">
-            <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-[#00ffa3] shadow-[0_0_5px_#00ffa3]" /><span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-[#afc0c9]">Connection: Secure</span></div>
-            <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-[#89a4ad]">Server Time: {kyivTime} (UTC)</span>
+            <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-[#00ffa3] shadow-[0_0_5px_#00ffa3]" /><span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-[#afc0c9]">{t("cp.connection_secure")}</span></div>
+            <span className="text-[7px] min-[375px]:text-[8px] md:text-[10px] text-[#89a4ad]">{t("cp.server_time")}: {kyivTime} (UTC)</span>
           </div>
           <span className="text-[6px] min-[375px]:text-[7px] md:text-[9px] text-[#A6B2C8] font-bold tracking-widest">UPDOWN PROTOCOL V2.4.1</span>
         </div>
@@ -1215,13 +1218,11 @@ export const ControlPanel = (): JSX.Element => {
           </div>
           <div className="flex items-center gap-4">
             <div className="flex flex-col items-end mr-2">
-              <span className="text-[9px] text-gray-500 font-semibold tracking-wider uppercase">Balance</span>
+              <span className="text-[9px] text-gray-500 font-semibold tracking-wider uppercase">{t("trading.balance")}</span>
               <span className="text-sm font-bold text-white">{fmt(userBalance)} <span className="text-gray-400 text-xs">USDT</span></span>
             </div>
-            <button onClick={() => navigate('/challenges')} className="bg-[#00ffa3] hover:bg-[#00e693] text-[#05070a] font-bold text-[11px] px-5 py-2.5 rounded-full border-none cursor-pointer transition-colors">DEPOSIT</button>
-            <button className="inline-flex items-center gap-1 bg-transparent border-none p-0 cursor-pointer transition-opacity hover:opacity-80">
-              <Globe className="h-[14px] w-[14px] text-gray-300" /><span className="font-bold text-gray-300 text-xs">EN</span><img className="w-4 h-4" alt="" src="/svg/arrow.svg" />
-            </button>
+            <button onClick={() => navigate('/challenges')} className="bg-[#00ffa3] hover:bg-[#00e693] text-[#05070a] font-bold text-[11px] px-5 py-2.5 rounded-full border-none cursor-pointer transition-colors">{t("cp.deposit")}</button>
+            <LanguageSwitcher />
             <button className="relative flex items-center justify-center bg-transparent border-none p-0 cursor-pointer hover:opacity-80" aria-label="Notifications">
               <img className="h-[18px] w-[18px]" alt="" src="/svg/bell.svg" /><span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-[#00FFA3]" />
             </button>
@@ -1265,7 +1266,7 @@ export const ControlPanel = (): JSX.Element => {
                             <span className="text-xs text-gray-400">{coin.pair}</span>
                           </div>
                         ))}
-                        {!filteredCoins.length && <div className="px-4 py-6 text-center text-gray-500 text-sm">No coins found</div>}
+                        {!filteredCoins.length && <div className="px-4 py-6 text-center text-gray-500 text-sm">{t("trading.no_coins_found")}</div>}
                       </div>
                     </div>
                   )}
@@ -1278,7 +1279,7 @@ export const ControlPanel = (): JSX.Element => {
               {/* Order Book */}
               <GradientBorderPanel width="273px">
                 <div className="flex items-center justify-between px-4 py-3 border-b border-white/5 shrink-0">
-                  <span className="text-[10px] font-bold text-[#A6B2C8] tracking-wider uppercase">Order Book</span>
+                  <span className="text-[10px] font-bold text-[#A6B2C8] tracking-wider uppercase">{t("trading.order_book")}</span>
                   <div className="flex bg-[#111820] rounded-[6px] p-0.5 gap-0.5">
                     {(["both","bids","asks"] as const).map(v => (
                       <button key={v} onClick={() => setOrderBookView(v)} className={`w-[28px] h-[22px] rounded-[4px] flex items-center justify-center border-none cursor-pointer transition-colors p-0 ${orderBookView===v?"bg-[#2A3441]":"bg-transparent hover:bg-[#2A3441]"}`}>
@@ -1288,7 +1289,7 @@ export const ControlPanel = (): JSX.Element => {
                   </div>
                 </div>
                 <div className="grid grid-cols-3 px-4 py-1.5 shrink-0">
-                  {["Price","Size","Sum"].map(h => <span key={h} className={`text-[8px] text-[#A6B2C8] font-semibold tracking-wide uppercase ${h!=="Price"?"text-right":""}`}>{h}</span>)}
+                  {[t("trading.price"),t("trading.size"),t("trading.sum")].map(h => <span key={h} className={`text-[8px] text-[#A6B2C8] font-semibold tracking-wide uppercase ${h!==t("trading.price")?"text-right":""}`}>{h}</span>)}
                 </div>
                 {orderBookView !== "bids" && (
                   <div className="flex flex-col px-4 flex-1 overflow-hidden pt-1 justify-end pb-1 border-b border-[#05070A]/50">
@@ -1299,7 +1300,7 @@ export const ControlPanel = (): JSX.Element => {
                         <span className="text-[11px] text-gray-500 text-right font-mono">{r.total}</span>
                       </div>
                     ))}
-                    {!asks.length && <div className="text-[10px] text-gray-600 flex-1 flex items-center justify-center">Loading...</div>}
+                    {!asks.length && <div className="text-[10px] text-gray-600 flex-1 flex items-center justify-center">{t("trading.loading")}</div>}
                   </div>
                 )}
                 <div className="px-4 py-2 border-y border-white/5 flex items-center bg-[#05070A] shrink-0">
@@ -1314,7 +1315,7 @@ export const ControlPanel = (): JSX.Element => {
                         <span className="text-[11px] text-gray-500 text-right font-mono">{r.total}</span>
                       </div>
                     ))}
-                    {!bids.length && <div className="text-[10px] text-gray-600 flex-1 flex items-center justify-center">Loading...</div>}
+                    {!bids.length && <div className="text-[10px] text-gray-600 flex-1 flex items-center justify-center">{t("trading.loading")}</div>}
                   </div>
                 )}
               </GradientBorderPanel>
@@ -1335,7 +1336,7 @@ export const ControlPanel = (): JSX.Element => {
               <div className={`flex-1 overflow-y-auto ${scrollbarCls}`}>
                 {bottomTab === "positions" && (<>
                   <div className="grid grid-cols-8 gap-2 px-6 py-2 border-b border-white/5 shrink-0">
-                    {["SYMBOL","SIZE","ENTRY PRICE","MARK PRICE","LIQ.PRICE","MARGIN","PNL (ROE%)",""].map(c => <span key={c} className="text-[10px] text-[#A6B2C8] font-semibold tracking-[0.5px] uppercase">{c}</span>)}
+                    {[t("trading.symbol"),t("trading.size"),t("trading.entry_price"),t("trading.mark_price"),t("trading.liq_price"),t("trading.margin"),t("trading.pnl_roe"),""].map(c => <span key={c} className="text-[10px] text-[#A6B2C8] font-semibold tracking-[0.5px] uppercase">{c}</span>)}
                   </div>
                   {positions.length ? positions.map(pos => {
                     const mark = priceMap[pos.pair]||pos.entryPrice;
@@ -1346,7 +1347,7 @@ export const ControlPanel = (): JSX.Element => {
                     return <div key={pos.id} className="grid grid-cols-8 gap-2 py-2.5 px-6 border-b border-white/5 items-center">
                       <div className="flex items-center gap-1.5">
                         <CoinIcon symbol={pos.symbol} color={COINS.find(c=>c.symbol===pos.symbol)?.color||"#666"} size={16} />
-                        <span className={`text-[11px] font-bold ${clr}`}>{pos.symbol} {pos.side==="long"?"Long":"Short"} {pos.leverage.toFixed(1)}x</span>
+                        <span className={`text-[11px] font-bold ${clr}`}>{pos.symbol} {pos.side==="long"?t("trading.long"):t("trading.short")} {pos.leverage.toFixed(1)}x</span>
                       </div>
                       <span className={`text-[11px] font-semibold ${clr}`}>${fmt(pos.sizeUsdt)}</span>
                       <span className="text-[11px] text-white font-mono">{fmt(pos.entryPrice)}</span>
@@ -1361,9 +1362,9 @@ export const ControlPanel = (): JSX.Element => {
                             className="inline-flex items-center gap-1 text-[11px] font-bold text-[#00ffa3] bg-[#09231c] hover:bg-[#0d2d23] px-3 py-1.5 rounded-md border border-[#00ffa3]/30 cursor-pointer transition-colors"
                           >
                             <Plus className="w-3.5 h-3.5" />
-                            Add
+                            {t("trading.add")}
                           </button>
-                          <button onClick={() => closePosition(pos.id)} className="text-[12px] font-bold text-white bg-[#ff4d4d] hover:bg-[#ff6b6b] px-4 py-1.5 rounded-md border-none cursor-pointer transition-colors w-fit shadow-sm">Close</button>
+                          <button onClick={() => closePosition(pos.id)} className="text-[12px] font-bold text-white bg-[#ff4d4d] hover:bg-[#ff6b6b] px-4 py-1.5 rounded-md border-none cursor-pointer transition-colors w-fit shadow-sm">{t("trading.close")}</button>
                         </div>
                         {(pos.takeProfit != null || pos.stopLoss != null) && (
                           <span className="text-[9px] text-gray-400">
@@ -1372,12 +1373,12 @@ export const ControlPanel = (): JSX.Element => {
                         )}
                       </div>
                     </div>;
-                  }) : <div className="flex flex-col items-center justify-center flex-1 gap-3 py-8"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4a5568" strokeWidth="1.5"><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></svg><span className="text-gray-500 text-[11px]">No Open Positions</span></div>}
+                  }) : <div className="flex flex-col items-center justify-center flex-1 gap-3 py-8"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4a5568" strokeWidth="1.5"><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></svg><span className="text-gray-500 text-[11px]">{t("trading.no_positions")}</span></div>}
                 </>)}
 
                 {bottomTab === "open-orders" && (<>
                   <div className="grid grid-cols-8 gap-2 px-6 py-2 border-b border-white/5">
-                    {["SYMBOL","TYPE","SIDE","PRICE","SIZE","LEVERAGE","CREATED",""].map(c => <span key={c} className="text-[10px] text-[#A6B2C8] font-semibold tracking-[0.5px] uppercase">{c}</span>)}
+                    {[t("trading.symbol"),t("trading.type"),t("trading.side"),t("trading.price"),t("trading.size"),t("trading.leverage_col"),t("trading.created"),""].map(c => <span key={c} className="text-[10px] text-[#A6B2C8] font-semibold tracking-[0.5px] uppercase">{c}</span>)}
                   </div>
                   {pendingOrders.length ? pendingOrders.map(o => (
                     <div key={o.id} className="grid grid-cols-8 gap-2 py-2.5 px-6 border-b border-white/5 items-center">
@@ -1386,62 +1387,62 @@ export const ControlPanel = (): JSX.Element => {
                         <span className="text-[11px] font-bold text-white">{o.symbol}</span>
                       </div>
                       <span className="text-[11px] text-[#ffa500] font-bold uppercase">{o.type}</span>
-                      <span className={`text-[11px] font-bold ${o.side==="long"?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{o.side==="long"?"Buy":"Sell"}</span>
+                      <span className={`text-[11px] font-bold ${o.side==="long"?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{o.side==="long"?t("trading.buy"):t("trading.sell")}</span>
                       <span className="text-[11px] text-white font-mono">{fmt(o.price)}</span>
                       <span className="text-[11px] text-white font-mono">${fmt(o.sizeUsdt)}</span>
                       <span className="text-[11px] text-[#00ffa3] font-bold">{o.leverage}x</span>
                       <span className="text-[11px] text-gray-400">{fmtDate(o.createdAt)}</span>
-                      <button onClick={() => cancelOrder(o.id)} className="text-[10px] font-bold text-[#ff4d4d] hover:text-[#ff6666] bg-[#2a1520] hover:bg-[#3a2030] px-2.5 py-1 rounded-md border-none cursor-pointer transition-colors w-fit">Cancel</button>
+                      <button onClick={() => cancelOrder(o.id)} className="text-[10px] font-bold text-[#ff4d4d] hover:text-[#ff6666] bg-[#2a1520] hover:bg-[#3a2030] px-2.5 py-1 rounded-md border-none cursor-pointer transition-colors w-fit">{t("trading.cancel")}</button>
                     </div>
-                  )) : <div className="flex items-center justify-center py-8 text-gray-500 text-[11px]">No Open Orders</div>}
+                  )) : <div className="flex items-center justify-center py-8 text-gray-500 text-[11px]">{t("trading.no_orders")}</div>}
                 </>)}
 
                 {bottomTab === "order-history" && (<>
                   <div className="grid grid-cols-8 gap-2 px-6 py-2 border-b border-white/5">
-                    {["SYMBOL","TYPE","SIDE","PRICE","SIZE","LEVERAGE","STATUS","DATE"].map(c => <span key={c} className="text-[10px] text-[#A6B2C8] font-semibold tracking-[0.5px] uppercase">{c}</span>)}
+                    {[t("trading.symbol"),t("trading.type"),t("trading.side"),t("trading.price"),t("trading.size"),t("trading.leverage_col"),t("trading.status"),t("trading.date")].map(c => <span key={c} className="text-[10px] text-[#A6B2C8] font-semibold tracking-[0.5px] uppercase">{c}</span>)}
                   </div>
                   {orderHistory.length ? orderHistory.map(o => (
                     <div key={o.id} className="grid grid-cols-8 gap-2 py-2.5 px-6 border-b border-white/5 items-center">
                       <span className="text-[11px] font-bold text-white">{o.symbol}</span>
                       <span className="text-[11px] text-[#ffa500] font-bold uppercase">{o.type}</span>
-                      <span className={`text-[11px] font-bold ${o.side==="long"?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{o.side==="long"?"Buy":"Sell"}</span>
+                      <span className={`text-[11px] font-bold ${o.side==="long"?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{o.side==="long"?t("trading.buy"):t("trading.sell")}</span>
                       <span className="text-[11px] text-white font-mono">{fmt(o.price)}</span>
                       <span className="text-[11px] text-white font-mono">${fmt(o.sizeUsdt)}</span>
                       <span className="text-[11px] text-[#00ffa3] font-bold">{o.leverage}x</span>
-                      <span className={`text-[11px] font-bold ${o.status==="filled"?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{o.status.toUpperCase()}</span>
+                      <span className={`text-[11px] font-bold ${o.status==="filled"?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{o.status==="filled"?t("trading.filled"):t("trading.cancelled")}</span>
                       <span className="text-[11px] text-gray-400">{fmtDate(o.createdAt)}</span>
                     </div>
-                  )) : <div className="flex items-center justify-center py-8 text-gray-500 text-[11px]">No Order History</div>}
+                  )) : <div className="flex items-center justify-center py-8 text-gray-500 text-[11px]">{t("trading.no_order_history")}</div>}
                 </>)}
 
                 {bottomTab === "trade-history" && (<>
                   <div className="grid grid-cols-9 gap-2 px-6 py-2 border-b border-white/5">
-                    {["SYMBOL","SIDE","ENTRY","EXIT","SIZE","FEE","PNL","OPENED","CLOSED"].map(c => <span key={c} className="text-[10px] text-[#A6B2C8] font-semibold tracking-[0.5px] uppercase">{c}</span>)}
+                    {[t("trading.symbol"),t("trading.side"),t("trading.entry"),t("trading.exit"),t("trading.size"),t("trading.fee"),"PNL",t("trading.opened"),t("trading.closed")].map(c => <span key={c} className="text-[10px] text-[#A6B2C8] font-semibold tracking-[0.5px] uppercase">{c}</span>)}
                   </div>
-                  {tradeHistory.length ? tradeHistory.map(t => {
-                    const up = t.pnl >= 0;
-                    const fee = t.sizeUsdt * FEE_MARKET;
-                    return <div key={t.id} className="grid grid-cols-9 gap-2 py-2.5 px-6 border-b border-white/5 items-center">
-                      <span className="text-[11px] font-bold text-white">{t.symbol}</span>
-                      <span className={`text-[11px] font-bold ${t.side==="long"?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{t.side==="long"?"Long":"Short"}</span>
-                      <span className="text-[11px] text-white font-mono">{fmtPrice(t.entryPrice)}</span>
-                      <span className="text-[11px] text-white font-mono">{fmtPrice(t.exitPrice)}</span>
-                      <span className="text-[11px] text-white font-mono">${fmt(t.sizeUsdt)}</span>
+                  {tradeHistory.length ? tradeHistory.map(tr => {
+                    const up = tr.pnl >= 0;
+                    const fee = tr.sizeUsdt * FEE_MARKET;
+                    return <div key={tr.id} className="grid grid-cols-9 gap-2 py-2.5 px-6 border-b border-white/5 items-center">
+                      <span className="text-[11px] font-bold text-white">{tr.symbol}</span>
+                      <span className={`text-[11px] font-bold ${tr.side==="long"?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{tr.side==="long"?t("trading.long"):t("trading.short")}</span>
+                      <span className="text-[11px] text-white font-mono">{fmtPrice(tr.entryPrice)}</span>
+                      <span className="text-[11px] text-white font-mono">{fmtPrice(tr.exitPrice)}</span>
+                      <span className="text-[11px] text-white font-mono">${fmt(tr.sizeUsdt)}</span>
                       <span className="text-[11px] text-[#ff9500] font-mono">-${fee.toFixed(2)}</span>
-                      <span className={`text-[11px] font-bold ${up?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{up?"+":""}{t.pnl.toFixed(2)}</span>
-                      <span className="text-[11px] text-gray-400">{fmtDate(t.openedAt)}</span>
-                      <span className="text-[11px] text-gray-400">{fmtDate(t.closedAt)}</span>
+                      <span className={`text-[11px] font-bold ${up?"text-[#00ffa3]":"text-[#ff4d4d]"}`}>{up?"+":""}{tr.pnl.toFixed(2)}</span>
+                      <span className="text-[11px] text-gray-400">{fmtDate(tr.openedAt)}</span>
+                      <span className="text-[11px] text-gray-400">{fmtDate(tr.closedAt)}</span>
                     </div>;
-                  }) : <div className="flex items-center justify-center py-8 text-gray-500 text-[11px]">No Trade History</div>}
+                  }) : <div className="flex items-center justify-center py-8 text-gray-500 text-[11px]">{t("trading.no_trade_history")}</div>}
                 </>)}
 
-                {bottomTab === "assets" && <div className="flex items-center justify-center py-8 text-gray-500 text-[11px]">Assets view coming soon</div>}
+                {bottomTab === "assets" && <div className="flex items-center justify-center py-8 text-gray-500 text-[11px]">{t("cp.assets_coming_soon")}</div>}
               </div>
 
               <div className="flex items-center justify-between px-6 py-2 border-t border-white/5 bg-[#05070A] shrink-0">
                 <div className="flex items-center gap-5">
-                  <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-[#00ffa3] shadow-[0_0_5px_#00ffa3]" /><span className="text-[10.5px] text-[#afc0c9]">Connection: Secure</span></div>
-                  <span className="text-[10.5px] text-[#89a4ad]">Server Time: {kyivTime}</span>
+                  <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-[#00ffa3] shadow-[0_0_5px_#00ffa3]" /><span className="text-[10.5px] text-[#afc0c9]">{t("cp.connection_secure")}</span></div>
+                  <span className="text-[10.5px] text-[#89a4ad]">{t("cp.server_time")}: {kyivTime}</span>
                 </div>
                 <span className="text-[10px] text-[#A6B2C8] font-bold tracking-widest">UPDOWN PROTOCOL V2.4.1</span>
               </div>
@@ -1453,10 +1454,10 @@ export const ControlPanel = (): JSX.Element => {
             <div className="flex flex-col h-full">
               {/* Scrollable content */}
               <div className={`flex-1 overflow-y-auto p-4 pb-0 min-h-0 ${scrollbarCls}`}>
-                <span className="text-sm font-bold text-[#A6B2C8] tracking-wider uppercase mb-3 mt-1 block">Trade</span>
+                <span className="text-sm font-bold text-[#A6B2C8] tracking-wider uppercase mb-3 mt-1 block">{t("cp.trade")}</span>
                 <div className="flex gap-1 bg-[#111820] rounded-xl p-1 mb-3">
-                  {(["Limit","Market","Trigger"] as const).map(t => (
-                    <button key={t} onClick={() => setOrderType(t)} className={`flex-1 py-1.5 text-[12px] font-bold rounded-lg border-none cursor-pointer transition-colors ${orderType===t?"bg-[#00FFA3] text-[#05070A]":"bg-transparent text-gray-500 hover:text-white"}`}>{t}</button>
+                  {([{key:"Limit",label:t("trading.limit")},{key:"Market",label:t("trading.market")},{key:"Trigger",label:t("trading.trigger")}] as const).map(item => (
+                    <button key={item.key} onClick={() => setOrderType(item.key as any)} className={`flex-1 py-1.5 text-[12px] font-bold rounded-lg border-none cursor-pointer transition-colors ${orderType===item.key?"bg-[#00FFA3] text-[#05070A]":"bg-transparent text-gray-500 hover:text-white"}`}>{item.label}</button>
                   ))}
                 </div>
                 <div className="flex gap-2 mb-3 relative">
@@ -1467,7 +1468,7 @@ export const ControlPanel = (): JSX.Element => {
                       <svg width="10" height="6" viewBox="0 0 10 6" fill="white"><path d="M0 0l5 6 5-6z"/></svg>
                     </div>
                     {marginDropdownOpen && <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-[#111820] border border-white/10 rounded-lg z-50 shadow-2xl py-1">
-                      {(["CROSS","ISOLATED"] as const).map(t => <div key={t} onClick={() => { setMarginType(t); setMarginDropdownOpen(false); }} className={`px-4 py-2 text-[11px] font-bold cursor-pointer transition-colors ${marginType===t?"text-[#00ffa3] bg-white/5":"text-white hover:bg-white/5"}`}>{t}</div>)}
+                      {(["CROSS","ISOLATED"] as const).map(mt => <div key={mt} onClick={() => { setMarginType(mt); setMarginDropdownOpen(false); }} className={`px-4 py-2 text-[11px] font-bold cursor-pointer transition-colors ${marginType===mt?"text-[#00ffa3] bg-white/5":"text-white hover:bg-white/5"}`}>{mt === "CROSS" ? t("trading.cross") : t("trading.isolated")}</div>)}
                     </div>}
                   </div>
                   <div className="flex-1 relative">
@@ -1485,7 +1486,7 @@ export const ControlPanel = (): JSX.Element => {
                 {/* Trigger Price */}
                 {orderType === "Trigger" && (
                   <div className="mb-2">
-                    <div className="flex justify-between mb-1"><span className="text-[11px] text-gray-500 font-bold">Trigger Price</span><span className="text-[10px] text-gray-500">USDT</span></div>
+                    <div className="flex justify-between mb-1"><span className="text-[11px] text-gray-500 font-bold">{t("trading.trigger_price")}</span><span className="text-[10px] text-gray-500">USDT</span></div>
                     <div className="flex gap-2">
                       <div className="bg-[#111820] rounded-xl px-3 py-1.5 border border-transparent focus-within:border-[#00ffa3]/30 flex items-center flex-1">
                         <input type="number" value={triggerPriceInput} onChange={e => setTriggerPriceInput(e.target.value)} placeholder="0.00"
@@ -1508,7 +1509,7 @@ export const ControlPanel = (): JSX.Element => {
                 {/* Price */}
                 {!(orderType === "Trigger" && triggerExecType === "Market") && (
                   <div className="mb-2">
-                    <div className="flex justify-between mb-1"><span className="text-[11px] text-gray-500 font-bold">Price</span><span className="text-[10px] text-gray-500">USDT</span></div>
+                    <div className="flex justify-between mb-1"><span className="text-[11px] text-gray-500 font-bold">{t("trading.price")}</span><span className="text-[10px] text-gray-500">USDT</span></div>
                     <div className="bg-[#111820] rounded-xl px-3 py-1.5 border border-transparent focus-within:border-[#00ffa3]/30 flex items-center">
                       <input type="number" 
                         value={orderType==="Market" ? (priceNumeric > 0 ? priceNumeric.toFixed(2) : "") : priceInput} 
@@ -1522,7 +1523,7 @@ export const ControlPanel = (): JSX.Element => {
 
                 {/* Size (USDT) */}
                 <div className="mb-2">
-                  <div className="flex justify-between mb-1"><span className="text-[11px] text-gray-500 font-bold">Size</span><span className="text-[10px] text-gray-500">USDT</span></div>
+                  <div className="flex justify-between mb-1"><span className="text-[11px] text-gray-500 font-bold">{t("trading.size")}</span><span className="text-[10px] text-gray-500">USDT</span></div>
                   <div className="bg-[#111820] rounded-xl px-3 py-1.5 border border-transparent focus-within:border-[#00ffa3]/30 flex items-center">
                     <input type="number" value={sizeInput} onChange={e => handleSizeChange(e.target.value)} placeholder="0.00"
                       className="w-full bg-transparent border-none outline-none text-[14px] font-medium text-white placeholder-gray-700 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
@@ -1541,8 +1542,8 @@ export const ControlPanel = (): JSX.Element => {
 
                 {/* Order Summary */}
                 <div className="flex flex-col gap-1 py-2 border-t border-white/5 text-[11px]">
-                  <div className="flex justify-between"><span className="text-gray-500">Margin</span><span className="font-semibold text-white">{sizeInput && parseFloat(sizeInput) > 0 ? fmt(parseFloat(sizeInput)/leverage) : "0.00"} USDT</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Leverage</span><span className="font-semibold text-[#00ffa3]">{leverage}x</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500">{t("trading.margin")}</span><span className="font-semibold text-white">{sizeInput && parseFloat(sizeInput) > 0 ? fmt(parseFloat(sizeInput)/leverage) : "0.00"} USDT</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500">{t("cp.leverage")}</span><span className="font-semibold text-[#00ffa3]">{leverage}x</span></div>
                   {sizeInput && parseFloat(sizeInput) > 0 && priceNumeric > 0 && <>
                     <div className="flex justify-between"><span className="text-gray-500">Liq. (Long)</span><span className="font-semibold text-[#ff9500]">{fmt(calcLiqPrice(priceNumeric, leverage, "long"))}</span></div>
                     <div className="flex justify-between"><span className="text-gray-500">Liq. (Short)</span><span className="font-semibold text-[#ff9500]">{fmt(calcLiqPrice(priceNumeric, leverage, "short"))}</span></div>
@@ -1552,7 +1553,7 @@ export const ControlPanel = (): JSX.Element => {
                 </div>
 
                 <div className="flex justify-between items-center py-1">
-                  <span className="text-[11px] text-gray-500">Available Balance</span>
+                  <span className="text-[11px] text-gray-500">{t("trading.available")}</span>
                   <span className="text-[11px] font-bold text-white">{fmt(availableBalance)} USDT</span>
                 </div>
               </div>
@@ -1560,12 +1561,12 @@ export const ControlPanel = (): JSX.Element => {
               {/* Pinned Buttons */}
               <div className="flex flex-col gap-2 p-4 pt-2 shrink-0">
                 <button onClick={() => openTrade("long")} className="w-full h-[42px] rounded-[10px] bg-gradient-to-b from-[#00FFA3] to-[#009962] hover:brightness-110 border-none cursor-pointer transition-all flex flex-col items-center justify-center shadow-[0_0_15px_rgba(0,255,163,0.3)]">
-                  <span className="font-bold text-[#05070a] text-[14px] tracking-wide leading-none mb-0.5">{orderType==="Market"?"BUY / LONG":`${orderType.toUpperCase()} BUY`}</span>
-                  <span className="text-[8px] text-[#05070a]/80 font-bold tracking-widest uppercase leading-none">PRICE: {orderType==="Market"?currentPrice:priceInput||"—"}</span>
+                  <span className="font-bold text-[#05070a] text-[14px] tracking-wide leading-none mb-0.5">{orderType==="Market"?t("trading.buy_long"):orderType==="Limit"?t("trading.limit_buy"):t("trading.trigger_buy")}</span>
+                  <span className="text-[8px] text-[#05070a]/80 font-bold tracking-widest uppercase leading-none">{t("trading.price_colon")}: {orderType==="Market"?currentPrice:priceInput||"—"}</span>
                 </button>
                 <button onClick={() => openTrade("short")} className="w-full h-[42px] rounded-[10px] bg-gradient-to-b from-[#FF3B3B] to-[#992323] hover:brightness-110 border-none cursor-pointer transition-all flex flex-col items-center justify-center shadow-[0_0_15px_rgba(255,59,59,0.3)]">
-                  <span className="font-bold text-white text-[14px] tracking-wide leading-none mb-0.5">{orderType==="Market"?"SELL / SHORT":`${orderType.toUpperCase()} SELL`}</span>
-                  <span className="text-[8px] text-white/80 font-bold tracking-widest uppercase leading-none">PRICE: {orderType==="Market"?currentPrice:priceInput||"—"}</span>
+                  <span className="font-bold text-white text-[14px] tracking-wide leading-none mb-0.5">{orderType==="Market"?t("trading.sell_short"):orderType==="Limit"?t("trading.limit_sell"):t("trading.trigger_sell")}</span>
+                  <span className="text-[8px] text-white/80 font-bold tracking-widest uppercase leading-none">{t("trading.price_colon")}: {orderType==="Market"?currentPrice:priceInput||"—"}</span>
                 </button>
               </div>
             </div>
@@ -1602,7 +1603,7 @@ export const ControlPanel = (): JSX.Element => {
                   <Plus className="w-4.5 h-4.5" />
                 </div>
                 <div>
-                  <h3 className="text-[17px] min-[375px]:text-[19px] font-bold text-white tracking-tight">Add TP/SL</h3>
+                  <h3 className="text-[17px] min-[375px]:text-[19px] font-bold text-white tracking-tight">{t("trading.tp_sl")}</h3>
                   <span className="text-[10px] text-gray-500 font-medium">{modalPosition.symbol} • {modalPosition.side === "long" ? "Long" : "Short"} {modalPosition.leverage.toFixed(1)}x</span>
                 </div>
               </div>
@@ -1621,19 +1622,19 @@ export const ControlPanel = (): JSX.Element => {
             {/* Info cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               <div className="rounded-xl bg-[#0a1018] border border-white/[0.06] px-3 py-2.5">
-                <div className="text-[9px] uppercase tracking-[0.1em] text-gray-500 font-semibold">Entry Price</div>
+                <div className="text-[9px] uppercase tracking-[0.1em] text-gray-500 font-semibold">{t("trading.entry_price")}</div>
                 <div className="text-[14px] font-bold text-white mt-0.5">{fmt(modalPosition.entryPrice)}</div>
               </div>
               <div className="rounded-xl bg-[#0a1018] border border-white/[0.06] px-3 py-2.5">
-                <div className="text-[9px] uppercase tracking-[0.1em] text-gray-500 font-semibold">Size</div>
+                <div className="text-[9px] uppercase tracking-[0.1em] text-gray-500 font-semibold">{t("trading.size")}</div>
                 <div className="text-[14px] font-bold text-white mt-0.5">${fmt(modalPosition.sizeUsdt)}</div>
               </div>
               <div className="rounded-xl bg-[#0a1018] border border-white/[0.06] px-3 py-2.5">
-                <div className="text-[9px] uppercase tracking-[0.1em] text-gray-500 font-semibold">Mark Price</div>
+                <div className="text-[9px] uppercase tracking-[0.1em] text-gray-500 font-semibold">{t("trading.mark_price")}</div>
                 <div className="text-[14px] font-bold text-white mt-0.5">{fmt(modalMarkPrice)}</div>
               </div>
               <div className="rounded-xl bg-[#0a1018] border border-white/[0.06] px-3 py-2.5">
-                <div className="text-[9px] uppercase tracking-[0.1em] text-gray-500 font-semibold">Liq. Price</div>
+                <div className="text-[9px] uppercase tracking-[0.1em] text-gray-500 font-semibold">{t("trading.liq_price")}</div>
                 <div className="text-[14px] font-bold text-[#ff9500] mt-0.5">{fmt(modalPosition.liqPrice)}</div>
               </div>
             </div>
@@ -1642,17 +1643,17 @@ export const ControlPanel = (): JSX.Element => {
             <div className="mt-4 rounded-xl border border-[#00ffa3]/10 bg-[#00ffa3]/[0.02] p-4">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-[#00ffa3] shadow-[0_0_6px_#00ffa3]" />
-                <span className="text-[12px] font-bold text-[#00ffa3]">Take Profit (TP)</span>
+                <span className="text-[12px] font-bold text-[#00ffa3]">{t("trading.take_profit")} (TP)</span>
               </div>
               <div className="text-[10px] text-gray-500 mb-2.5">
-                {modalPosition.side === "long" ? "For Long: TP should be above Mark Price." : "For Short: TP should be below Mark Price."}
+                {modalPosition.side === "long" ? t("trading.tp_long_hint") : t("trading.tp_short_hint")}
               </div>
               <div className="relative">
                 <input
                   type="number"
                   value={tpInput}
                   onChange={(e) => setTpInput(e.target.value)}
-                  placeholder="Trigger price"
+                  placeholder={t("trading.trigger_price_placeholder")}
                   className="w-full rounded-lg border border-white/[0.08] bg-[#080d14] px-3.5 py-2.5 pr-14 text-[14px] text-white outline-none focus:border-[#00ffa3]/40 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-gray-600"
                 />
                 <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-gray-500">USDT</span>
@@ -1662,7 +1663,7 @@ export const ControlPanel = (): JSX.Element => {
                 const isPos = pnlDiff >= 0;
                 return (
                   <div className={`mt-2 text-[11px] font-semibold ${isPos ? "text-[#00ffa3]" : "text-[#ff4d4d]"}`}>
-                    Estimated PNL: {isPos ? "+$" : "-$"}{Math.abs(pnlDiff).toFixed(2)}
+                    {t("trading.estimated_pnl")}: {isPos ? "+$" : "-$"}{Math.abs(pnlDiff).toFixed(2)}
                   </div>
                 );
               })()}
@@ -1672,17 +1673,17 @@ export const ControlPanel = (): JSX.Element => {
             <div className="mt-3 rounded-xl border border-[#ff4d4d]/10 bg-[#ff4d4d]/[0.02] p-4">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-[#ff4d4d] shadow-[0_0_6px_#ff4d4d]" />
-                <span className="text-[12px] font-bold text-[#ff4d4d]">Stop Loss (SL)</span>
+                <span className="text-[12px] font-bold text-[#ff4d4d]">{t("trading.stop_loss")} (SL)</span>
               </div>
               <div className="text-[10px] text-gray-500 mb-2.5">
-                {modalPosition.side === "long" ? "For Long: SL should be below Mark Price." : "For Short: SL should be above Mark Price."}
+                {modalPosition.side === "long" ? t("trading.sl_long_hint") : t("trading.sl_short_hint")}
               </div>
               <div className="relative">
                 <input
                   type="number"
                   value={slInput}
                   onChange={(e) => setSlInput(e.target.value)}
-                  placeholder="Trigger price"
+                  placeholder={t("trading.trigger_price_placeholder")}
                   className="w-full rounded-lg border border-white/[0.08] bg-[#080d14] px-3.5 py-2.5 pr-14 text-[14px] text-white outline-none focus:border-[#ff4d4d]/40 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-gray-600"
                 />
                 <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-gray-500">USDT</span>
@@ -1692,7 +1693,7 @@ export const ControlPanel = (): JSX.Element => {
                 const isPos = pnlDiff >= 0;
                 return (
                   <div className={`mt-2 text-[11px] font-semibold ${isPos ? "text-[#00ffa3]" : "text-[#ff4d4d]"}`}>
-                    Estimated PNL: {isPos ? "+$" : "-$"}{Math.abs(pnlDiff).toFixed(2)}
+                    {t("trading.estimated_pnl")}: {isPos ? "+$" : "-$"}{Math.abs(pnlDiff).toFixed(2)}
                   </div>
                 );
               })()}
@@ -1712,7 +1713,7 @@ export const ControlPanel = (): JSX.Element => {
                 disabled={tpslSaving}
                 className="flex-1 rounded-xl bg-gradient-to-b from-[#00ffa3] to-[#00cc82] px-4 py-3 text-[13px] font-bold text-[#04140f] border-none cursor-pointer hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-[0_4px_16px_rgba(0,255,163,0.2)]"
               >
-                {tpslSaving ? "Saving..." : "Confirm"}
+                {tpslSaving ? "..." : t("trading.confirm")}
               </button>
               <button
                 type="button"
@@ -1720,7 +1721,7 @@ export const ControlPanel = (): JSX.Element => {
                 disabled={tpslSaving}
                 className="flex-1 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-[13px] font-semibold text-gray-300 cursor-pointer hover:bg-white/[0.06] hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
-                Cancel
+                {t("trading.cancel")}
               </button>
             </div>
           </div>

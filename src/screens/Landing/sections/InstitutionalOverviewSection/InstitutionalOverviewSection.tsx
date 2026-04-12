@@ -1,43 +1,44 @@
 import { Button } from "../../../../components/ui/button";
 import { Card, CardContent } from "../../../../components/ui/card";
-
-// Stat card data
-const stats = [
-  {
-    value: "4,578+",
-    label: "ACTIVE TRADERS",
-    valueColor: "text-white",
-    labelColor: "text-[#00ffa3]",
-    row: "lg:row-[1_/_2]",
-    col: "lg:col-[1_/_2]",
-  },
-  {
-    value: "$11M+",
-    label: "TOTAL PAYOUTS",
-    valueColor: "text-white",
-    labelColor: "text-[#00ffa3]",
-    row: "lg:row-[1_/_2]",
-    col: "lg:col-[2_/_3]",
-  },
-  {
-    value: "$14,200",
-    label: "AVG. MONTHLY PAYOUT",
-    valueColor: "text-white",
-    labelColor: "text-[#00ffa3]",
-    row: "lg:row-[2_/_3]",
-    col: "lg:col-[1_/_2]",
-  },
-  {
-    value: "99.9%",
-    label: "UPTIME RELIABILITY",
-    valueColor: "text-[#00ffa3]",
-    labelColor: "text-[#ffffff80]",
-    row: "lg:row-[2_/_3]",
-    col: "lg:col-[2_/_3]",
-  },
-];
+import { useTranslation } from "../../../../lib/i18n";
 
 export const InstitutionalOverviewSection = (): JSX.Element => {
+  const { t } = useTranslation();
+
+  const stats = [
+    {
+      value: t("institutional.active_traders"),
+      label: t("institutional.active_traders_label"),
+      valueColor: "text-white",
+      labelColor: "text-[#00ffa3]",
+      row: "lg:row-[1_/_2]",
+      col: "lg:col-[1_/_2]",
+    },
+    {
+      value: t("institutional.total_payouts"),
+      label: t("institutional.total_payouts_label"),
+      valueColor: "text-white",
+      labelColor: "text-[#00ffa3]",
+      row: "lg:row-[1_/_2]",
+      col: "lg:col-[2_/_3]",
+    },
+    {
+      value: t("institutional.avg_monthly"),
+      label: t("institutional.avg_monthly_label"),
+      valueColor: "text-white",
+      labelColor: "text-[#00ffa3]",
+      row: "lg:row-[2_/_3]",
+      col: "lg:col-[1_/_2]",
+    },
+    {
+      value: t("institutional.uptime"),
+      label: t("institutional.uptime_label"),
+      valueColor: "text-[#00ffa3]",
+      labelColor: "text-[#ffffff80]",
+      row: "lg:row-[2_/_3]",
+      col: "lg:col-[2_/_3]",
+    },
+  ];
   return (
     <section className="flex w-full flex-col items-start bg-[#0b0f144c] px-4 py-16 sm:px-6 lg:px-28 lg:py-24">
       <div className="relative flex w-full flex-col gap-10 self-stretch lg:flex-row lg:items-center lg:gap-16">
@@ -45,20 +46,20 @@ export const InstitutionalOverviewSection = (): JSX.Element => {
         <div className="flex flex-col items-start gap-[16.5px] relative flex-1 grow">
           {/* OUR STORY label */}
           <span className="[font-family:'Inter',Helvetica] font-bold text-[#00ffa3] text-sm tracking-[1.40px] leading-5 whitespace-nowrap">
-            OUR STORY
+            {t("institutional.label")}
           </span>
 
           {/* Heading */}
           <h2 className="self-stretch [font-family:'Inter',Helvetica] text-3xl font-extrabold leading-tight tracking-[0] text-white sm:text-4xl sm:leading-[45px]">
-            Empowering Global Traders
+            {t("institutional.title_line1")}
             <br />
-            with Institutional Power
+            {t("institutional.title_line2")}
           </h2>
 
           {/* Description */}
           <div className="flex w-full flex-col items-start self-stretch px-0 pb-0 pt-[7.5px]">
             <p className="self-stretch [font-family:'Inter',Helvetica] text-base font-normal leading-7 tracking-[0] text-gray-400 sm:text-lg sm:leading-[29.2px]">
-              UPDOWNX was born from the vision of professional traders who believe talent should never be limited by capital. We provide the infrastructure, liquidity, and risk management tools to turn skilled individuals into institutional-grade crypto traders.
+              {t("institutional.description")}
             </p>
           </div>
 
@@ -68,7 +69,7 @@ export const InstitutionalOverviewSection = (): JSX.Element => {
               variant="outline"
               className="h-auto px-6 py-3 rounded-xl border border-solid border-[#00ffa3] bg-transparent hover:bg-[#00ffa310] text-[#00ffa3] hover:text-[#00ffa3] [font-family:'Inter',Helvetica] font-bold text-base leading-6"
             >
-              Read Mission
+              {t("institutional.button")}
             </Button>
           </div>
         </div>

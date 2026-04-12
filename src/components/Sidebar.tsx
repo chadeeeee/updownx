@@ -1,38 +1,14 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
+import { useTranslation } from "../lib/i18n";
 
 const navItems = [
-  {
-    icon: "/svg/rocket.svg",
-    alt: "Icon rocket",
-    label: "New Challenge",
-    route: "/challenge",
-  },
-  {
-    icon: "/svg/wallet.svg",
-    alt: "Icon wallet",
-    label: "Accounts",
-    route: "/accounts",
-  },
-  {
-    icon: "/svg/money.svg",
-    alt: "Icon cash",
-    label: "Payments",
-    route: "/payments",
-  },
-  {
-    icon: "/svg/withdrawal.svg",
-    alt: "Icon withdrawals",
-    label: "Withdrawals",
-    route: "/withdrawals",
-  },
-  {
-    icon: "/svg/faq.svg",
-    alt: "Icon faq",
-    label: "Help",
-    route: "/help",
-  },
+  { icon: "/svg/rocket.svg", alt: "Icon rocket", labelKey: "sidebar.new_challenge", route: "/challenge" },
+  { icon: "/svg/wallet.svg", alt: "Icon wallet", labelKey: "sidebar.accounts", route: "/accounts" },
+  { icon: "/svg/money.svg", alt: "Icon cash", labelKey: "sidebar.payments", route: "/payments" },
+  { icon: "/svg/withdrawal.svg", alt: "Icon withdrawals", labelKey: "sidebar.withdrawals", route: "/withdrawals" },
+  { icon: "/svg/faq.svg", alt: "Icon faq", labelKey: "sidebar.help", route: "/help" },
 ];
 
 interface SidebarProps {
@@ -43,6 +19,7 @@ interface SidebarProps {
 export const Sidebar = ({ mobileOpen, onClose }: SidebarProps): JSX.Element => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [desktopPinned, setDesktopPinned] = useState(false);
 
   useEffect(() => {
@@ -88,7 +65,7 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps): JSX.Element => {
           <div className="flex flex-col w-[210px] items-start gap-[5px]">
             {navItems.map((item) => {
               const isActive = location.pathname.startsWith(item.route) || (item.route === "/challenge" && location.pathname === "/event-live") || (item.route === "/accounts" && location.pathname === "/control-panel");
-              const isHelp = item.label === "Help";
+              const isHelp = item.labelKey === "sidebar.help";
               return (
                 <button
                   key={item.label}
@@ -120,7 +97,7 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps): JSX.Element => {
                       isActive ? "font-semibold text-[#05070a]" : "font-normal text-gray-300"
                     }`}
                   >
-                    {item.label}
+                    {t(item.labelKey)}
                   </span>
                 </button>
               );
@@ -134,12 +111,12 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps): JSX.Element => {
       <div className="fixed bottom-[30px] left-[30px] w-[210px] z-50 hidden lg:block">
         <div className="relative w-full h-[90px] rounded-xl bg-[linear-gradient(211deg,rgba(44,246,195,0.3)_0%,rgba(1,50,38,0.3)_100%)] before:content-[''] before:absolute before:inset-0 before:p-px before:rounded-xl before:[background:linear-gradient(227deg,rgba(44,246,195,0.3)_0%,rgba(1,50,38,0.3)_100%)] before:[-webkit-mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] before:[-webkit-mask-composite:xor] before:[mask-composite:exclude] before:z-[1] before:pointer-events-none">
           <div className="absolute top-[17px] left-[17px] flex items-center [font-family:'Inter',Helvetica] font-normal text-white text-[11.3px] tracking-[0] leading-4">
-            Need assistance?
+            {t("sidebar.need_assistance")}
           </div>
           <Button 
               onClick={() => navigate('/support')}
               className="absolute top-[41px] left-1/2 -translate-x-1/2 w-[173px] h-[33px] bg-[#00ffa3] hover:bg-[#00ffa3]/90 rounded-xl [font-family:'Inter',Helvetica] font-semibold text-[#0b0f14] text-[11.1px] text-center tracking-[0] leading-4 whitespace-nowrap border-none">
-            Contact Support
+            {t("sidebar.contact_support")}
           </Button>
         </div>
       </div>

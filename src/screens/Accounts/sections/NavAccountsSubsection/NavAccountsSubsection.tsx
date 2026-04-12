@@ -1,8 +1,10 @@
+import { useTranslation } from "../../../../lib/i18n";
+
 const navItems = [
-  { value: "trader", label: "TRADER" },
-  { value: "challenge", label: "CHALLENGE" },
-  { value: "will-be-activated", label: "WILL BE ACTIVATED" },
-  { value: "failed", label: "FAILED" },
+  { value: "trader", labelKey: "accounts.tab_trader" },
+  { value: "challenge", labelKey: "accounts.tab_challenge" },
+  { value: "will-be-activated", labelKey: "accounts.tab_activated" },
+  { value: "failed", labelKey: "accounts.tab_failed" },
 ];
 
 type NavAccountsSubsectionProps = {
@@ -11,6 +13,7 @@ type NavAccountsSubsectionProps = {
 };
 
 export const NavAccountsSubsection = ({ activeTab, onTabChange }: NavAccountsSubsectionProps): JSX.Element => {
+  const { t } = useTranslation();
 
   return (
     <div className="relative flex w-full items-center justify-between px-3 sm:px-8 lg:px-16 2xl:px-20 py-3 2xl:py-4 bg-[#05070a] rounded-xl 2xl:rounded-2xl before:content-[''] before:absolute before:inset-0 before:p-px before:rounded-xl 2xl:before:rounded-2xl before:[background:linear-gradient(227deg,rgba(44,246,195,0.3)_0%,rgba(1,50,38,0.3)_100%)] before:[-webkit-mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] before:[-webkit-mask-composite:xor] before:[mask-composite:exclude] before:z-[1] before:pointer-events-none overflow-x-auto">
@@ -26,7 +29,7 @@ export const NavAccountsSubsection = ({ activeTab, onTabChange }: NavAccountsSub
                 : "bg-transparent text-white font-medium hover:bg-[#00ffa3]/10"
                 }`}
             >
-              {item.label}
+              {t(item.labelKey)}
             </button>
           );
         })}

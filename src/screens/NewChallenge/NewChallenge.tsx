@@ -2,14 +2,15 @@ import { Link, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { DashboardLayout } from "../../components/DashboardLayout";
 import { api, type Challenge } from "../../lib/api";
+import { useTranslation } from "../../lib/i18n";
 import { ArrowRight, CheckCircle2, ChevronDown, Menu, X } from "lucide-react";
 
 /* ── Shared constants ── */
 const mobileNavTabs = [
-  { label: "New challenge", route: "/challenge" },
-  { label: "Accounts", route: "/accounts" },
-  { label: "Payments", route: "/payments" },
-  { label: "Withdrawals", route: "/withdrawals" },
+  { labelKey: "nav.new_challenge", route: "/challenge" },
+  { labelKey: "nav.accounts", route: "/accounts" },
+  { labelKey: "nav.payments", route: "/payments" },
+  { labelKey: "nav.withdrawals", route: "/withdrawals" },
 ];
 
 const features = [
@@ -21,15 +22,18 @@ const features = [
   "1:5 Leverage",
 ];
 
-const NeedAssistance = () => (
+const NeedAssistance = () => {
+  const { t } = useTranslation();
+  return (
   <div className="mt-4 rounded-[18px] border border-[#1a5a4a]/50 bg-[linear-gradient(180deg,rgba(15,56,50,0.92)_0%,rgba(8,20,27,0.92)_100%)] p-3 shadow-[0_12px_30px_rgba(0,0,0,0.22)] min-[375px]:rounded-[20px] min-[375px]:p-4 md:mt-6 md:p-6">
-    <p className="mb-2.5 text-[11px] text-[#d7e4e0] min-[375px]:mb-3 min-[375px]:text-xs md:mb-4 md:text-sm">Need assistance?</p>
+    <p className="mb-2.5 text-[11px] text-[#d7e4e0] min-[375px]:mb-3 min-[375px]:text-xs md:mb-4 md:text-sm">{t("sidebar.need_assistance")}</p>
     <div className="grid grid-cols-2 gap-2 min-[375px]:gap-2.5 md:gap-4">
-      <button className="h-9 rounded-[10px] bg-[#00FFA3] px-2 text-[11px] font-bold text-black min-[375px]:h-10 min-[375px]:rounded-xl min-[375px]:text-xs md:h-14 md:text-sm">Contact Support</button>
-      <button className="h-9 rounded-[10px] border border-[#2f7563] bg-transparent px-2 text-[11px] font-bold text-[#c3d8d0] min-[375px]:h-10 min-[375px]:rounded-xl min-[375px]:text-xs md:h-14 md:text-sm">Help</button>
+      <button className="h-9 rounded-[10px] bg-[#00FFA3] px-2 text-[11px] font-bold text-black min-[375px]:h-10 min-[375px]:rounded-xl min-[375px]:text-xs md:h-14 md:text-sm">{t("sidebar.contact_support")}</button>
+      <button className="h-9 rounded-[10px] border border-[#2f7563] bg-transparent px-2 text-[11px] font-bold text-[#c3d8d0] min-[375px]:h-10 min-[375px]:rounded-xl min-[375px]:text-xs md:h-14 md:text-sm">{t("sidebar.help")}</button>
     </div>
   </div>
-);
+  );
+};
 
 export const NewChallenge = (): JSX.Element => {
   const [plans, setPlans] = useState<Challenge[]>([]);
@@ -37,6 +41,7 @@ export const NewChallenge = (): JSX.Element => {
   const [activeCard, setActiveCard] = useState(1);
   const scrollRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+  const { t } = useTranslation();
 
   useEffect(() => {
     api.challenges()
@@ -94,11 +99,9 @@ export const NewChallenge = (): JSX.Element => {
           <img src="/images/logo.png" alt="UPDOWNX" className="h-6 w-auto object-contain min-[375px]:h-7" />
         </Link>
         <div className="flex items-center gap-2 min-[375px]:gap-3">
-          <button className="flex items-center gap-1 text-[11px] text-gray-400 min-[375px]:text-xs">
-            EN <ChevronDown size={10} />
-          </button>
+          <LanguageSwitcher size="sm" />
           <Link to="/challenge" className="rounded-lg bg-[#00FFA3] px-2.5 py-1.5 text-[10px] font-bold text-black min-[375px]:px-3 min-[375px]:text-[11px]">
-            START
+            {t("trading.start")}
           </Link>
           <button onClick={() => setSidebarOpen((p) => !p)} className="text-gray-300 hover:text-white" aria-label="Toggle menu">
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
@@ -119,7 +122,7 @@ export const NewChallenge = (): JSX.Element => {
                   isActive ? "text-[#00FFA3]" : "text-gray-400 hover:text-gray-200"
                 }`}
               >
-                {tab.label}
+                {t(tab.labelKey)}
                 <span
                   className={`absolute bottom-1 left-2.5 right-2.5 h-px rounded-full transition-opacity min-[375px]:left-3 min-[375px]:right-3 ${
                     isActive ? "bg-[#00FFA3] opacity-100" : "opacity-0"
@@ -143,23 +146,22 @@ export const NewChallenge = (): JSX.Element => {
             <div className="relative z-10 mb-2.5 flex items-center gap-2 min-[375px]:mb-3">
               <span className="inline-flex items-center gap-1 rounded-full bg-[#00FFA3] px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.16em] text-[#021a14] min-[375px]:gap-1.5 min-[375px]:px-2.5 min-[375px]:text-[9px] md:text-xs">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#021a14]" />
-                Event Live
+                {t("event.badge")}
               </span>
             </div>
             <h2 className="relative z-10 max-w-[235px] text-[17px] font-black leading-[1.08] tracking-tight text-white min-[375px]:max-w-[260px] min-[375px]:text-[18px] md:max-w-2xl md:text-3xl lg:text-4xl">
-              WSCT Blockchain Forum 2026 –
+              {t("event.title_line1")}
               <br />
-              Qualifying Tour
+              {t("event.title_line2")}
             </h2>
             <p className="relative z-10 mt-2 max-w-[230px] text-[9px] leading-[1.55] text-[#c9d6db]/72 min-[375px]:max-w-[255px] min-[375px]:text-[10px] md:mt-3 md:max-w-2xl md:text-sm">
-              Join the elite circle of institutional-grade traders. Complete the qualifying assessment
-              during the WSCT Forum and gain access to a dedicated $1M pool.
+              {t("event.description")}
             </p>
             <Link
               to="/event-live"
               className="relative z-10 mt-4 inline-flex h-8.5 items-center gap-1.5 rounded-[10px] bg-[#00FFA3] px-3.5 text-[11px] font-bold text-black transition-all hover:bg-[#00e895] min-[375px]:h-9 min-[375px]:px-4 min-[375px]:text-[12px] md:mt-6 md:h-11 md:px-6 md:text-base"
             >
-              Read the rules <ArrowRight size={13} />
+              {t("event.read_rules")} <ArrowRight size={13} />
             </Link>
           </section>
 
@@ -176,7 +178,7 @@ export const NewChallenge = (): JSX.Element => {
             }}
           >
             {plans.map((plan) => {
-              const isPro = plan.id.toLowerCase().includes("pro");
+              const isPro = plan.id.toLowerCase().includes("killer");
               return (
                 <div
                   key={plan.id}
@@ -199,15 +201,15 @@ export const NewChallenge = (): JSX.Element => {
                         ${plan.balance.toLocaleString()}
                       </span>
                       <span className="mt-2 block text-[8px] font-bold uppercase tracking-[0.16em] text-[#586b74] min-[375px]:text-[9px] min-[375px]:tracking-[0.18em]">
-                        Account Balance
+                        {t("event.account_balance")}
                       </span>
                     </div>
 
                     <div className="space-y-2.5 min-[375px]:space-y-3">
-                      {features.map((feature, idx) => (
+                      {featureKeys.map((featureKey, idx) => (
                         <div key={idx} className="flex items-center gap-2">
                           <CheckCircle2 size={12} className="shrink-0 text-[#00FFA3] min-[375px]:h-[13px] min-[375px]:w-[13px]" />
-                          <span className="text-[10px] font-medium leading-tight text-[#95a7af] min-[375px]:text-[11px]">{feature}</span>
+                          <span className="text-[10px] font-medium leading-tight text-[#95a7af] min-[375px]:text-[11px]">{t(featureKey)}</span>
                         </div>
                       ))}
                     </div>
@@ -215,7 +217,7 @@ export const NewChallenge = (): JSX.Element => {
                     {isPro && (
                       <div className="absolute inset-x-0 -bottom-3 flex justify-center">
                         <span className="rounded-full bg-[#00FFA3] px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.16em] text-black whitespace-nowrap min-[375px]:px-3 min-[375px]:text-[9px] min-[375px]:tracking-[0.18em]">
-                          Most Popular
+                          {t("pricing.most_popular")}
                         </span>
                       </div>
                     )}
@@ -240,7 +242,7 @@ export const NewChallenge = (): JSX.Element => {
                         to={`/checkout/${plan.id}?method=crypto`}
                         className="flex h-9 w-full items-center justify-center rounded-[10px] bg-[#00FFA3] px-2 text-[10px] font-black uppercase tracking-[0.03em] text-black transition-all hover:bg-[#00e895] min-[375px]:h-10 min-[375px]:px-3 min-[375px]:text-[11px] min-[375px]:tracking-[0.04em]"
                       >
-                        Crypto Payment
+                        {t("event.crypto_payment")}
                       </Link>
 
                     </div>
@@ -250,7 +252,7 @@ export const NewChallenge = (): JSX.Element => {
             })}
           </div>
 
-          {/* ── Carousel dots ── */}
+          {/* ── Carousel dots ── */}}
           {plans.length > 1 && (
             <div className="flex justify-center gap-1.5">
               {plans.map((_, idx) => (
@@ -273,30 +275,29 @@ export const NewChallenge = (): JSX.Element => {
           <div className="mb-4 flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[#00FFA3] px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#021a14]">
               <span className="h-1.5 w-1.5 rounded-full bg-[#021a14]" />
-              Event Live
+              {t("event.badge")}
             </span>
           </div>
           <h2 className="text-4xl font-black leading-tight tracking-tight text-white">
-            WSCT Blockchain Forum 2026 –
+            {t("event.title_line1")}
             <br />
-            Qualifying Tour
+            {t("event.title_line2")}
           </h2>
           <p className="mt-3 max-w-2xl text-[#89a4ad]">
-            Join the elite circle of institutional-grade traders. Complete the qualifying assessment
-            during the WSCT Forum and gain access to a dedicated $1M pool.
+            {t("event.description")}
           </p>
           <Link
             to="/event-live"
             className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#00FFA3] px-6 py-3 font-bold text-black transition-all hover:bg-[#00e895] hover:shadow-[0_0_20px_rgba(0,255,163,0.2)]"
           >
-            Read the rules <ArrowRight size={16} />
+            {t("event.read_rules")} <ArrowRight size={16} />
           </Link>
         </section>
 
         {/* Pricing Grid */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-5 items-start">
           {plans.map((plan) => {
-            const isPro = plan.id.toLowerCase().includes("pro");
+            const isPro = plan.id.toLowerCase().includes("killer");
 
             return (
               <div key={plan.id} className="flex flex-col gap-4">
@@ -310,7 +311,7 @@ export const NewChallenge = (): JSX.Element => {
                   {isPro && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
                       <span className="rounded-full bg-[#00FFA3] px-4 py-1 text-[10px] font-black uppercase tracking-widest text-black whitespace-nowrap">
-                        Most Popular
+                        {t("pricing.most_popular")}
                       </span>
                     </div>
                   )}
@@ -323,16 +324,16 @@ export const NewChallenge = (): JSX.Element => {
                         ${plan.balance.toLocaleString()}
                       </span>
                       <span className="text-[10px] uppercase font-bold text-[#5e747e] tracking-widest mt-1">
-                        Account Balance
+                        {t("event.account_balance")}
                       </span>
                     </div>
                   </div>
                   <div className="space-y-4 mb-8">
-                    {features.map((feature, idx) => (
+                    {featureKeys.map((featureKey, idx) => (
                       <div key={idx} className="flex items-center gap-3">
                         <CheckCircle2 size={16} className="text-[#00FFA3] shrink-0" />
                         <span className="text-[13px] text-[#8ea4ad] font-medium leading-tight">
-                          {feature}
+                          {t(featureKey)}
                         </span>
                       </div>
                     ))}
@@ -352,7 +353,7 @@ export const NewChallenge = (): JSX.Element => {
                     to={`/checkout/${plan.id}?method=crypto`}
                     className="group flex w-full items-center justify-center rounded-xl bg-[#00FFA3] py-3.5 text-[13px] font-black uppercase tracking-wider text-black transition-all hover:bg-[#00e895] hover:shadow-[0_0_15px_rgba(0,255,163,0.3)]"
                   >
-                    Crypto Payment
+                    {t("event.crypto_payment")}
                   </Link>
                 </div>
               </div>

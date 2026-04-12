@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "../../lib/i18n";
 
 export const NotFound = (): JSX.Element => {
+  const { t } = useTranslation();
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#02060c] text-white">
       {/* BG texture */}
@@ -50,22 +52,19 @@ export const NotFound = (): JSX.Element => {
           <path d="M37 23L39 25" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
         </svg>
 
-        <h1 className="text-[42px] font-bold leading-tight tracking-tight">
-          Sorry, this page is available
-          <br />
-          only to traders.
+        <h1 className="text-[42px] font-bold leading-tight tracking-tight whitespace-pre-line">
+          {t("page.not_available_title")}
         </h1>
 
-        <p className="mt-4 max-w-[460px] text-base leading-relaxed text-[#6e8188]">
-          Traders are individuals who have successfully completed the Evaluation
-          Process and manage a Hash Updown trading account.
+        <p className="mt-4 max-w-[460px] text-base leading-relaxed text-[#6e8188] whitespace-pre-line">
+          {t("page.not_available_desc")}
         </p>
 
         <Link
           to="/challenge"
           className="mt-10 inline-block rounded-xl bg-[#00FFA3] px-10 py-3.5 text-lg font-bold text-black transition-all hover:bg-[#00e895] hover:shadow-[0_0_20px_rgba(0,255,163,0.3)]"
         >
-          New challenge
+          {t("page.new_challenge")}
         </Link>
       </section>
 

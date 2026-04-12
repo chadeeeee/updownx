@@ -48,11 +48,11 @@ const TRADING_FEE_RATE = {
 };
 
 const challenges = [
-  { id: "starter", name: "Starter", balance: 799, fee: 49 },
-  { id: "boost", name: "Boost", balance: 5000, fee: 99 },
-  { id: "pro", name: "Pro", balance: 25000, fee: 199 },
-  { id: "elite", name: "Elite", balance: 50000, fee: 399 },
-  { id: "legend", name: "Legend", balance: 100000, fee: 699 },
+  { id: "trial", name: "Trial", balance: 799, fee: 49 },
+  { id: "hunter", name: "Hunter", balance: 5000, fee: 69 },
+  { id: "killer", name: "Killer", balance: 25000, fee: 199 },
+  { id: "shark", name: "Shark", balance: 50000, fee: 399 },
+  { id: "whale", name: "Whale", balance: 100000, fee: 699 },
 ];
 
 if (!process.env.DATABASE_URL) {

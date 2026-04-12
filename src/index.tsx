@@ -13,6 +13,8 @@ import { ControlPanel } from "./screens/ControlPanel";
 import { Withdrawals } from "./screens/Withdrawals";
 import { AuthProvider, useAuth } from "./lib/auth";
 
+import { I18nProvider } from "./lib/i18n";
+
 const PrivateRoute = ({ children }: { children: JSX.Element }): JSX.Element => {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
@@ -21,6 +23,7 @@ const PrivateRoute = ({ children }: { children: JSX.Element }): JSX.Element => {
 
 createRoot(document.getElementById("app") as HTMLElement).render(
   <StrictMode>
+    <I18nProvider>
     <AuthProvider>
       <BrowserRouter>
         <Routes>
@@ -97,5 +100,6 @@ createRoot(document.getElementById("app") as HTMLElement).render(
         </Routes>
       </BrowserRouter>
     </AuthProvider>
+    </I18nProvider>
   </StrictMode>,
 );
